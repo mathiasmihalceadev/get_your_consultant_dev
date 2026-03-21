@@ -1,27 +1,32 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminSettingsController;
+use App\Http\Controllers\PublicReportController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+// Public routes
+Route::get('/', [PublicReportController::class, 'index'])->name('home');
+Route::get('/submit-url', [PublicReportController::class, 'showUrlForm'])->name('submit-url');
+Route::get('/submit-email', [PublicReportController::class, 'showEmailForm'])->name('submit-email');
+Route::get('/report/{page_token}', [PublicReportController::class, 'status'])->name('report.status');
+
+// Rate-limited public POST routes
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('/validate-url', [PublicReportController::class, 'validateUrl'])->name('validate-url');
+    Route::post('/submit-email', [PublicReportController::class, 'submitEmail'])->name('submit-email.store');
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// API endpoint for polling
+Route::get('/api/report-status/{page_token}', [PublicReportController::class, 'statusJson']);
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// Admin routes
+Route::middleware('auth')->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/reports/{id}', [AdminController::class, 'show'])->name('admin.reports.show');
+    Route::post('/reports/{id}/send', [AdminController::class, 'send'])->name('admin.reports.send');
+    Route::get('/settings', [AdminSettingsController::class, 'show'])->name('admin.settings');
+    Route::post('/settings', [AdminSettingsController::class, 'update'])->name('admin.settings.update');
 });
 
 require __DIR__.'/auth.php';

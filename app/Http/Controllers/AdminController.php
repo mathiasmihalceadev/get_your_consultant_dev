@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Mail\ReportMail;
+use App\Models\Report;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Inertia\Inertia;
+
+class AdminController extends Controller
+{
+    public function dashboard(Request $request)
+    {
+        $query = Report::query();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->query('status'));
+        }
+
+        if ($request->filled('report_type')) {
+            $query->where('report_type', $request->query('report_type'));
+        }
+
+        $reports = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
+
+        $counts = [
+            'total' => Report::count(),
+            'pending' => Report::where('status', 'pending')->count(),
+            'to_be_sent' => Report::where('status', 'to_be_sent')->count(),
+            'sent' => Report::where('status', 'sent')->count(),
+            'error' => Report::where('status', 'error')->count(),
+            'not_accessible' => Report::where('status', 'not_accessible')->count(),
+        ];
+
+        return Inertia::render('Admin/Dashboard', [
+            'reports' => $reports,
+            'counts' => $counts,
+            'filters' => [
+                'status' => $request->query('status', ''),
+                'report_type' => $request->query('report_type', ''),
+            ],
+        ]);
+    }
+
+    public function show(int $id)
+    {
+        $report = Report::findOrFail($id);
+
+        return Inertia::render('Admin/ReportDetail', [
+            'report' => $report,
+        ]);
+    }
+
+    public function send(int $id)
+    {
+        $report = Report::findOrFail($id);
+
+        if ($report->status !== 'to_be_sent') {
+            return back()->with('error', 'Report cannot be sent — status is not "to_be_sent".');
+        }
+
+        Mail::to($report->email)->send(new ReportMail($report));
+        $report->update(['status' => 'sent']);
+
+        Log::channel('report')->info('Report manually sent by admin', [
+            'report_id' => $report->id,
+        ]);
+
+        return back()->with('success', "Report has been sent to {$report->email}.");
+    }
+}
