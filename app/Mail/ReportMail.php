@@ -21,36 +21,39 @@ class ReportMail extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
-        $typeLabel = match ($this->report->report_type) {
-            'purchase' => 'Purchase',
-            'rental' => 'Rental',
-            'commercial' => 'Commercial',
-        };
+        $locale = $this->report->locale ?? 'en';
+        $translations = $this->loadTranslations($locale);
+
+        $subjectKey = "email_subject_{$this->report->report_type}";
+        $subject = $translations[$subjectKey] ?? "Your Property Report is Ready";
 
         return new Envelope(
-            subject: "Your {$typeLabel} Property Report is Ready",
+            subject: $subject,
         );
     }
 
     public function content(): Content
     {
+        $locale = $this->report->locale ?? 'en';
+        $translations = $this->loadTranslations($locale);
+
+        $typeKey = "type_{$this->report->report_type}";
+        $typeLabel = $translations[$typeKey] ?? $this->report->report_type;
+
         return new Content(
             view: 'emails.report',
             with: [
                 'report' => $this->report,
-                'typeLabel' => match ($this->report->report_type) {
-                    'purchase' => 'Purchase',
-                    'rental' => 'Rental',
-                    'commercial' => 'Commercial',
-                },
-                'statusUrl' => url("/report/{$this->report->page_token}"),
+                'typeLabel' => $typeLabel,
+                'statusUrl' => url("/{$locale}/report/{$this->report->page_token}"),
+                'trans' => $translations,
             ],
         );
     }
 
     public function attachments(): array
     {
-        $path = storage_path("app/reports/{$this->report->page_token}.pdf");
+        $path = storage_path("app/public/reports/{$this->report->page_token}.pdf");
 
         if (!file_exists($path)) {
             return [];
@@ -61,5 +64,14 @@ class ReportMail extends Mailable implements ShouldQueue
                 ->as('property-report.pdf')
                 ->withMime('application/pdf'),
         ];
+    }
+
+    private function loadTranslations(string $locale): array
+    {
+        $path = lang_path("{$locale}.json");
+        if (file_exists($path)) {
+            return json_decode(file_get_contents($path), true) ?? [];
+        }
+        return [];
     }
 }

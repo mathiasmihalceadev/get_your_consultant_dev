@@ -15,7 +15,11 @@ export interface User {
     updated_at: string;
 }
 
-export type ReportType = "purchase" | "rental" | "commercial";
+export type ReportType =
+    | "rental_living"
+    | "rental_business"
+    | "buying_living"
+    | "buying_business";
 export type ReportStatus =
     | "not_accessible"
     | "pending"
@@ -38,13 +42,16 @@ export interface Report {
 }
 
 export interface Settings {
-    id: number;
-    purchase_prompt: string;
-    rental_prompt: string;
-    commercial_prompt: string;
+    rental_living_prompt: string;
+    rental_living_prompt_ro: string;
+    rental_business_prompt: string;
+    rental_business_prompt_ro: string;
+    buying_living_prompt: string;
+    buying_living_prompt_ro: string;
+    buying_business_prompt: string;
+    buying_business_prompt_ro: string;
     auto_send: boolean;
-    created_at: string;
-    updated_at: string;
+    [key: string]: string | boolean;
 }
 
 export interface PaginationLink {
@@ -72,5 +79,7 @@ export interface PageProps {
         user: User | null;
     };
     flash: FlashMessages;
+    locale: string;
+    translations: Record<string, string>;
     [key: string]: unknown;
 }

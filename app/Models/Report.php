@@ -10,6 +10,7 @@ class Report extends Model
         'report_type',
         'url',
         'email',
+        'locale',
         'status',
         'report_url',
         'page_token',

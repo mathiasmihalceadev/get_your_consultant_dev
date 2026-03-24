@@ -10,24 +10,28 @@ class AdminSettingsController extends Controller
 {
     public function show()
     {
-        $settings = Settings::first();
-
         return Inertia::render('Admin/Settings', [
-            'settings' => $settings,
+            'settings' => Settings::getAllSettings(),
         ]);
     }
 
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'purchase_prompt' => ['required', 'string'],
-            'rental_prompt' => ['required', 'string'],
-            'commercial_prompt' => ['required', 'string'],
+            'rental_living_prompt' => ['required', 'string'],
+            'rental_living_prompt_ro' => ['required', 'string'],
+            'rental_business_prompt' => ['required', 'string'],
+            'rental_business_prompt_ro' => ['required', 'string'],
+            'buying_living_prompt' => ['required', 'string'],
+            'buying_living_prompt_ro' => ['required', 'string'],
+            'buying_business_prompt' => ['required', 'string'],
+            'buying_business_prompt_ro' => ['required', 'string'],
             'auto_send' => ['boolean'],
         ]);
 
-        $settings = Settings::first();
-        $settings->update($validated);
+        foreach ($validated as $key => $value) {
+            Settings::set($key, $value);
+        }
 
         return back()->with('success', 'Settings saved successfully.');
     }

@@ -42,13 +42,17 @@ class GenerateReportJob implements ShouldQueue
             'type' => $report->report_type,
         ]);
 
-        $settings = Settings::first();
+        $locale = $report->locale ?? 'en';
+        $suffix = $locale === 'ro' ? '_ro' : '';
 
-        $prompt = match ($report->report_type) {
-            'purchase' => $settings->purchase_prompt,
-            'rental' => $settings->rental_prompt,
-            'commercial' => $settings->commercial_prompt,
+        $baseField = match ($report->report_type) {
+            'rental_living' => 'rental_living_prompt',
+            'rental_business' => 'rental_business_prompt',
+            'buying_living' => 'buying_living_prompt',
+            'buying_business' => 'buying_business_prompt',
         };
+
+        $prompt = Settings::get($baseField . $suffix) ?? Settings::get($baseField);
 
         try {
             $reportData = $openAI->generateReportData($report->url, $prompt);
@@ -67,14 +71,17 @@ class GenerateReportJob implements ShouldQueue
 
         // Generate PDF
         try {
-            Storage::makeDirectory('reports');
-            $path = storage_path("app/reports/{$report->page_token}.pdf");
+            $dir = storage_path('app/public/reports');
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            $path = $dir . "/{$report->page_token}.pdf";
 
-            Pdf::view('reports.template', ['data' => $reportData, 'report' => $report])
+            Pdf::view('reports.template', ['data' => $reportData, 'report' => $report, 'trans' => $this->loadTranslations($report->locale ?? 'en')])
                 ->format('a4')
                 ->save($path);
 
-            $report->report_url = "reports/{$report->page_token}.pdf";
+            $report->report_url = "/storage/reports/{$report->page_token}.pdf";
         } catch (\Exception $e) {
             Log::channel('report')->error('PDF generation failed', [
                 'report_id' => $report->id,
@@ -95,7 +102,7 @@ class GenerateReportJob implements ShouldQueue
             'path' => $report->report_url,
         ]);
 
-        if ($settings->auto_send) {
+        if (Settings::get('auto_send')) {
             Mail::to($report->email)->send(new ReportMail($report));
             $report->status = 'sent';
         } else {
@@ -108,5 +115,14 @@ class GenerateReportJob implements ShouldQueue
             'report_id' => $report->id,
             'status' => $report->status,
         ]);
+    }
+
+    private function loadTranslations(string $locale): array
+    {
+        $path = lang_path("{$locale}.json");
+        if (file_exists($path)) {
+            return json_decode(file_get_contents($path), true) ?? [];
+        }
+        return [];
     }
 }

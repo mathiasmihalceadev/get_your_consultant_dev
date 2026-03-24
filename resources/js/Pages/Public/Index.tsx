@@ -1,118 +1,175 @@
 import { useState } from "react";
 import { Head, router } from "@inertiajs/react";
-import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardContent,
-} from "@/Components/ui/card";
 import { Button } from "@/Components/ui/button";
-import { House, Key, Buildings, Icon } from "@phosphor-icons/react";
+import {
+    Key,
+    Storefront,
+    House,
+    ShoppingCart,
+    ArrowRight,
+    CheckCircle,
+    Icon,
+} from "@phosphor-icons/react";
+import PublicLayout from "@/Layouts/PublicLayout";
+import WizardLayout from "@/Components/WizardLayout";
+import { useTranslation } from "@/hooks/useTranslation";
 import { ReportType } from "@/types";
 
-interface ReportTypeOption {
+const typeOptions: {
     type: ReportType;
-    title: string;
-    description: string;
     icon: Icon;
-}
-
-const reportTypes: ReportTypeOption[] = [
+    labelKey: string;
+    descKey: string;
+}[] = [
     {
-        type: "purchase",
-        title: "Purchase Report",
-        description:
-            "Full analysis for buying a property. Price evaluation, investment potential, risk assessment.",
-        icon: House,
-    },
-    {
-        type: "rental",
-        title: "Rental Report",
-        description:
-            "Evaluate a rental listing. Fair rent analysis, livability score, hidden costs.",
+        type: "rental_living",
         icon: Key,
+        labelKey: "type_rental_living",
+        descKey: "rental_living_desc",
     },
     {
-        type: "commercial",
-        title: "Commercial Report",
-        description:
-            "Analyse commercial spaces. Foot traffic, zoning, investment yield.",
-        icon: Buildings,
+        type: "rental_business",
+        icon: Storefront,
+        labelKey: "type_rental_business",
+        descKey: "rental_business_desc",
+    },
+    {
+        type: "buying_living",
+        icon: House,
+        labelKey: "type_buying_living",
+        descKey: "buying_living_desc",
+    },
+    {
+        type: "buying_business",
+        icon: ShoppingCart,
+        labelKey: "type_buying_business",
+        descKey: "buying_business_desc",
     },
 ];
 
 export default function Index() {
-    const [selected, setSelected] = useState<ReportType | null>(null);
+    const [selectedType, setSelectedType] = useState<ReportType | null>(null);
+    const { t, localePath } = useTranslation();
 
     const handleContinue = () => {
-        if (selected) {
-            router.visit(`/submit-url?type=${selected}`);
-        }
+        if (!selectedType) return;
+        router.visit(localePath(`/submit-url?type=${selectedType}`));
     };
 
+    const sidebar = (
+        <div className="space-y-6">
+            <div className="bg-gray-50 border border-gray-200 p-6">
+                <h3 className="text-xs font-bold text-brand-primary uppercase tracking-widest mb-5">
+                    {t("sidebar_how_title")}
+                </h3>
+                <div className="space-y-4">
+                    {[
+                        t("sidebar_how_step_1"),
+                        t("sidebar_how_step_2"),
+                        t("sidebar_how_step_3"),
+                    ].map((text, i) => (
+                        <div key={i} className="flex items-start gap-3">
+                            <div className="w-6 h-6 bg-brand-secondary flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span className="text-white text-xs font-bold">
+                                    {i + 1}
+                                </span>
+                            </div>
+                            <p className="text-sm text-brand-neutral leading-relaxed">
+                                {text}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="border border-gray-200 p-6">
+                <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-brand-tertiary/10 flex items-center justify-center flex-shrink-0">
+                        <CheckCircle
+                            size={22}
+                            weight="fill"
+                            className="text-brand-tertiary"
+                        />
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-bold text-brand-primary mb-1">
+                            {t("sidebar_secure_title")}
+                        </h4>
+                        <p className="text-xs text-brand-neutral leading-relaxed">
+                            {t("sidebar_secure_desc")}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
     return (
-        <>
-            <Head title="Get Your Property Report" />
-            <div className="min-h-screen bg-white flex items-center justify-center px-4 py-16">
-                <div className="max-w-4xl w-full text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold text-[#0a0a0a] mb-3">
-                        Get Your Property Report
-                    </h1>
-                    <p className="text-lg text-muted-foreground mb-12">
-                        Choose the type of analysis you need.
+        <PublicLayout>
+            <Head title={t("home_title")} />
+            <WizardLayout currentStep={1} sidebar={sidebar}>
+                <div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-brand-primary mb-1 tracking-tight">
+                        {t("select_report_type")}
+                    </h2>
+                    <p className="text-brand-neutral mb-6">
+                        {t("what_report")}
                     </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                        {reportTypes.map(
-                            ({ type, title, description, icon: Icon }) => (
-                                <Card
+                    <div className="space-y-3 mb-8">
+                        {typeOptions.map(
+                            ({ type, icon: TypeIcon, labelKey, descKey }) => (
+                                <button
                                     key={type}
-                                    className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                                        selected === type
-                                            ? "border-[#1a56db] border-2 shadow-lg"
-                                            : "border-border hover:border-[#1a56db]/50"
+                                    onClick={() => setSelectedType(type)}
+                                    className={`w-full flex items-center gap-4 p-4 border-2 text-left transition-all cursor-pointer ${
+                                        selectedType === type
+                                            ? "border-brand-tertiary bg-brand-tertiary/5"
+                                            : "border-gray-200 hover:border-gray-300 bg-white"
                                     }`}
-                                    onClick={() => setSelected(type)}
                                 >
-                                    <CardHeader className="items-center pt-8">
-                                        <Icon
-                                            size={48}
-                                            weight={
-                                                selected === type
-                                                    ? "fill"
-                                                    : "regular"
-                                            }
+                                    <div
+                                        className={`w-11 h-11 flex items-center justify-center flex-shrink-0 ${
+                                            selectedType === type
+                                                ? "bg-brand-tertiary/10"
+                                                : "bg-gray-50"
+                                        }`}
+                                    >
+                                        <TypeIcon
+                                            size={22}
+                                            weight="duotone"
                                             className={
-                                                selected === type
-                                                    ? "text-[#1a56db]"
-                                                    : "text-[#0a0a0a]"
+                                                selectedType === type
+                                                    ? "text-brand-tertiary"
+                                                    : "text-brand-primary"
                                             }
                                         />
-                                        <CardTitle className="text-xl mt-3">
-                                            {title}
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <CardDescription className="text-sm leading-relaxed">
-                                            {description}
-                                        </CardDescription>
-                                    </CardContent>
-                                </Card>
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-brand-primary text-sm">
+                                            {t(labelKey)}
+                                        </p>
+                                        <p className="text-xs text-brand-neutral mt-0.5">
+                                            {t(descKey)}
+                                        </p>
+                                    </div>
+                                </button>
                             ),
                         )}
                     </div>
 
-                    <Button
-                        size="lg"
-                        disabled={!selected}
-                        onClick={handleContinue}
-                        className="bg-[#1a56db] hover:bg-[#1a56db]/90 text-white px-8 py-3 text-base cursor-pointer"
-                    >
-                        Continue
-                    </Button>
+                    <div className="flex justify-end">
+                        <Button
+                            onClick={handleContinue}
+                            disabled={!selectedType}
+                            className="bg-brand-secondary hover:bg-brand-secondary/90 text-white px-6 cursor-pointer"
+                        >
+                            {t("continue")}
+                            <ArrowRight size={16} className="ml-2" />
+                        </Button>
+                    </div>
                 </div>
-            </div>
-        </>
+            </WizardLayout>
+        </PublicLayout>
     );
 }

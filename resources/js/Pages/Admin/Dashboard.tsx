@@ -15,17 +15,18 @@ const statusBadgeColors: Record<ReportStatus, string> = {
 };
 
 const typeBadgeColors: Record<ReportType, string> = {
-    purchase: "bg-violet-100 text-violet-800",
-    rental: "bg-teal-100 text-teal-800",
-    commercial: "bg-amber-100 text-amber-800",
+    rental_living: "bg-teal-100 text-teal-800",
+    rental_business: "bg-amber-100 text-amber-800",
+    buying_living: "bg-violet-100 text-violet-800",
+    buying_business: "bg-rose-100 text-rose-800",
 };
 
 const statusLabels: Record<ReportStatus, string> = {
-    not_accessible: "Not Accessible",
-    pending: "Pending",
-    to_be_sent: "To Be Sent",
-    sent: "Sent",
-    error: "Error",
+    not_accessible: "Inaccesibil",
+    pending: "În așteptare",
+    to_be_sent: "De trimis",
+    sent: "Trimis",
+    error: "Eroare",
 };
 
 function truncate(str: string | null, len = 40): string {
@@ -70,10 +71,10 @@ export default function Dashboard({
 
     return (
         <AdminLayout>
-            <Head title="Admin Dashboard" />
+            <Head title="Panou de Control" />
 
-            <h1 className="text-2xl font-bold text-[#0a0a0a] mb-6">
-                Dashboard
+            <h1 className="text-2xl font-bold text-brand-primary mb-6">
+                Panou de Control
             </h1>
 
             {/* Summary cards */}
@@ -85,27 +86,27 @@ export default function Dashboard({
                         color: "text-gray-900",
                     },
                     {
-                        label: "Pending",
+                        label: "În așteptare",
                         count: counts.pending,
                         color: "text-blue-600",
                     },
                     {
-                        label: "To Be Sent",
+                        label: "De trimis",
                         count: counts.to_be_sent,
                         color: "text-orange-600",
                     },
                     {
-                        label: "Sent",
+                        label: "Trimis",
                         count: counts.sent,
                         color: "text-green-600",
                     },
                     {
-                        label: "Error",
+                        label: "Eroare",
                         count: counts.error,
                         color: "text-red-600",
                     },
                     {
-                        label: "Not Accessible",
+                        label: "Inaccesibil",
                         count: counts.not_accessible,
                         color: "text-yellow-600",
                     },
@@ -146,10 +147,19 @@ export default function Dashboard({
                     onChange={(e) => applyFilter("report_type", e.target.value)}
                     className="text-sm border rounded-md px-3 py-1.5 bg-white"
                 >
-                    <option value="">All Types</option>
-                    <option value="purchase">Purchase</option>
-                    <option value="rental">Rental</option>
-                    <option value="commercial">Commercial</option>
+                    <option value="">Toate Tipurile</option>
+                    <option value="rental_living">
+                        Închiriere – Rezidențial
+                    </option>
+                    <option value="rental_business">
+                        Închiriere – Business
+                    </option>
+                    <option value="buying_living">
+                        Cumpărare – Rezidențial
+                    </option>
+                    <option value="buying_business">
+                        Cumpărare – Business
+                    </option>
                 </select>
             </div>
 
@@ -164,7 +174,7 @@ export default function Dashboard({
                                         ID
                                     </th>
                                     <th className="px-4 py-3 text-left font-medium text-gray-500">
-                                        Type
+                                        Tip
                                     </th>
                                     <th className="px-4 py-3 text-left font-medium text-gray-500">
                                         URL
@@ -173,16 +183,16 @@ export default function Dashboard({
                                         Email
                                     </th>
                                     <th className="px-4 py-3 text-left font-medium text-gray-500">
-                                        Status
+                                        Stare
                                     </th>
                                     <th className="px-4 py-3 text-left font-medium text-gray-500">
-                                        Created
+                                        Creat
                                     </th>
                                     <th className="px-4 py-3 text-left font-medium text-gray-500">
-                                        Processed
+                                        Procesat
                                     </th>
                                     <th className="px-4 py-3 text-left font-medium text-gray-500">
-                                        Actions
+                                        Acțiuni
                                     </th>
                                 </tr>
                             </thead>
@@ -193,7 +203,7 @@ export default function Dashboard({
                                             colSpan={8}
                                             className="px-4 py-8 text-center text-muted-foreground"
                                         >
-                                            No reports found.
+                                            Nu s-au găsit rapoarte.
                                         </td>
                                     </tr>
                                 )}
@@ -257,24 +267,24 @@ export default function Dashboard({
                                                             )
                                                         }
                                                     >
-                                                        Send
+                                                        Trimite
                                                     </Button>
                                                 )}
                                                 {report.report_url && (
                                                     <a
-                                                        href={`/storage/${report.report_url}`}
+                                                        href={report.report_url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-xs text-[#1a56db] hover:underline"
+                                                        className="text-xs text-brand-tertiary hover:underline"
                                                     >
                                                         PDF
                                                     </a>
                                                 )}
                                                 <Link
                                                     href={`/admin/reports/${report.id}`}
-                                                    className="text-xs text-[#1a56db] hover:underline"
+                                                    className="text-xs text-brand-tertiary hover:underline"
                                                 >
-                                                    Details
+                                                    Detalii
                                                 </Link>
                                             </div>
                                         </td>
@@ -301,7 +311,7 @@ export default function Dashboard({
                                     }
                                     className={`px-3 py-1 text-sm rounded cursor-pointer ${
                                         link.active
-                                            ? "bg-[#1a56db] text-white"
+                                            ? "bg-brand-primary text-white"
                                             : "text-gray-600 hover:bg-gray-100"
                                     } ${!link.url ? "opacity-50 cursor-not-allowed" : ""}`}
                                     dangerouslySetInnerHTML={{

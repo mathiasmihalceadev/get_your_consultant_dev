@@ -16,17 +16,18 @@ const statusBadgeColors: Record<ReportStatus, string> = {
 };
 
 const typeBadgeColors: Record<ReportType, string> = {
-    purchase: "bg-violet-100 text-violet-800",
-    rental: "bg-teal-100 text-teal-800",
-    commercial: "bg-amber-100 text-amber-800",
+    rental_living: "bg-teal-100 text-teal-800",
+    rental_business: "bg-amber-100 text-amber-800",
+    buying_living: "bg-violet-100 text-violet-800",
+    buying_business: "bg-rose-100 text-rose-800",
 };
 
 const statusLabels: Record<ReportStatus, string> = {
-    not_accessible: "Not Accessible",
-    pending: "Pending",
-    to_be_sent: "To Be Sent",
-    sent: "Sent",
-    error: "Error",
+    not_accessible: "Inaccesibil",
+    pending: "În așteptare",
+    to_be_sent: "De trimis",
+    sent: "Trimis",
+    error: "Eroare",
 };
 
 export default function ReportDetail({ report }: { report: Report }) {
@@ -36,10 +37,10 @@ export default function ReportDetail({ report }: { report: Report }) {
 
             <Link
                 href="/admin/dashboard"
-                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-[#0a0a0a] mb-6 transition-colors"
+                className="inline-flex items-center gap-1 text-sm text-brand-neutral hover:text-brand-primary mb-6 transition-colors"
             >
                 <ArrowLeft size={16} />
-                Back to Dashboard
+                Înapoi la Panou
             </Link>
 
             <div className="max-w-2xl">
@@ -57,7 +58,7 @@ export default function ReportDetail({ report }: { report: Report }) {
                                 {statusLabels[report.status] || report.status}
                             </span>
                         </div>
-                        <CardTitle>Report #{report.id}</CardTitle>
+                        <CardTitle>Raport #{report.id}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 gap-3 text-sm">
@@ -80,7 +81,7 @@ export default function ReportDetail({ report }: { report: Report }) {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <span className="text-muted-foreground">
-                                        Created:
+                                        Creat:
                                     </span>
                                     <p className="font-medium">
                                         {new Date(
@@ -90,7 +91,7 @@ export default function ReportDetail({ report }: { report: Report }) {
                                 </div>
                                 <div>
                                     <span className="text-muted-foreground">
-                                        Processed:
+                                        Procesat:
                                     </span>
                                     <p className="font-medium">
                                         {report.processed_at
@@ -124,7 +125,7 @@ export default function ReportDetail({ report }: { report: Report }) {
                         <div className="flex items-center gap-3 pt-2">
                             {report.report_url && (
                                 <a
-                                    href={`/storage/${report.report_url}`}
+                                    href={report.report_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
@@ -137,7 +138,7 @@ export default function ReportDetail({ report }: { report: Report }) {
                                             weight="fill"
                                             className="text-red-600"
                                         />
-                                        View PDF
+                                        Vezi PDF
                                     </Button>
                                 </a>
                             )}
@@ -148,10 +149,10 @@ export default function ReportDetail({ report }: { report: Report }) {
                                             `/admin/reports/${report.id}/send`,
                                         )
                                     }
-                                    className="gap-2 bg-[#1a56db] hover:bg-[#1a56db]/90 text-white cursor-pointer"
+                                    className="gap-2 bg-brand-primary hover:bg-brand-primary/90 text-white cursor-pointer"
                                 >
                                     <PaperPlaneTilt size={18} />
-                                    Send Report
+                                    Trimite Raport
                                 </Button>
                             )}
                         </div>

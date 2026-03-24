@@ -1,22 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Head, router } from "@inertiajs/react";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
-import { Card, CardContent } from "@/Components/ui/card";
 import {
+    ArrowRight,
     ArrowLeft,
-    MagnifyingGlass,
-    Envelope,
-    FilePdf,
+    CheckCircle,
+    Clock,
 } from "@phosphor-icons/react";
 import { ReportType } from "@/types";
+import PublicLayout from "@/Layouts/PublicLayout";
+import WizardLayout from "@/Components/WizardLayout";
+import { useTranslation } from "@/hooks/useTranslation";
 
-const typeLabels: Record<ReportType, string> = {
-    purchase: "Purchase Report",
-    rental: "Rental Report",
-    commercial: "Commercial Report",
-};
+function isValidUrl(value: string): boolean {
+    try {
+        const parsed = new URL(value);
+        return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch {
+        return false;
+    }
+}
 
 interface SubmitUrlProps {
     reportType: ReportType;
@@ -24,124 +29,170 @@ interface SubmitUrlProps {
 }
 
 export default function SubmitUrl({ reportType, errors }: SubmitUrlProps) {
+    const { t, localePath } = useTranslation();
     const [url, setUrl] = useState("");
     const [processing, setProcessing] = useState(false);
+    const [touched, setTouched] = useState(false);
+    const [clientError, setClientError] = useState<string | null>(null);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const typeLabels: Record<ReportType, string> = {
+        rental_living: t("type_rental_living"),
+        rental_business: t("type_rental_business"),
+        buying_living: t("type_buying_living"),
+        buying_business: t("type_buying_business"),
+    };
+
+    useEffect(() => {
+        if (!touched) return;
+
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+
+        debounceRef.current = setTimeout(() => {
+            if (!url.trim()) {
+                setClientError(t("url_required"));
+            } else if (!isValidUrl(url)) {
+                setClientError(t("url_invalid"));
+            } else {
+                setClientError(null);
+            }
+        }, 400);
+
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        };
+    }, [url, touched]);
+
+    const urlError = clientError || errors?.url || null;
+    const isValid = touched && !clientError && url.trim().length > 0;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
         router.post(
-            "/validate-url",
-            {
-                url,
-                report_type: reportType,
-            },
-            {
-                onFinish: () => setProcessing(false),
-            },
+            localePath("/validate-url"),
+            { url, report_type: reportType },
+            { onFinish: () => setProcessing(false) },
         );
     };
 
+    const sidebar = (
+        <div className="space-y-6">
+            <div className="bg-gray-50 border border-gray-200 p-6">
+                <h3 className="text-xs font-bold text-brand-primary uppercase tracking-widest mb-5">
+                    {t("sidebar_report_title")}
+                </h3>
+                <div className="space-y-3">
+                    {[
+                        t("sidebar_report_1"),
+                        t("sidebar_report_2"),
+                        t("sidebar_report_3"),
+                        t("sidebar_report_4"),
+                    ].map((text, i) => (
+                        <div key={i} className="flex items-start gap-3">
+                            <CheckCircle
+                                size={18}
+                                weight="fill"
+                                className="text-brand-secondary flex-shrink-0 mt-0.5"
+                            />
+                            <p className="text-sm text-brand-neutral">{text}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="border border-gray-200 p-6">
+                <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-brand-secondary/10 flex items-center justify-center flex-shrink-0">
+                        <Clock
+                            size={22}
+                            weight="fill"
+                            className="text-brand-secondary"
+                        />
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-bold text-brand-primary mb-1">
+                            {t("sidebar_fast_title")}
+                        </h4>
+                        <p className="text-xs text-brand-neutral leading-relaxed">
+                            {t("sidebar_fast_desc")}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
     return (
-        <>
+        <PublicLayout>
             <Head title={typeLabels[reportType]} />
-            <div className="min-h-screen bg-white flex items-center justify-center px-4 py-16">
-                <div className="max-w-xl w-full">
+            <WizardLayout currentStep={2} sidebar={sidebar}>
+                <div>
                     <a
-                        href="/"
+                        href={localePath("/")}
                         onClick={(e) => {
                             e.preventDefault();
-                            router.visit("/");
+                            router.visit(localePath("/"));
                         }}
-                        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-[#0a0a0a] mb-8 transition-colors"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-brand-neutral hover:text-brand-primary mb-6 transition-colors uppercase tracking-wider"
                     >
-                        <ArrowLeft size={16} />
-                        Back to selection
+                        <ArrowLeft size={14} />
+                        {t("back_to_selection")}
                     </a>
 
-                    <h1 className="text-3xl md:text-4xl font-bold text-[#0a0a0a] mb-2">
+                    <h2 className="text-2xl md:text-3xl font-bold text-brand-primary mb-1 tracking-tight">
                         {typeLabels[reportType]}
-                    </h1>
-                    <p className="text-muted-foreground mb-8">
-                        Enter the property listing URL to generate your report.
-                    </p>
+                    </h2>
+                    <p className="text-brand-neutral mb-6">{t("enter_url")}</p>
 
-                    <form onSubmit={handleSubmit} className="space-y-4 mb-12">
+                    <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <Label
                                 htmlFor="url"
                                 className="text-sm font-medium mb-1.5 block"
                             >
-                                Property listing URL
+                                {t("property_url_label")}
                             </Label>
                             <Input
                                 id="url"
-                                type="url"
-                                placeholder="https://example.com/property/123"
+                                placeholder={t("url_placeholder")}
                                 value={url}
-                                onChange={(e) => setUrl(e.target.value)}
+                                onChange={(e) => {
+                                    setUrl(e.target.value);
+                                    if (!touched) setTouched(true);
+                                }}
+                                onBlur={() => setTouched(true)}
                                 required
-                                className={errors?.url ? "border-red-500" : ""}
+                                className={
+                                    urlError
+                                        ? "border-red-500"
+                                        : isValid
+                                          ? "border-green-500"
+                                          : ""
+                                }
                             />
-                            {errors?.url && (
+                            {urlError && (
                                 <p className="text-sm text-red-600 mt-1.5">
-                                    {errors.url}
+                                    {urlError}
                                 </p>
                             )}
                         </div>
 
-                        <Button
-                            type="submit"
-                            disabled={processing || !url}
-                            className="w-full bg-[#1a56db] hover:bg-[#1a56db]/90 text-white cursor-pointer"
-                        >
-                            {processing ? "Validating…" : "Submit URL"}
-                        </Button>
-                    </form>
-
-                    <div>
-                        <h2 className="text-lg font-semibold text-[#0a0a0a] mb-6">
-                            How it works
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {[
-                                {
-                                    icon: MagnifyingGlass,
-                                    step: "1",
-                                    title: "Submit URL",
-                                    desc: "Paste the property listing URL for analysis.",
-                                },
-                                {
-                                    icon: Envelope,
-                                    step: "2",
-                                    title: "Confirm your email",
-                                    desc: "Enter your email to receive the report.",
-                                },
-                                {
-                                    icon: FilePdf,
-                                    step: "3",
-                                    title: "Receive report",
-                                    desc: "Get a detailed PDF report via email.",
-                                },
-                            ].map(({ icon: Icon, step, title, desc }) => (
-                                <Card key={step} className="text-center">
-                                    <CardContent className="pt-6">
-                                        <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#1a56db]/10 text-[#1a56db] mb-3">
-                                            <Icon size={20} weight="bold" />
-                                        </div>
-                                        <h3 className="font-medium text-sm mb-1">
-                                            {title}
-                                        </h3>
-                                        <p className="text-xs text-muted-foreground">
-                                            {desc}
-                                        </p>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                        <div className="flex justify-end">
+                            <Button
+                                type="submit"
+                                disabled={processing || !isValid}
+                                className="bg-brand-secondary hover:bg-brand-secondary/90 text-white px-6 cursor-pointer"
+                            >
+                                {processing ? t("validating") : t("continue")}
+                                {!processing && (
+                                    <ArrowRight size={16} className="ml-2" />
+                                )}
+                            </Button>
                         </div>
-                    </div>
+                    </form>
                 </div>
-            </div>
-        </>
+            </WizardLayout>
+        </PublicLayout>
     );
 }

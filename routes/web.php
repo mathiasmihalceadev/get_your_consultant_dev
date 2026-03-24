@@ -3,21 +3,27 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminSettingsController;
 use App\Http\Controllers\PublicReportController;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Support\Facades\Route;
 
-// Public routes
-Route::get('/', [PublicReportController::class, 'index'])->name('home');
-Route::get('/submit-url', [PublicReportController::class, 'showUrlForm'])->name('submit-url');
-Route::get('/submit-email', [PublicReportController::class, 'showEmailForm'])->name('submit-email');
-Route::get('/report/{page_token}', [PublicReportController::class, 'status'])->name('report.status');
+// Redirect root to default locale
+Route::get('/', fn () => redirect('/en'));
 
-// Rate-limited public POST routes
-Route::middleware('throttle:10,1')->group(function () {
-    Route::post('/validate-url', [PublicReportController::class, 'validateUrl'])->name('validate-url');
-    Route::post('/submit-email', [PublicReportController::class, 'submitEmail'])->name('submit-email.store');
+// Public routes with locale prefix
+Route::prefix('{locale}')->where(['locale' => 'en|ro'])->middleware(SetLocale::class)->group(function () {
+    Route::get('/', [PublicReportController::class, 'index'])->name('home');
+    Route::get('/submit-url', [PublicReportController::class, 'showUrlForm'])->name('submit-url');
+    Route::get('/submit-email', [PublicReportController::class, 'showEmailForm'])->name('submit-email');
+    Route::get('/report/{page_token}', [PublicReportController::class, 'status'])->name('report.status');
+
+    // Rate-limited public POST routes
+    Route::middleware('throttle:10,1')->group(function () {
+        Route::post('/validate-url', [PublicReportController::class, 'validateUrl'])->name('validate-url');
+        Route::post('/submit-email', [PublicReportController::class, 'submitEmail'])->name('submit-email.store');
+    });
 });
 
-// API endpoint for polling
+// API endpoint for polling (no locale needed)
 Route::get('/api/report-status/{page_token}', [PublicReportController::class, 'statusJson']);
 
 // Admin routes

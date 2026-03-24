@@ -23,8 +23,8 @@ class PublicReportController extends Controller
     {
         $type = $request->query('type');
 
-        if (!in_array($type, ['purchase', 'rental', 'commercial'])) {
-            return redirect('/');
+        if (!in_array($type, ['rental_living', 'rental_business', 'buying_living', 'buying_business'])) {
+            return redirect('/' . app()->getLocale());
         }
 
         return Inertia::render('Public/SubmitUrl', [
@@ -34,14 +34,16 @@ class PublicReportController extends Controller
 
     public function validateUrl(Request $request, OpenAIService $openAI)
     {
+        $locale = app()->getLocale();
         $validated = $request->validate([
             'url' => ['required', 'url'],
-            'report_type' => ['required', 'in:purchase,rental,commercial'],
+            'report_type' => ['required', 'in:rental_living,rental_business,buying_living,buying_business'],
         ]);
 
         $report = Report::create([
             'url' => $validated['url'],
             'report_type' => $validated['report_type'],
+            'locale' => $locale,
             'status' => 'pending',
         ]);
 
@@ -91,21 +93,22 @@ class PublicReportController extends Controller
             'report_id' => $report->id,
         ]);
 
-        return redirect('/submit-email');
+        return redirect("/{$locale}/submit-email");
     }
 
     public function showEmailForm()
     {
+        $locale = app()->getLocale();
         $reportId = session('report_id');
 
         if (!$reportId) {
-            return redirect('/');
+            return redirect("/{$locale}");
         }
 
         $report = Report::find($reportId);
 
         if (!$report) {
-            return redirect('/');
+            return redirect("/{$locale}");
         }
 
         return Inertia::render('Public/SubmitEmail', [
@@ -119,6 +122,7 @@ class PublicReportController extends Controller
 
     public function submitEmail(Request $request)
     {
+        $locale = app()->getLocale();
         $validated = $request->validate([
             'email' => ['required', 'email'],
             'report_id' => ['required', 'exists:reports,id'],
@@ -127,17 +131,30 @@ class PublicReportController extends Controller
         $report = Report::findOrFail($validated['report_id']);
 
         if ($report->status !== 'pending') {
-            return redirect('/')->withErrors(['error' => 'This report is no longer pending.']);
+            return redirect("/{$locale}")->withErrors(['error' => 'This report is no longer pending.']);
         }
 
         $pageToken = hash('sha256', $validated['email'] . $report->url . $report->report_type);
+
+        // If a report with this page_token already exists, redirect to it
+        $existingByToken = Report::where('page_token', $pageToken)->first();
+        if ($existingByToken) {
+            $report->delete();
+            session()->forget('report_id');
+
+            Log::channel('report')->info('Duplicate submission — redirecting to existing report', [
+                'existing_report_id' => $existingByToken->id,
+            ]);
+
+            return redirect("/{$locale}/report/{$pageToken}");
+        }
 
         $report->update([
             'email' => $validated['email'],
             'page_token' => $pageToken,
         ]);
 
-        // Duplicate URL + type check
+        // Duplicate URL + type check (same URL+type but different email)
         $existing = Report::where('url', $report->url)
             ->where('report_type', $report->report_type)
             ->where('id', '!=', $report->id)
@@ -153,9 +170,7 @@ class PublicReportController extends Controller
 
             $report->update(['report_url' => $existing->report_url]);
 
-            $settings = Settings::first();
-
-            if ($settings && $settings->auto_send) {
+            if (Settings::get('auto_send')) {
                 Mail::to($report->email)->send(new ReportMail($report));
                 $report->update(['status' => 'sent', 'processed_at' => now()]);
             } else {
@@ -171,10 +186,10 @@ class PublicReportController extends Controller
 
         session()->forget('report_id');
 
-        return redirect("/report/{$pageToken}");
+        return redirect("/{$locale}/report/{$pageToken}");
     }
 
-    public function status(string $pageToken)
+    public function status(string $locale, string $pageToken)
     {
         $report = Report::where('page_token', $pageToken)->firstOrFail();
 
