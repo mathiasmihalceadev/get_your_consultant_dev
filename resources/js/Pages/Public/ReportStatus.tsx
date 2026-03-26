@@ -16,7 +16,7 @@ function GeneratingAnimation() {
                     style={{
                         backgroundColor:
                             i % 3 === 0
-                                ? "#2A2755"
+                                ? "#303048"
                                 : i % 3 === 1
                                   ? "#f5915d"
                                   : "#0073f0",

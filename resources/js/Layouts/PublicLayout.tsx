@@ -1,5 +1,5 @@
 import { Link, router } from "@inertiajs/react";
-import { House, Globe } from "@phosphor-icons/react";
+import { Globe } from "@phosphor-icons/react";
 import { PropsWithChildren } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 
@@ -21,20 +21,20 @@ export default function PublicLayout({ children }: PropsWithChildren) {
             {/* Header */}
             <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
                 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex h-16 items-center justify-between">
+                    <div className="flex h-20 items-center justify-between">
                         <Link
                             href={localePath("/")}
                             className="flex items-center gap-2.5 text-brand-primary font-bold text-lg hover:opacity-80 transition-opacity"
                         >
                             <img
-                                className="h-8 w-auto object-contain"
+                                className="h-12 w-auto object-contain"
                                 src="/images/logo-white.jpg"
                             />
                         </Link>
 
                         <nav className="hidden md:flex items-center gap-7">
                             <Link
-                                href={localePath("/")}
+                                href={localePath("/get-report")}
                                 className="text-sm font-semibold text-brand-primary hover:text-brand-secondary transition-colors"
                             >
                                 {t("get_report")}
@@ -157,16 +157,11 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                         </div>
                     </div>
                     <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div className="flex items-center gap-2.5 text-white font-bold">
-                            <div className="w-7 h-7 bg-brand-secondary flex items-center justify-center">
-                                <House
-                                    size={14}
-                                    weight="fill"
-                                    className="text-white"
-                                />
-                            </div>
-                            {t("site_name")}
-                        </div>
+                        <img
+                            src="/images/logo-dark.jpg"
+                            alt={t("site_name")}
+                            className="h-10 w-auto object-contain"
+                        />
                         <p className="text-sm text-white/40">
                             &copy; {new Date().getFullYear()} {t("site_name")}.{" "}
                             {t("all_rights_reserved")}

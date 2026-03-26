@@ -14,6 +14,11 @@ use Inertia\Inertia;
 
 class PublicReportController extends Controller
 {
+    public function landing()
+    {
+        return Inertia::render('Public/Landing');
+    }
+
     public function index()
     {
         return Inertia::render('Public/Index');

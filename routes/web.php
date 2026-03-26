@@ -11,7 +11,8 @@ Route::get('/', fn () => redirect('/en'));
 
 // Public routes with locale prefix
 Route::prefix('{locale}')->where(['locale' => 'en|ro'])->middleware(SetLocale::class)->group(function () {
-    Route::get('/', [PublicReportController::class, 'index'])->name('home');
+    Route::get('/', [PublicReportController::class, 'landing'])->name('home');
+    Route::get('/get-report', [PublicReportController::class, 'index'])->name('get-report');
     Route::get('/submit-url', [PublicReportController::class, 'showUrlForm'])->name('submit-url');
     Route::get('/submit-email', [PublicReportController::class, 'showEmailForm'])->name('submit-email');
     Route::get('/report/{page_token}', [PublicReportController::class, 'status'])->name('report.status');

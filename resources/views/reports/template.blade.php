@@ -23,11 +23,11 @@
         .header {
             padding-bottom: 20px;
             margin-bottom: 28px;
-            border-bottom: 3px solid #2A2755;
+            border-bottom: 3px solid #303048;
         }
         .header-type {
             display: inline-block;
-            background: #2A2755;
+            background: #303048;
             color: #fff;
             padding: 4px 14px;
             border-radius: 4px;
@@ -40,7 +40,7 @@
             font-size: 24px;
             font-weight: 800;
             margin-top: 12px;
-            color: #2A2755;
+            color: #303048;
         }
         .header-meta {
             margin-top: 8px;
@@ -55,7 +55,7 @@
         .section-title {
             font-size: 14px;
             font-weight: 700;
-            color: #2A2755;
+            color: #303048;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-bottom: 2px solid #e2e0f0;
@@ -123,14 +123,14 @@
             padding: 8px 12px;
             background: #f8f7fd;
             border-radius: 6px;
-            border-left: 3px solid #2A2755;
+            border-left: 3px solid #303048;
         }
-        .risk-list li strong { color: #2A2755; }
+        .risk-list li strong { color: #303048; }
         .factors-list { margin: 6px 0; padding-left: 18px; }
         .factors-list li { font-size: 12px; margin-bottom: 3px; color: #334155; }
         .final-score-section {
             background: linear-gradient(135deg, #f8f7fd 0%, #eeecf9 100%);
-            border: 2px solid #2A2755;
+            border: 2px solid #303048;
             border-radius: 10px;
             padding: 28px;
             text-align: center;
@@ -138,7 +138,7 @@
         .final-score-number {
             font-size: 52px;
             font-weight: 800;
-            color: #2A2755;
+            color: #303048;
         }
         .final-score-label {
             font-size: 11px;

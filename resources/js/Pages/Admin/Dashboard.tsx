@@ -3,30 +3,74 @@ import AdminLayout from "@/Layouts/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import { Badge } from "@/Components/ui/badge";
 import { Button } from "@/Components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/Components/ui/tabs";
 import { Report, ReportType, ReportStatus, PaginatedData } from "@/types";
+import {
+    PaperPlaneTilt,
+    FilePdf,
+    Eye,
+    ClockCountdown,
+    EnvelopeSimple,
+    Warning,
+    CheckCircle,
+    XCircle,
+    ListDashes,
+} from "@phosphor-icons/react";
 
-const statusBadgeColors: Record<ReportStatus, string> = {
-    not_accessible: "bg-yellow-100 text-yellow-800",
-    pending: "bg-blue-100 text-blue-800",
-    to_be_sent: "bg-orange-100 text-orange-800",
-    sent: "bg-green-100 text-green-800",
-    error: "bg-red-100 text-red-800",
+const statusConfig: Record<
+    ReportStatus,
+    { label: string; bg: string; text: string }
+> = {
+    not_accessible: {
+        label: "Inaccesibil",
+        bg: "bg-brand-secondary/10",
+        text: "text-brand-secondary",
+    },
+    pending: {
+        label: "În așteptare",
+        bg: "bg-brand-tertiary/10",
+        text: "text-brand-tertiary",
+    },
+    to_be_sent: {
+        label: "De trimis",
+        bg: "bg-brand-secondary/15",
+        text: "text-brand-secondary",
+    },
+    sent: {
+        label: "Trimis",
+        bg: "bg-emerald-50",
+        text: "text-emerald-700",
+    },
+    error: {
+        label: "Eroare",
+        bg: "bg-red-50",
+        text: "text-red-600",
+    },
 };
 
-const typeBadgeColors: Record<ReportType, string> = {
-    rental_living: "bg-teal-100 text-teal-800",
-    rental_business: "bg-amber-100 text-amber-800",
-    buying_living: "bg-violet-100 text-violet-800",
-    buying_business: "bg-rose-100 text-rose-800",
-};
-
-const statusLabels: Record<ReportStatus, string> = {
-    not_accessible: "Inaccesibil",
-    pending: "În așteptare",
-    to_be_sent: "De trimis",
-    sent: "Trimis",
-    error: "Eroare",
+const typeConfig: Record<
+    ReportType,
+    { label: string; bg: string; text: string }
+> = {
+    rental_living: {
+        label: "Închiriere – Rezidențial",
+        bg: "bg-brand-tertiary/10",
+        text: "text-brand-tertiary",
+    },
+    rental_business: {
+        label: "Închiriere – Business",
+        bg: "bg-brand-secondary/10",
+        text: "text-brand-secondary",
+    },
+    buying_living: {
+        label: "Cumpărare – Rezidențial",
+        bg: "bg-brand-primary/10",
+        text: "text-brand-primary",
+    },
+    buying_business: {
+        label: "Cumpărare – Business",
+        bg: "bg-brand-neutral/10",
+        text: "text-brand-neutral",
+    },
 };
 
 function truncate(str: string | null, len = 40): string {
@@ -83,40 +127,51 @@ export default function Dashboard({
                     {
                         label: "Total",
                         count: counts.total,
-                        color: "text-gray-900",
+                        color: "text-brand-primary",
+                        icon: ListDashes,
                     },
                     {
                         label: "În așteptare",
                         count: counts.pending,
-                        color: "text-blue-600",
+                        color: "text-brand-tertiary",
+                        icon: ClockCountdown,
                     },
                     {
                         label: "De trimis",
                         count: counts.to_be_sent,
-                        color: "text-orange-600",
+                        color: "text-brand-secondary",
+                        icon: EnvelopeSimple,
                     },
                     {
                         label: "Trimis",
                         count: counts.sent,
-                        color: "text-green-600",
+                        color: "text-emerald-600",
+                        icon: CheckCircle,
                     },
                     {
                         label: "Eroare",
                         count: counts.error,
-                        color: "text-red-600",
+                        color: "text-red-500",
+                        icon: XCircle,
                     },
                     {
                         label: "Inaccesibil",
                         count: counts.not_accessible,
-                        color: "text-yellow-600",
+                        color: "text-brand-secondary",
+                        icon: Warning,
                     },
-                ].map(({ label, count, color }) => (
+                ].map(({ label, count, color, icon: Icon }) => (
                     <Card key={label}>
                         <CardContent className="pt-4 pb-4 text-center">
+                            <Icon
+                                size={20}
+                                weight="duotone"
+                                className={`mx-auto mb-1 ${color}`}
+                            />
                             <div className={`text-2xl font-bold ${color}`}>
                                 {count}
                             </div>
-                            <div className="text-xs text-muted-foreground mt-1">
+                            <div className="text-xs text-brand-neutral mt-1">
                                 {label}
                             </div>
                         </CardContent>
@@ -125,41 +180,48 @@ export default function Dashboard({
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap items-center gap-4 mb-4">
-                <Tabs
-                    value={filters.status || "all"}
-                    onValueChange={(v) =>
-                        applyFilter("status", v === "all" ? "" : v)
-                    }
-                >
-                    <TabsList>
-                        <TabsTrigger value="all">All</TabsTrigger>
-                        {Object.entries(statusLabels).map(([key, label]) => (
-                            <TabsTrigger key={key} value={key}>
-                                {label}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
-                </Tabs>
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+                <div className="flex flex-wrap gap-1.5">
+                    {[
+                        { value: "all", label: "Toate" },
+                        ...Object.entries(statusConfig).map(
+                            ([key, { label }]) => ({
+                                value: key,
+                                label,
+                            }),
+                        ),
+                    ].map(({ value, label }) => (
+                        <button
+                            key={value}
+                            type="button"
+                            onClick={() =>
+                                applyFilter(
+                                    "status",
+                                    value === "all" ? "" : value,
+                                )
+                            }
+                            className={`px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                                (filters.status || "all") === value
+                                    ? "bg-brand-primary text-white"
+                                    : "bg-muted text-brand-neutral hover:bg-muted/80"
+                            }`}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
 
                 <select
                     value={filters.report_type || ""}
                     onChange={(e) => applyFilter("report_type", e.target.value)}
-                    className="text-sm border rounded-md px-3 py-1.5 bg-white"
+                    className="text-xs font-medium border border-border px-3 py-1.5 bg-white text-brand-primary cursor-pointer"
                 >
                     <option value="">Toate Tipurile</option>
-                    <option value="rental_living">
-                        Închiriere – Rezidențial
-                    </option>
-                    <option value="rental_business">
-                        Închiriere – Business
-                    </option>
-                    <option value="buying_living">
-                        Cumpărare – Rezidențial
-                    </option>
-                    <option value="buying_business">
-                        Cumpărare – Business
-                    </option>
+                    {Object.entries(typeConfig).map(([key, { label }]) => (
+                        <option key={key} value={key}>
+                            {label}
+                        </option>
+                    ))}
                 </select>
             </div>
 
@@ -169,29 +231,29 @@ export default function Dashboard({
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="border-b bg-gray-50">
-                                    <th className="px-4 py-3 text-left font-medium text-gray-500">
+                                <tr className="border-b bg-brand-primary/3">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-brand-primary uppercase tracking-wide">
                                         ID
                                     </th>
-                                    <th className="px-4 py-3 text-left font-medium text-gray-500">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-brand-primary uppercase tracking-wide">
                                         Tip
                                     </th>
-                                    <th className="px-4 py-3 text-left font-medium text-gray-500">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-brand-primary uppercase tracking-wide">
                                         URL
                                     </th>
-                                    <th className="px-4 py-3 text-left font-medium text-gray-500">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-brand-primary uppercase tracking-wide">
                                         Email
                                     </th>
-                                    <th className="px-4 py-3 text-left font-medium text-gray-500">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-brand-primary uppercase tracking-wide">
                                         Stare
                                     </th>
-                                    <th className="px-4 py-3 text-left font-medium text-gray-500">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-brand-primary uppercase tracking-wide">
                                         Creat
                                     </th>
-                                    <th className="px-4 py-3 text-left font-medium text-gray-500">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-brand-primary uppercase tracking-wide">
                                         Procesat
                                     </th>
-                                    <th className="px-4 py-3 text-left font-medium text-gray-500">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-brand-primary uppercase tracking-wide">
                                         Acțiuni
                                     </th>
                                 </tr>
@@ -201,7 +263,7 @@ export default function Dashboard({
                                     <tr>
                                         <td
                                             colSpan={8}
-                                            className="px-4 py-8 text-center text-muted-foreground"
+                                            className="px-4 py-8 text-center text-brand-neutral"
                                         >
                                             Nu s-au găsit rapoarte.
                                         </td>
@@ -210,43 +272,45 @@ export default function Dashboard({
                                 {reports.data.map((report) => (
                                     <tr
                                         key={report.id}
-                                        className="border-b hover:bg-gray-50"
+                                        className="border-b border-border/50 hover:bg-brand-primary/2 transition-colors"
                                     >
-                                        <td className="px-4 py-3 font-mono text-xs">
+                                        <td className="px-4 py-3 font-mono text-xs text-brand-primary font-semibold">
                                             {report.id}
                                         </td>
                                         <td className="px-4 py-3">
                                             <span
-                                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${typeBadgeColors[report.report_type] || ""}`}
+                                                className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium ${typeConfig[report.report_type]?.bg ?? ""} ${typeConfig[report.report_type]?.text ?? ""}`}
                                             >
-                                                {report.report_type}
+                                                {typeConfig[report.report_type]
+                                                    ?.label ??
+                                                    report.report_type}
                                             </span>
                                         </td>
                                         <td
                                             className="px-4 py-3"
                                             title={report.url}
                                         >
-                                            <span className="text-xs">
+                                            <span className="text-xs text-brand-primary/70">
                                                 {truncate(report.url)}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 text-xs">
+                                        <td className="px-4 py-3 text-xs text-brand-primary/70">
                                             {report.email || "—"}
                                         </td>
                                         <td className="px-4 py-3">
                                             <span
-                                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusBadgeColors[report.status] || ""}`}
+                                                className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium ${statusConfig[report.status]?.bg ?? ""} ${statusConfig[report.status]?.text ?? ""}`}
                                             >
-                                                {statusLabels[report.status] ||
-                                                    report.status}
+                                                {statusConfig[report.status]
+                                                    ?.label ?? report.status}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 text-xs text-muted-foreground">
+                                        <td className="px-4 py-3 text-xs text-brand-neutral">
                                             {new Date(
                                                 report.created_at,
                                             ).toLocaleDateString()}
                                         </td>
-                                        <td className="px-4 py-3 text-xs text-muted-foreground">
+                                        <td className="px-4 py-3 text-xs text-brand-neutral">
                                             {report.processed_at
                                                 ? new Date(
                                                       report.processed_at,
@@ -254,37 +318,48 @@ export default function Dashboard({
                                                 : "—"}
                                         </td>
                                         <td className="px-4 py-3">
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-1.5">
                                                 {report.status ===
                                                     "to_be_sent" && (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        className="text-xs h-7 cursor-pointer"
+                                                    <button
+                                                        type="button"
+                                                        title="Trimite"
+                                                        className="p-1.5 text-brand-secondary hover:bg-brand-secondary/10 transition-colors cursor-pointer"
                                                         onClick={() =>
                                                             router.post(
                                                                 `/admin/reports/${report.id}/send`,
                                                             )
                                                         }
                                                     >
-                                                        Trimite
-                                                    </Button>
+                                                        <PaperPlaneTilt
+                                                            size={16}
+                                                            weight="duotone"
+                                                        />
+                                                    </button>
                                                 )}
                                                 {report.report_url && (
                                                     <a
                                                         href={report.report_url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-xs text-brand-tertiary hover:underline"
+                                                        title="PDF"
+                                                        className="p-1.5 text-brand-tertiary hover:bg-brand-tertiary/10 transition-colors"
                                                     >
-                                                        PDF
+                                                        <FilePdf
+                                                            size={16}
+                                                            weight="duotone"
+                                                        />
                                                     </a>
                                                 )}
                                                 <Link
                                                     href={`/admin/reports/${report.id}`}
-                                                    className="text-xs text-brand-tertiary hover:underline"
+                                                    title="Detalii"
+                                                    className="p-1.5 text-brand-primary hover:bg-brand-primary/10 transition-colors"
                                                 >
-                                                    Detalii
+                                                    <Eye
+                                                        size={16}
+                                                        weight="duotone"
+                                                    />
                                                 </Link>
                                             </div>
                                         </td>

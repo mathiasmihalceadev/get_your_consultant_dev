@@ -1,5 +1,6 @@
 import { useTranslation } from "@/hooks/useTranslation";
 import { Check } from "@phosphor-icons/react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const stepKeys = [
     "wizard_step_type",
@@ -34,21 +35,52 @@ export default function WizardLayout({
                         return (
                             <div key={key} className="flex items-center">
                                 <div className="flex items-center gap-2">
-                                    <div
-                                        className={`w-7 h-7 flex items-center justify-center text-xs font-bold ${
-                                            isCompleted
-                                                ? "bg-brand-secondary text-white"
+                                    <motion.div
+                                        initial={false}
+                                        animate={{
+                                            scale: isActive ? 1.1 : 1,
+                                            backgroundColor: isCompleted
+                                                ? "#f5915d"
                                                 : isActive
-                                                  ? "bg-brand-tertiary text-white"
-                                                  : "bg-gray-200 text-gray-500"
+                                                  ? "#0073f0"
+                                                  : "#e5e7eb",
+                                        }}
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 300,
+                                            damping: 25,
+                                        }}
+                                        className={`w-7 h-7 flex items-center justify-center text-xs font-bold ${
+                                            isCompleted || isActive
+                                                ? "text-white"
+                                                : "text-gray-500"
                                         }`}
                                     >
                                         {isCompleted ? (
-                                            <Check size={14} weight="bold" />
+                                            <motion.div
+                                                initial={{
+                                                    scale: 0,
+                                                    rotate: -90,
+                                                }}
+                                                animate={{
+                                                    scale: 1,
+                                                    rotate: 0,
+                                                }}
+                                                transition={{
+                                                    type: "spring",
+                                                    stiffness: 300,
+                                                    damping: 20,
+                                                }}
+                                            >
+                                                <Check
+                                                    size={14}
+                                                    weight="bold"
+                                                />
+                                            </motion.div>
                                         ) : (
                                             stepNum
                                         )}
-                                    </div>
+                                    </motion.div>
                                     <span
                                         className={`text-sm font-semibold hidden sm:inline ${
                                             isActive
@@ -62,23 +94,54 @@ export default function WizardLayout({
                                     </span>
                                 </div>
                                 {i < stepKeys.length - 1 && (
-                                    <div
-                                        className={`w-10 md:w-20 h-0.5 mx-3 ${
-                                            isCompleted
-                                                ? "bg-brand-secondary"
-                                                : "bg-gray-200"
-                                        }`}
-                                    />
+                                    <div className="relative w-10 md:w-20 h-0.5 mx-3 bg-gray-200 overflow-hidden">
+                                        <motion.div
+                                            initial={{ scaleX: 0 }}
+                                            animate={{
+                                                scaleX: isCompleted ? 1 : 0,
+                                            }}
+                                            transition={{
+                                                duration: 0.4,
+                                                ease: "easeOut",
+                                            }}
+                                            className="absolute inset-0 bg-brand-secondary origin-left"
+                                        />
+                                    </div>
                                 )}
                             </div>
                         );
                     })}
                 </div>
 
-                {/* Two-column layout */}
+                {/* Two-column layout with animated content */}
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
-                    <div className="lg:col-span-3">{children}</div>
-                    {sidebar && <div className="lg:col-span-2">{sidebar}</div>}
+                    <motion.div
+                        key={currentStep}
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                            duration: 0.35,
+                            ease: "easeOut",
+                        }}
+                        className="lg:col-span-3"
+                    >
+                        {children}
+                    </motion.div>
+                    {sidebar && (
+                        <motion.div
+                            key={`sidebar-${currentStep}`}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{
+                                duration: 0.35,
+                                ease: "easeOut",
+                                delay: 0.1,
+                            }}
+                            className="lg:col-span-2"
+                        >
+                            {sidebar}
+                        </motion.div>
+                    )}
                 </div>
             </div>
         </div>
