@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Report;
+use App\Support\LocalizedUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -45,7 +46,7 @@ class ReportMail extends Mailable implements ShouldQueue
             with: [
                 'report' => $this->report,
                 'typeLabel' => $typeLabel,
-                'statusUrl' => url("/{$locale}/report/{$this->report->page_token}"),
+                'statusUrl' => LocalizedUrl::urlForLocale($locale, "/report/{$this->report->page_token}"),
                 'trans' => $translations,
             ],
         );

@@ -40,9 +40,9 @@ export default function WizardLayout({
                                         animate={{
                                             scale: isActive ? 1.1 : 1,
                                             backgroundColor: isCompleted
-                                                ? "#f5915d"
+                                                ? "#F68C56"
                                                 : isActive
-                                                  ? "#0073f0"
+                                                  ? "#7380D9"
                                                   : "#e5e7eb",
                                         }}
                                         transition={{

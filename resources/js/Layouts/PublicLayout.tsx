@@ -1,4 +1,4 @@
-import { Link, router } from "@inertiajs/react";
+import { Link } from "@inertiajs/react";
 import {
     Globe,
     FacebookLogo,
@@ -9,7 +9,7 @@ import { PropsWithChildren } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 
 export default function PublicLayout({ children }: PropsWithChildren) {
-    const { t, locale, localePath } = useTranslation();
+    const { t, locale, localePath, localizedUrls } = useTranslation();
     const otherLocale = locale === "en" ? "ro" : "en";
     const navItems = [
         { key: "how_it_works", href: localePath("/#how-it-works") },
@@ -26,9 +26,13 @@ export default function PublicLayout({ children }: PropsWithChildren) {
     ];
 
     const switchLocale = () => {
-        const currentPath = window.location.pathname;
-        const newPath = currentPath.replace(`/${locale}`, `/${otherLocale}`);
-        router.visit(newPath);
+        const targetUrl = localizedUrls?.[otherLocale];
+
+        if (!targetUrl) {
+            return;
+        }
+
+        window.location.assign(`${targetUrl}${window.location.hash || ""}`);
     };
 
     return (
@@ -39,10 +43,10 @@ export default function PublicLayout({ children }: PropsWithChildren) {
             {/* Header */}
             <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
                 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-3">
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center justify-between gap-4 lg:gap-6">
                         <Link
                             href={localePath("/")}
-                            className="flex items-center gap-2.5 text-brand-primary font-bold text-lg hover:opacity-80 transition-opacity"
+                            className="shrink-0 flex items-center gap-2.5 text-brand-primary font-bold text-lg hover:opacity-80 transition-opacity"
                         >
                             <img
                                 className="h-10 w-auto object-contain"
@@ -50,7 +54,19 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                             />
                         </Link>
 
-                        <div className="flex items-center gap-2.5">
+                        <nav className="hidden lg:flex min-w-0 flex-1 items-center justify-center gap-1 px-2">
+                            {navItems.map((item) => (
+                                <a
+                                    key={item.key}
+                                    href={item.href}
+                                    className="truncate px-3 py-1.5 text-sm font-medium text-brand-neutral hover:text-brand-primary hover:bg-gray-100 transition-colors"
+                                >
+                                    {t(item.key)}
+                                </a>
+                            ))}
+                        </nav>
+
+                        <div className="shrink-0 flex items-center gap-2.5">
                             <Link
                                 href={localePath("/get-report")}
                                 className="inline-flex items-center justify-center bg-brand-secondary text-white text-sm font-semibold px-4 py-2 hover:bg-brand-secondary/90 transition-colors"
@@ -68,7 +84,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                         </div>
                     </div>
 
-                    <nav className="mt-3 -mx-1 flex items-center gap-1 overflow-x-auto pb-1">
+                    <nav className="mt-3 -mx-1 flex items-center gap-1 overflow-x-auto pb-1 lg:hidden">
                         {navItems.map((item) => (
                             <a
                                 key={item.key}

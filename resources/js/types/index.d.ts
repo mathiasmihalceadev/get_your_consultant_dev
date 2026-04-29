@@ -80,6 +80,15 @@ export interface PageProps {
     };
     flash: FlashMessages;
     locale: string;
+    supportedLocales: string[];
+    domainUrls: Record<string, string>;
+    localizedUrls: Record<string, string>;
+    seoIndexing: boolean;
+    seo: {
+        canonical?: string | null;
+        alternates?: Record<string, string | null>;
+        xDefault?: string | null;
+    };
     translations: Record<string, string>;
     [key: string]: unknown;
 }

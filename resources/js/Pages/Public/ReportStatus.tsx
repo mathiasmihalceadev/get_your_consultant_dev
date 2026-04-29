@@ -16,10 +16,10 @@ function GeneratingAnimation() {
                     style={{
                         backgroundColor:
                             i % 3 === 0
-                                ? "#303048"
+                                ? "#34306A"
                                 : i % 3 === 1
-                                  ? "#f5915d"
-                                  : "#0073f0",
+                                  ? "#F68C56"
+                                  : "#7380D9",
                         animation: `bubbleBounce 1.4s ease-in-out ${i * 0.2}s infinite`,
                     }}
                 />

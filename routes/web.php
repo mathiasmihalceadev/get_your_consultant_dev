@@ -3,26 +3,43 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminSettingsController;
 use App\Http\Controllers\PublicReportController;
-use App\Http\Middleware\SetLocale;
+use App\Support\LocalizedUrl;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Redirect root to default locale
-Route::get('/', fn () => redirect('/en'));
+Route::get('/', [PublicReportController::class, 'landing'])->name('home');
+Route::get('/get-report', [PublicReportController::class, 'index'])->name('get-report');
+Route::get('/submit-url', [PublicReportController::class, 'showUrlForm'])->name('submit-url');
+Route::get('/submit-email', [PublicReportController::class, 'showEmailForm'])->name('submit-email');
+Route::get('/report/{pageToken}', [PublicReportController::class, 'status'])->name('report.status');
 
-// Public routes with locale prefix
-Route::prefix('{locale}')->where(['locale' => 'en|ro'])->middleware(SetLocale::class)->group(function () {
-    Route::get('/', [PublicReportController::class, 'landing'])->name('home');
-    Route::get('/get-report', [PublicReportController::class, 'index'])->name('get-report');
-    Route::get('/submit-url', [PublicReportController::class, 'showUrlForm'])->name('submit-url');
-    Route::get('/submit-email', [PublicReportController::class, 'showEmailForm'])->name('submit-email');
-    Route::get('/report/{page_token}', [PublicReportController::class, 'status'])->name('report.status');
-
-    // Rate-limited public POST routes
-    Route::middleware('throttle:10,1')->group(function () {
-        Route::post('/validate-url', [PublicReportController::class, 'validateUrl'])->name('validate-url');
-        Route::post('/submit-email', [PublicReportController::class, 'submitEmail'])->name('submit-email.store');
-    });
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('/validate-url', [PublicReportController::class, 'validateUrl'])->name('validate-url');
+    Route::post('/submit-email', [PublicReportController::class, 'submitEmail'])->name('submit-email.store');
 });
+
+Route::get('/locale-test', function (Request $request) {
+    $host = LocalizedUrl::requestHost($request);
+
+    return response()->json([
+        'host' => $host,
+        'locale' => app()->getLocale(),
+        'message' => __('get_report'),
+    ]);
+})->name('locale.test');
+
+Route::get('/sitemap.xml', function () {
+    abort_unless(config('seo.indexing'), 404);
+
+    $paths = ['/', '/get-report'];
+    $urls = collect(config('locales.supported', []))
+        ->flatMap(fn (string $locale) => collect($paths)->map(fn (string $path) => LocalizedUrl::urlForLocale($locale, $path)))
+        ->all();
+
+    return response()
+        ->view('sitemap', ['urls' => $urls])
+        ->header('Content-Type', 'application/xml');
+})->name('sitemap');
 
 // API endpoint for polling (no locale needed)
 Route::get('/api/report-status/{page_token}', [PublicReportController::class, 'statusJson']);
