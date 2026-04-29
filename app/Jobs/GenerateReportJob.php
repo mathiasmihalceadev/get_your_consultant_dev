@@ -77,8 +77,23 @@ class GenerateReportJob implements ShouldQueue
             }
             $path = $dir . "/{$report->page_token}.pdf";
 
-            Pdf::view('reports.template', ['data' => $reportData, 'report' => $report, 'trans' => $this->loadTranslations($report->locale ?? 'en')])
+            $footerHtml = '<div style="width:100%;text-align:center;font-family:Plus Jakarta Sans,sans-serif;padding:0 40px;line-height:1.4;">'
+                . '<div style="font-size:8px;color:#9CA3AF;font-style:italic;">Raport informativ generat prin analiza datelor publice disponibile È™i utilizarea unor modele statistice proprietare dezvoltate de Get Your Consultant.</div>'
+                . '<div style="font-size:8px;color:#9CA3AF;font-style:italic;">Datele prezentate au caracter informativ È™i pot necesita verificare independentÄƒ.</div>'
+                . '<div style="font-size:7px;color:#B0B0B0;margin-top:2px;">Â© 2026 Get Your Consultant. Toate drepturile rezervate.</div>'
+                . '</div>';
+
+            $reportType = $reportData['report_meta']['report_type'] ?? 'rental';
+            $templateView = $reportType === 'buying' ? 'reports.template-buying' : 'reports.template-rental';
+
+            Pdf::view($templateView, ['data' => $reportData, 'report' => $report, 'trans' => $this->loadTranslations($report->locale ?? 'en')])
                 ->format('a4')
+                ->withBrowsershot(function ($browsershot) use ($footerHtml) {
+                    $browsershot->waitUntilNetworkIdle()
+                        ->showBrowserHeaderAndFooter()
+                        ->headerHtml('<div></div>')
+                        ->footerHtml($footerHtml);
+                })
                 ->save($path);
 
             $report->report_url = "/storage/reports/{$report->page_token}.pdf";
@@ -126,3 +141,4 @@ class GenerateReportJob implements ShouldQueue
         return [];
     }
 }
+

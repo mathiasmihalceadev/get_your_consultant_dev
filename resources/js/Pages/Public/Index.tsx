@@ -3,9 +3,7 @@ import { Head, router } from "@inertiajs/react";
 import { Button } from "@/Components/ui/button";
 import {
     Key,
-    Storefront,
     House,
-    ShoppingCart,
     ArrowRight,
     CheckCircle,
     Icon,
@@ -28,22 +26,10 @@ const typeOptions: {
         descKey: "rental_living_desc",
     },
     {
-        type: "rental_business",
-        icon: Storefront,
-        labelKey: "type_rental_business",
-        descKey: "rental_business_desc",
-    },
-    {
         type: "buying_living",
         icon: House,
         labelKey: "type_buying_living",
         descKey: "buying_living_desc",
-    },
-    {
-        type: "buying_business",
-        icon: ShoppingCart,
-        labelKey: "type_buying_business",
-        descKey: "buying_business_desc",
     },
 ];
 

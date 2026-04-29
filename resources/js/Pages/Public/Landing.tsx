@@ -7,12 +7,11 @@ import {
     EnvelopeSimple,
     FilePdf,
     House,
-    Storefront,
     Key,
-    ShoppingCart,
     Scales,
     MapPin,
     Pulse,
+    CheckCircle,
 } from "@phosphor-icons/react";
 import PublicLayout from "@/Layouts/PublicLayout";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -73,24 +72,24 @@ export default function Landing() {
             labelKey: "type_rental_living",
             descKey: "rental_living_desc",
             type: "rental_living",
-        },
-        {
-            icon: Storefront,
-            labelKey: "type_rental_business",
-            descKey: "rental_business_desc",
-            type: "rental_business",
+            price: "17 EUR",
+            detailKeys: [
+                "landing_rental_detail_1",
+                "landing_rental_detail_2",
+                "landing_rental_detail_3",
+            ],
         },
         {
             icon: House,
             labelKey: "type_buying_living",
             descKey: "buying_living_desc",
             type: "buying_living",
-        },
-        {
-            icon: ShoppingCart,
-            labelKey: "type_buying_business",
-            descKey: "buying_business_desc",
-            type: "buying_business",
+            price: "30 EUR",
+            detailKeys: [
+                "landing_buying_detail_1",
+                "landing_buying_detail_2",
+                "landing_buying_detail_3",
+            ],
         },
     ];
 
@@ -119,180 +118,150 @@ export default function Landing() {
         <PublicLayout>
             <Head title={t("landing_meta_title")} />
 
-            {/* ── HERO — Split-screen, left-aligned ── */}
-            <section className="relative overflow-hidden bg-[#fafaf9] min-h-dvh flex items-center">
-                {/* Subtle noise overlay */}
-                <div
-                    className="pointer-events-none fixed inset-0 z-50 opacity-[0.025]"
-                    style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-                    }}
-                />
-
-                <div className="relative mx-auto w-full max-w-350 px-6 md:px-10 lg:px-16 py-20 md:py-0">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 items-center">
-                        {/* Left — Text */}
-                        <motion.div
-                            initial="hidden"
-                            animate="visible"
-                            variants={staggerContainer}
-                            className="max-w-xl"
-                        >
-                            <motion.p
-                                variants={slideUp}
-                                className="text-xs font-semibold tracking-[0.2em] uppercase text-brand-secondary mb-6"
-                            >
-                                {t("landing_badge")}
-                            </motion.p>
-
-                            <motion.h1
-                                variants={slideUp}
-                                className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter leading-none text-brand-primary mb-6"
-                            >
-                                {t("landing_hero_title_1")}
-                                <br />
-                                <span className="text-brand-secondary">
-                                    {t("landing_hero_title_2")}
-                                </span>
-                            </motion.h1>
-
-                            <motion.p
-                                variants={slideUp}
-                                className="text-base text-slate-500 leading-relaxed max-w-[55ch] mb-10"
-                            >
-                                {t("landing_hero_desc")}
-                            </motion.p>
-
-                            <motion.div
-                                variants={slideUp}
-                                className="flex flex-wrap items-center gap-4"
-                            >
-                                <Link
-                                    href={localePath("/get-report")}
-                                    className="group inline-flex items-center gap-2.5 bg-brand-primary text-white font-medium px-7 py-3.5 text-sm transition-all duration-200 hover:scale-[0.98] active:scale-[0.96]"
-                                >
-                                    {t("landing_cta_primary")}
-                                    <ArrowRight
-                                        size={15}
-                                        weight="bold"
-                                        className="transition-transform duration-200 group-hover:translate-x-0.5"
-                                    />
-                                </Link>
-                                <a
-                                    href="#how-it-works"
-                                    className="inline-flex items-center gap-2 text-sm font-medium text-brand-neutral hover:text-brand-primary transition-colors duration-200"
-                                >
-                                    {t("landing_cta_secondary")}
-                                </a>
-                            </motion.div>
-
-                            <motion.div
-                                variants={slideUp}
-                                className="mt-12 flex items-center gap-6 text-xs text-slate-400"
-                            >
-                                {[
-                                    t("landing_trust_1"),
-                                    t("landing_trust_2"),
-                                    t("landing_trust_3"),
-                                ].map((item, i) => (
-                                    <span
-                                        key={i}
-                                        className="flex items-center gap-1.5"
-                                    >
-                                        <span className="w-1 h-1 rounded-full bg-brand-secondary" />
-                                        {item}
-                                    </span>
-                                ))}
-                            </motion.div>
-                        </motion.div>
-
-                        {/* Right — Asymmetric bento preview */}
-                        <motion.div
-                            initial="hidden"
-                            animate="visible"
-                            variants={staggerContainer}
-                            className="hidden md:grid grid-cols-2 gap-3"
-                        >
-                            {reportTypes.map(
-                                (
-                                    { icon: Icon, labelKey, descKey, type },
-                                    i,
-                                ) => (
-                                    <motion.div key={type} variants={scaleIn}>
-                                        <Link
-                                            href={localePath(
-                                                `/get-report?type=${type}`,
-                                            )}
-                                            className={`group block bg-white border border-slate-200/60 p-6 transition-all duration-300 hover:border-brand-secondary/30 hover:shadow-[0_8px_30px_-12px_rgba(245,145,93,0.15)] ${
-                                                i === 0
-                                                    ? "col-span-1 row-span-1"
-                                                    : ""
-                                            }`}
-                                        >
-                                            <Icon
-                                                size={24}
-                                                weight="duotone"
-                                                className="text-brand-primary mb-4 transition-colors duration-200 group-hover:text-brand-secondary"
-                                            />
-                                            <h3 className="font-semibold text-brand-primary text-sm tracking-tight mb-1.5">
-                                                {t(labelKey)}
-                                            </h3>
-                                            <p className="text-xs text-slate-400 leading-relaxed">
-                                                {t(descKey)}
-                                            </p>
-                                            <div className="mt-4 flex items-center gap-1 text-xs font-medium text-brand-secondary opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0">
-                                                {t("landing_start_report")}
-                                                <ArrowRight
-                                                    size={11}
-                                                    weight="bold"
-                                                />
-                                            </div>
-                                        </Link>
-                                    </motion.div>
-                                ),
-                            )}
-                        </motion.div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ── MOBILE REPORT TYPES (visible only on small screens) ── */}
-            <section className="md:hidden py-16 bg-white">
-                <div className="px-6">
+            {/* Hero */}
+            <section className="bg-white py-14 md:py-18">
+                <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
                     <motion.div
                         initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true, margin: "-40px" }}
+                        animate="visible"
                         variants={staggerContainer}
-                        className="space-y-3"
+                        className="text-center max-w-3xl mx-auto"
+                    >
+                        <motion.p
+                            variants={slideUp}
+                            className="text-xs font-semibold tracking-[0.18em] uppercase text-brand-secondary mb-4"
+                        >
+                            {t("landing_badge")}
+                        </motion.p>
+
+                        <motion.h1
+                            variants={slideUp}
+                            className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter leading-[0.95] text-brand-primary mb-4"
+                        >
+                            {t("landing_hero_title_1")}
+                            <br />
+                            <span className="text-brand-secondary">
+                                {t("landing_hero_title_2")}
+                            </span>
+                        </motion.h1>
+
+                        <motion.p
+                            variants={slideUp}
+                            className="text-base text-slate-500 leading-relaxed max-w-2xl mx-auto mb-7"
+                        >
+                            {t("landing_hero_desc")}
+                        </motion.p>
+
+                        <motion.div
+                            variants={slideUp}
+                            className="flex flex-wrap items-center justify-center gap-3"
+                        >
+                            <Link
+                                href={localePath("/get-report")}
+                                className="group inline-flex items-center gap-2.5 bg-brand-primary text-white font-medium px-6 py-3 text-sm transition-all duration-200 hover:scale-[0.98] active:scale-[0.96]"
+                            >
+                                {t("landing_cta_primary")}
+                                <ArrowRight
+                                    size={15}
+                                    weight="bold"
+                                    className="transition-transform duration-200 group-hover:translate-x-0.5"
+                                />
+                            </Link>
+                            <a
+                                href="#how-it-works"
+                                className="inline-flex items-center gap-2 text-sm font-medium text-brand-neutral hover:text-brand-primary transition-colors duration-200 border border-gray-200 px-5 py-3"
+                            >
+                                {t("landing_cta_secondary")}
+                            </a>
+                        </motion.div>
+
+                        <motion.div
+                            variants={slideUp}
+                            className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400"
+                        >
+                            {[
+                                t("landing_trust_1"),
+                                t("landing_trust_2"),
+                                t("landing_trust_3"),
+                            ].map((item, i) => (
+                                <span
+                                    key={i}
+                                    className="flex items-center gap-1.5"
+                                >
+                                    <span className="w-1.5 h-1.5 rounded-full bg-brand-secondary" />
+                                    {item}
+                                </span>
+                            ))}
+                        </motion.div>
+                    </motion.div>
+
+                    <motion.div
+                        initial="hidden"
+                        animate="visible"
+                        variants={staggerContainer}
+                        className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-10 max-w-5xl mx-auto"
                     >
                         {reportTypes.map(
-                            ({ icon: Icon, labelKey, descKey, type }) => (
-                                <motion.div key={type} variants={slideUp}>
+                            ({
+                                icon: Icon,
+                                labelKey,
+                                descKey,
+                                type,
+                                price,
+                                detailKeys,
+                            }) => (
+                                <motion.div key={type} variants={scaleIn}>
                                     <Link
                                         href={localePath(
                                             `/get-report?type=${type}`,
                                         )}
-                                        className="group flex items-center gap-4 bg-white border border-slate-200/60 p-5 transition-all duration-300 hover:border-brand-secondary/30 active:scale-[0.98]"
+                                        className="group block bg-white border border-slate-200 p-6 md:p-7 h-full transition-all duration-300 hover:border-brand-secondary/40 hover:shadow-[0_14px_30px_-20px_rgba(48,48,72,0.35)]"
                                     >
-                                        <Icon
-                                            size={22}
-                                            weight="duotone"
-                                            className="text-brand-primary shrink-0 group-hover:text-brand-secondary transition-colors"
-                                        />
-                                        <div className="min-w-0">
-                                            <h3 className="font-semibold text-brand-primary text-sm tracking-tight">
-                                                {t(labelKey)}
-                                            </h3>
-                                            <p className="text-xs text-slate-400 leading-relaxed mt-0.5">
-                                                {t(descKey)}
-                                            </p>
+                                        <div className="flex items-start justify-between gap-4 mb-5">
+                                            <div className="w-14 h-14 bg-brand-primary/5 flex items-center justify-center">
+                                                <Icon
+                                                    size={32}
+                                                    weight="duotone"
+                                                    className="text-brand-primary group-hover:text-brand-secondary transition-colors"
+                                                />
+                                            </div>
+                                            <span className="text-xs font-semibold text-brand-secondary bg-brand-secondary/10 px-2.5 py-1">
+                                                {price}
+                                            </span>
                                         </div>
-                                        <ArrowRight
-                                            size={14}
-                                            weight="bold"
-                                            className="text-slate-300 shrink-0 ml-auto group-hover:text-brand-secondary transition-colors"
-                                        />
+
+                                        <h3 className="font-bold text-brand-primary text-lg tracking-tight mb-2">
+                                            {t(labelKey)}
+                                        </h3>
+                                        <p className="text-sm text-slate-500 leading-relaxed mb-4">
+                                            {t(descKey)}
+                                        </p>
+
+                                        <div className="space-y-2.5 mb-5">
+                                            {detailKeys.map((key) => (
+                                                <div
+                                                    key={key}
+                                                    className="flex items-start gap-2"
+                                                >
+                                                    <CheckCircle
+                                                        size={16}
+                                                        weight="fill"
+                                                        className="text-brand-tertiary shrink-0 mt-0.5"
+                                                    />
+                                                    <span className="text-sm text-brand-neutral">
+                                                        {t(key)}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-secondary">
+                                            {t("landing_start_report")}
+                                            <ArrowRight
+                                                size={13}
+                                                weight="bold"
+                                            />
+                                        </div>
                                     </Link>
                                 </motion.div>
                             ),
@@ -302,19 +271,22 @@ export default function Landing() {
             </section>
 
             {/* ── HOW IT WORKS — Vertical stepped timeline ── */}
-            <section id="how-it-works" className="py-24 md:py-32 bg-white">
-                <div className="mx-auto max-w-350 px-6 md:px-10 lg:px-16">
+            <section
+                id="how-it-works"
+                className="py-14 md:py-18 bg-white border-t border-gray-100"
+            >
+                <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, margin: "-80px" }}
                         variants={staggerContainer}
-                        className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-12 lg:gap-20"
+                        className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-8 lg:gap-14"
                     >
                         {/* Left — Section header, pinned feel */}
                         <motion.div
                             variants={slideRight}
-                            className="lg:sticky lg:top-32 lg:self-start"
+                            className="lg:sticky lg:top-28 lg:self-start"
                         >
                             <p className="text-xs font-semibold tracking-[0.2em] uppercase text-brand-secondary mb-4">
                                 {t("landing_how_title")}
@@ -338,7 +310,7 @@ export default function Landing() {
                                     <motion.div
                                         key={num}
                                         variants={slideLeft}
-                                        className={`relative flex gap-6 md:gap-8 pb-12 ${
+                                        className={`relative flex gap-5 md:gap-7 pb-8 ${
                                             i < steps.length - 1
                                                 ? "border-l border-slate-200 ml-4 pl-8"
                                                 : "ml-4 pl-8"
@@ -371,8 +343,11 @@ export default function Landing() {
             </section>
 
             {/* ── FEATURES — Zig-zag pairs ── */}
-            <section className="py-24 md:py-32 bg-[#fafaf9]">
-                <div className="mx-auto max-w-350 px-6 md:px-10 lg:px-16 space-y-20 md:space-y-28">
+            <section
+                id="report-content"
+                className="py-14 md:py-18 bg-[#fafaf9]"
+            >
+                <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 space-y-12 md:space-y-16">
                     {/* Section label */}
                     <motion.div
                         initial="hidden"
@@ -415,9 +390,9 @@ export default function Landing() {
                                 },
                             ].map(({ icon: Icon, titleKey, descKey }) => (
                                 <div key={titleKey} className="flex gap-4">
-                                    <div className="w-9 h-9 bg-brand-secondary/8 flex items-center justify-center shrink-0 mt-0.5">
+                                    <div className="w-11 h-11 bg-brand-secondary/8 flex items-center justify-center shrink-0 mt-0.5">
                                         <Icon
-                                            size={18}
+                                            size={22}
                                             weight="duotone"
                                             className="text-brand-secondary"
                                         />
@@ -436,7 +411,7 @@ export default function Landing() {
 
                         <motion.div
                             variants={slideLeft}
-                            className="bg-white border border-slate-200/60 p-8 md:p-10"
+                            className="bg-white border border-slate-200/60 p-6 md:p-8"
                         >
                             <div className="space-y-4">
                                 {[
@@ -486,7 +461,7 @@ export default function Landing() {
                     >
                         <motion.div
                             variants={slideRight}
-                            className="bg-white border border-slate-200/60 p-8 md:p-10 order-2 md:order-1"
+                            className="bg-white border border-slate-200/60 p-6 md:p-8 order-2 md:order-1"
                         >
                             <div className="grid grid-cols-2 gap-6">
                                 {[
@@ -541,9 +516,9 @@ export default function Landing() {
                                 },
                             ].map(({ icon: Icon, titleKey, descKey }) => (
                                 <div key={titleKey} className="flex gap-4">
-                                    <div className="w-9 h-9 bg-brand-secondary/8 flex items-center justify-center shrink-0 mt-0.5">
+                                    <div className="w-11 h-11 bg-brand-secondary/8 flex items-center justify-center shrink-0 mt-0.5">
                                         <Icon
-                                            size={18}
+                                            size={22}
                                             weight="duotone"
                                             className="text-brand-secondary"
                                         />
@@ -563,15 +538,225 @@ export default function Landing() {
                 </div>
             </section>
 
-            {/* ── BOTTOM CTA — Clean, warm section ── */}
-            <section className="py-24 md:py-32 bg-white">
-                <div className="mx-auto max-w-350 px-6 md:px-10 lg:px-16">
+            {/* Consultant vs Report */}
+            <section
+                id="consultant-vs-report"
+                className="py-14 md:py-18 bg-white border-t border-gray-100"
+            >
+                <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, margin: "-60px" }}
                         variants={staggerContainer}
-                        className="bg-brand-primary p-10 md:p-16 flex flex-col md:flex-row items-start md:items-center justify-between gap-8"
+                        className="text-center max-w-3xl mx-auto mb-8"
+                    >
+                        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-brand-secondary mb-3">
+                            {t("landing_compare_badge")}
+                        </p>
+                        <h2 className="text-3xl md:text-4xl font-bold tracking-tighter leading-none text-brand-primary mb-3">
+                            {t("landing_compare_title")}
+                        </h2>
+                        <p className="text-sm md:text-base text-slate-500 leading-relaxed">
+                            {t("landing_compare_desc")}
+                        </p>
+                    </motion.div>
+
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-60px" }}
+                        variants={staggerContainer}
+                        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                    >
+                        <motion.div
+                            variants={slideRight}
+                            className="border border-slate-200 bg-slate-50 p-6"
+                        >
+                            <h3 className="text-lg font-bold text-brand-primary mb-4">
+                                {t("landing_compare_human_title")}
+                            </h3>
+                            <div className="space-y-3">
+                                {[1, 2, 3, 4].map((item) => (
+                                    <div
+                                        key={item}
+                                        className="border-b border-slate-200 pb-3 last:border-0"
+                                    >
+                                        <p className="text-xs uppercase tracking-wider text-brand-neutral mb-1">
+                                            {t(
+                                                `landing_compare_point_${item}_label`,
+                                            )}
+                                        </p>
+                                        <p className="text-sm text-brand-primary font-medium">
+                                            {t(
+                                                `landing_compare_point_${item}_human`,
+                                            )}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            variants={slideLeft}
+                            className="border border-brand-tertiary/20 bg-brand-tertiary/5 p-6"
+                        >
+                            <h3 className="text-lg font-bold text-brand-primary mb-4">
+                                {t("landing_compare_report_title")}
+                            </h3>
+                            <div className="space-y-3">
+                                {[1, 2, 3, 4].map((item) => (
+                                    <div
+                                        key={item}
+                                        className="border-b border-brand-tertiary/20 pb-3 last:border-0"
+                                    >
+                                        <p className="text-xs uppercase tracking-wider text-brand-neutral mb-1">
+                                            {t(
+                                                `landing_compare_point_${item}_label`,
+                                            )}
+                                        </p>
+                                        <p className="text-sm text-brand-primary font-medium">
+                                            {t(
+                                                `landing_compare_point_${item}_report`,
+                                            )}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* Pricing */}
+            <section
+                id="pricing"
+                className="py-14 md:py-18 bg-[#fafaf9] border-t border-gray-100"
+            >
+                <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-60px" }}
+                        variants={staggerContainer}
+                        className="text-center max-w-3xl mx-auto mb-8"
+                    >
+                        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-brand-secondary mb-3">
+                            {t("landing_pricing_badge")}
+                        </p>
+                        <h2 className="text-3xl md:text-4xl font-bold tracking-tighter leading-none text-brand-primary mb-3">
+                            {t("landing_pricing_title")}
+                        </h2>
+                        <p className="text-sm md:text-base text-slate-500 leading-relaxed">
+                            {t("landing_pricing_desc")}
+                        </p>
+                    </motion.div>
+
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-60px" }}
+                        variants={staggerContainer}
+                        className="grid grid-cols-1 md:grid-cols-2 gap-5"
+                    >
+                        <motion.div
+                            variants={scaleIn}
+                            className="bg-white border border-slate-200 p-6 md:p-7"
+                        >
+                            <p className="text-sm font-semibold text-brand-primary mb-2">
+                                {t("type_rental_living")}
+                            </p>
+                            <p className="text-4xl font-bold text-brand-primary tracking-tight mb-2">
+                                17 EUR
+                            </p>
+                            <p className="text-xs text-slate-500 mb-5">
+                                {t("landing_price_vat_included")}
+                            </p>
+                            <div className="space-y-2.5 mb-6">
+                                {[1, 2, 3, 4].map((item) => (
+                                    <div
+                                        key={item}
+                                        className="flex items-start gap-2"
+                                    >
+                                        <CheckCircle
+                                            size={16}
+                                            weight="fill"
+                                            className="text-brand-secondary shrink-0 mt-0.5"
+                                        />
+                                        <p className="text-sm text-brand-neutral">
+                                            {t(
+                                                `landing_pricing_rental_feature_${item}`,
+                                            )}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                            <Link
+                                href={localePath(
+                                    "/get-report?type=rental_living",
+                                )}
+                                className="inline-flex items-center gap-2 text-sm font-semibold bg-brand-primary text-white px-4 py-2.5 hover:bg-brand-primary/90 transition-colors"
+                            >
+                                {t("landing_pricing_cta")}
+                                <ArrowRight size={14} weight="bold" />
+                            </Link>
+                        </motion.div>
+
+                        <motion.div
+                            variants={scaleIn}
+                            className="bg-white border border-brand-secondary/40 p-6 md:p-7"
+                        >
+                            <p className="text-sm font-semibold text-brand-primary mb-2">
+                                {t("type_buying_living")}
+                            </p>
+                            <p className="text-4xl font-bold text-brand-primary tracking-tight mb-2">
+                                30 EUR
+                            </p>
+                            <p className="text-xs text-slate-500 mb-5">
+                                {t("landing_price_vat_included")}
+                            </p>
+                            <div className="space-y-2.5 mb-6">
+                                {[1, 2, 3, 4].map((item) => (
+                                    <div
+                                        key={item}
+                                        className="flex items-start gap-2"
+                                    >
+                                        <CheckCircle
+                                            size={16}
+                                            weight="fill"
+                                            className="text-brand-secondary shrink-0 mt-0.5"
+                                        />
+                                        <p className="text-sm text-brand-neutral">
+                                            {t(
+                                                `landing_pricing_buying_feature_${item}`,
+                                            )}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                            <Link
+                                href={localePath(
+                                    "/get-report?type=buying_living",
+                                )}
+                                className="inline-flex items-center gap-2 text-sm font-semibold bg-brand-secondary text-white px-4 py-2.5 hover:bg-brand-secondary/90 transition-colors"
+                            >
+                                {t("landing_pricing_cta")}
+                                <ArrowRight size={14} weight="bold" />
+                            </Link>
+                        </motion.div>
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* ── BOTTOM CTA — Clean, warm section ── */}
+            <section className="py-14 md:py-18 bg-white border-t border-gray-100">
+                <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-60px" }}
+                        variants={staggerContainer}
+                        className="bg-brand-primary p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
                     >
                         <motion.div variants={slideRight} className="max-w-lg">
                             <h2 className="text-2xl md:text-3xl font-bold tracking-tighter leading-tight text-white mb-3">
@@ -598,6 +783,42 @@ export default function Landing() {
                     </motion.div>
                 </div>
             </section>
+
+            <section
+                id="contact"
+                className="py-12 bg-[#fafaf9] border-t border-gray-100"
+            >
+                <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 text-center">
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-brand-primary mb-3">
+                        {t("landing_contact_title")}
+                    </h2>
+                    <p className="text-sm md:text-base text-slate-500 max-w-2xl mx-auto mb-4">
+                        {t("landing_contact_desc")}
+                    </p>
+                    <a
+                        href="mailto:contact@getyourconsultant.com"
+                        className="inline-flex items-center gap-2 text-sm font-semibold text-brand-primary hover:text-brand-secondary transition-colors"
+                    >
+                        contact@getyourconsultant.com
+                    </a>
+                </div>
+            </section>
+
+            <section
+                id="privacy-policy"
+                className="sr-only"
+                aria-hidden="true"
+            />
+            <section
+                id="terms-and-conditions"
+                className="sr-only"
+                aria-hidden="true"
+            />
+            <section
+                id="cookie-policy"
+                className="sr-only"
+                aria-hidden="true"
+            />
         </PublicLayout>
     );
 }

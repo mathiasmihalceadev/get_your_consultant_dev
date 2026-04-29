@@ -34,6 +34,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/reports/{id}/send', [AdminController::class, 'send'])->name('admin.reports.send');
     Route::get('/settings', [AdminSettingsController::class, 'show'])->name('admin.settings');
     Route::post('/settings', [AdminSettingsController::class, 'update'])->name('admin.settings.update');
+    Route::get('/test-pdf', [AdminSettingsController::class, 'testPdf'])->name('admin.test-pdf');
 });
 
 require __DIR__.'/auth.php';

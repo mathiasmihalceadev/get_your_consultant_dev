@@ -47,6 +47,7 @@ export default function Settings({ settings }: { settings: SettingsType }) {
         auto_send: settings?.auto_send || false,
     });
     const [processing, setProcessing] = useState(false);
+    const [generatingPdf, setGeneratingPdf] = useState(false);
     const [selectedType, setSelectedType] = useState("rental_living");
     const [selectedLang, setSelectedLang] = useState("en");
 
@@ -101,6 +102,46 @@ export default function Settings({ settings }: { settings: SettingsType }) {
                     {processing ? "Se salvează…" : "Salvează Setările"}
                 </Button>
             </form>
+
+            <Card className="mt-8">
+                <CardHeader>
+                    <CardTitle className="text-brand-primary">
+                        Test PDF Template
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                        Generează un PDF de test folosind datele mock. Folosește
+                        template-ul selectat fără a apela API-ul OpenAI.
+                    </p>
+                    <div className="flex items-end gap-4">
+                        <Button
+                            type="button"
+                            disabled={generatingPdf}
+                            onClick={() => {
+                                setGeneratingPdf(true);
+                                window.location.href = `/admin/test-pdf?type=rental`;
+                                setTimeout(() => setGeneratingPdf(false), 5000);
+                            }}
+                            className="bg-brand-tertiary hover:bg-brand-tertiary/90 text-white cursor-pointer"
+                        >
+                            {generatingPdf ? "Se generează…" : "PDF Închiriere"}
+                        </Button>
+                        <Button
+                            type="button"
+                            disabled={generatingPdf}
+                            onClick={() => {
+                                setGeneratingPdf(true);
+                                window.location.href = `/admin/test-pdf?type=buying`;
+                                setTimeout(() => setGeneratingPdf(false), 5000);
+                            }}
+                            className="bg-brand-primary hover:bg-brand-primary/90 text-white cursor-pointer"
+                        >
+                            {generatingPdf ? "Se generează…" : "PDF Cumpărare"}
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
         </AdminLayout>
     );
 }
