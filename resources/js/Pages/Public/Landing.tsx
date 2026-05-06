@@ -438,7 +438,7 @@ export default function Landing() {
                                         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-secondary/12 text-brand-secondary">
                                             <Icon size={20} weight={weight} />
                                         </span>
-                                        <span className="flex-1 text-[1rem] leading-[1.55] text-brand-primary md:text-[0.98rem]">
+                                        <span className="block flex-1 self-center text-[1rem] leading-[1.45] text-brand-primary md:text-[0.98rem]">
                                             {t(key)}
                                         </span>
                                     </motion.div>
@@ -742,7 +742,7 @@ export default function Landing() {
                                     <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-secondary/12 text-brand-secondary">
                                         <Icon size={19} weight={weight} />
                                     </span>
-                                    <span className="text-[1.04rem] leading-[1.62] text-brand-primary md:text-base">
+                                    <span className="block self-center text-[1.04rem] leading-[1.45] text-brand-primary md:text-base">
                                         {t(key)}
                                     </span>
                                 </motion.div>
