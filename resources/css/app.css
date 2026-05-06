@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource-variable/outfit";
 
 @theme inline {
     --color-background: var(--background);
@@ -43,7 +43,7 @@
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);
     --radius-xl: calc(var(--radius) + 4px);
-    --font-sans: "Plus Jakarta Sans Variable", sans-serif;
+    --font-sans: "Outfit Variable", sans-serif;
 }
 
 @layer base {
@@ -90,7 +90,7 @@
     }
     body {
         @apply bg-background text-foreground font-medium;
-        letter-spacing: -0.012em;
+        letter-spacing: -0.022em;
     }
 }
 

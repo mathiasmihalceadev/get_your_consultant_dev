@@ -1,6 +1,39 @@
 import { useTranslation } from "@/hooks/useTranslation";
 import { Check } from "@phosphor-icons/react";
-import { motion } from "framer-motion";
+import {
+    AnimatePresence,
+    motion,
+    useReducedMotion,
+    type Variants,
+} from "framer-motion";
+
+const wizardEase = [0.22, 1, 0.36, 1] as const;
+
+const wizardSectionVariants: Variants = {
+    hidden: { opacity: 0, y: 14 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.34,
+            ease: wizardEase,
+            when: "beforeChildren",
+            staggerChildren: 0.04,
+        },
+    },
+};
+
+const wizardItemVariants: Variants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.24,
+            ease: wizardEase,
+        },
+    },
+};
 
 const stepKeys = [
     "wizard_step_type",
@@ -21,19 +54,38 @@ export default function WizardLayout({
     sidebar,
 }: WizardLayoutProps) {
     const { t } = useTranslation();
+    const shouldReduceMotion = useReducedMotion();
+
+    const sectionMotionProps = shouldReduceMotion
+        ? { initial: false }
+        : { initial: "hidden" as const, animate: "visible" as const };
 
     return (
-        <section className="border-b solid-divider bg-[linear-gradient(180deg,#ffffff_0%,#fff7f1_100%)]">
-            <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14 lg:px-8">
+        <motion.section
+            className="border-b solid-divider bg-[linear-gradient(180deg,#ffffff_0%,#fff7f1_100%)]"
+            variants={wizardSectionVariants}
+            {...sectionMotionProps}
+        >
+            <motion.div
+                className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14 lg:px-8"
+                variants={wizardItemVariants}
+            >
                 {/* Step Indicator */}
-                <div className="mb-10 flex items-center justify-center overflow-x-auto pb-2">
+                <motion.div
+                    className="mb-10 flex items-center justify-center overflow-x-auto pb-2"
+                    variants={wizardItemVariants}
+                >
                     {stepKeys.map((key, i) => {
                         const stepNum = i + 1;
                         const isActive = stepNum === currentStep;
                         const isCompleted = stepNum < currentStep;
 
                         return (
-                            <div key={key} className="flex items-center">
+                            <motion.div
+                                key={key}
+                                className="flex items-center"
+                                variants={wizardItemVariants}
+                            >
                                 <div className="flex items-center gap-2">
                                     <motion.div
                                         initial={false}
@@ -102,49 +154,77 @@ export default function WizardLayout({
                                                 scaleX: isCompleted ? 1 : 0,
                                             }}
                                             transition={{
-                                                duration: 0.4,
+                                                duration: 0.24,
                                                 ease: "easeOut",
                                             }}
                                             className="absolute inset-0 origin-left bg-brand-secondary"
                                         />
                                     </div>
                                 )}
-                            </div>
+                            </motion.div>
                         );
                     })}
-                </div>
+                </motion.div>
 
                 {/* Two-column layout with animated content */}
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(300px,0.72fr)] lg:gap-8">
-                    <motion.div
-                        key={currentStep}
-                        initial={{ opacity: 0, y: 16 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                            duration: 0.35,
-                            ease: "easeOut",
-                        }}
-                        className="border solid-border solid-border-warm bg-white p-6 md:p-8"
-                    >
-                        {children}
-                    </motion.div>
-                    {sidebar && (
+                <motion.div
+                    className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(300px,0.72fr)] lg:gap-8"
+                    variants={wizardItemVariants}
+                >
+                    <AnimatePresence mode="wait" initial={!shouldReduceMotion}>
                         <motion.div
-                            key={`sidebar-${currentStep}`}
-                            initial={{ opacity: 0, y: 12 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            key={currentStep}
+                            initial={
+                                shouldReduceMotion
+                                    ? false
+                                    : { opacity: 0, y: 12, scale: 0.995 }
+                            }
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={
+                                shouldReduceMotion
+                                    ? undefined
+                                    : { opacity: 0, y: -6, scale: 0.998 }
+                            }
                             transition={{
-                                duration: 0.35,
-                                ease: "easeOut",
-                                delay: 0.1,
+                                duration: 0.26,
+                                ease: wizardEase,
                             }}
-                            className="space-y-4"
+                            className="border solid-border solid-border-warm bg-white p-6 md:p-8"
                         >
-                            {sidebar}
+                            {children}
                         </motion.div>
+                    </AnimatePresence>
+                    {sidebar && (
+                        <AnimatePresence
+                            mode="wait"
+                            initial={!shouldReduceMotion}
+                        >
+                            <motion.div
+                                key={`sidebar-${currentStep}`}
+                                initial={
+                                    shouldReduceMotion
+                                        ? false
+                                        : { opacity: 0, y: 10 }
+                                }
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={
+                                    shouldReduceMotion
+                                        ? undefined
+                                        : { opacity: 0, y: -5 }
+                                }
+                                transition={{
+                                    duration: 0.24,
+                                    ease: wizardEase,
+                                    delay: shouldReduceMotion ? 0 : 0.02,
+                                }}
+                                className="space-y-4"
+                            >
+                                {sidebar}
+                            </motion.div>
+                        </AnimatePresence>
                     )}
-                </div>
-            </div>
-        </section>
+                </motion.div>
+            </motion.div>
+        </motion.section>
     );
 }
