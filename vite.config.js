@@ -1,4 +1,5 @@
 import { defineConfig, loadEnv } from "vite";
+import path from "node:path";
 import laravel from "laravel-vite-plugin";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -16,6 +17,14 @@ export default defineConfig(({ mode }) => {
     );
 
     return {
+        resolve: {
+            alias: {
+                "object-inspect/util.inspect.js": path.resolve(
+                    process.cwd(),
+                    "resources/js/shims/object-inspect-util.ts",
+                ),
+            },
+        },
         server: {
             host: "0.0.0.0",
             port: 5173,

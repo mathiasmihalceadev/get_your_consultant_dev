@@ -89,6 +89,29 @@
         @apply border-border outline-ring/50;
     }
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground font-medium;
+        letter-spacing: -0.012em;
+    }
+}
+
+@layer utilities {
+    .solid-border {
+        border-width: 1.5px;
+    }
+
+    .solid-border-warm {
+        border-color: #d7cec3;
+    }
+
+    .solid-border-warm-strong {
+        border-color: #c7bdae;
+    }
+
+    .solid-divider {
+        border-color: #d7cec3;
+    }
+
+    .solid-divider-strong {
+        border-color: #c7bdae;
     }
 }

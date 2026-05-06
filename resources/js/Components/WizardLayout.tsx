@@ -1,6 +1,6 @@
 import { useTranslation } from "@/hooks/useTranslation";
 import { Check } from "@phosphor-icons/react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 const stepKeys = [
     "wizard_step_type",
@@ -23,10 +23,10 @@ export default function WizardLayout({
     const { t } = useTranslation();
 
     return (
-        <div className="px-4 py-8 md:py-12">
-            <div className="max-w-5xl mx-auto">
+        <section className="border-b solid-divider bg-[linear-gradient(180deg,#ffffff_0%,#fff7f1_100%)]">
+            <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14 lg:px-8">
                 {/* Step Indicator */}
-                <div className="flex items-center justify-center mb-10">
+                <div className="mb-10 flex items-center justify-center overflow-x-auto pb-2">
                     {stepKeys.map((key, i) => {
                         const stepNum = i + 1;
                         const isActive = stepNum === currentStep;
@@ -38,22 +38,25 @@ export default function WizardLayout({
                                     <motion.div
                                         initial={false}
                                         animate={{
-                                            scale: isActive ? 1.1 : 1,
-                                            backgroundColor: isCompleted
-                                                ? "#F68C56"
-                                                : isActive
-                                                  ? "#7380D9"
-                                                  : "#e5e7eb",
+                                            scale: isActive ? 1.04 : 1,
+                                            backgroundColor:
+                                                isCompleted || isActive
+                                                    ? "#34306A"
+                                                    : "#ffffff",
+                                            borderColor:
+                                                isCompleted || isActive
+                                                    ? "#34306A"
+                                                    : "#e2e8f0",
                                         }}
                                         transition={{
                                             type: "spring",
                                             stiffness: 300,
                                             damping: 25,
                                         }}
-                                        className={`w-7 h-7 flex items-center justify-center text-xs font-bold ${
+                                        className={`flex h-9 w-9 items-center justify-center border-[1.5px] text-sm font-semibold ${
                                             isCompleted || isActive
                                                 ? "text-white"
-                                                : "text-gray-500"
+                                                : "text-brand-primary"
                                         }`}
                                     >
                                         {isCompleted ? (
@@ -82,19 +85,17 @@ export default function WizardLayout({
                                         )}
                                     </motion.div>
                                     <span
-                                        className={`text-sm font-semibold hidden sm:inline ${
-                                            isActive
+                                        className={`hidden text-sm font-semibold sm:inline ${
+                                            isCompleted || isActive
                                                 ? "text-brand-primary"
-                                                : isCompleted
-                                                  ? "text-brand-secondary"
-                                                  : "text-gray-400"
+                                                : "text-brand-primary/70"
                                         }`}
                                     >
                                         {t(key)}
                                     </span>
                                 </div>
                                 {i < stepKeys.length - 1 && (
-                                    <div className="relative w-10 md:w-20 h-0.5 mx-3 bg-gray-200 overflow-hidden">
+                                    <div className="relative mx-3 h-px w-10 overflow-hidden bg-[#d7cec3] md:w-20">
                                         <motion.div
                                             initial={{ scaleX: 0 }}
                                             animate={{
@@ -104,7 +105,7 @@ export default function WizardLayout({
                                                 duration: 0.4,
                                                 ease: "easeOut",
                                             }}
-                                            className="absolute inset-0 bg-brand-secondary origin-left"
+                                            className="absolute inset-0 origin-left bg-brand-secondary"
                                         />
                                     </div>
                                 )}
@@ -114,7 +115,7 @@ export default function WizardLayout({
                 </div>
 
                 {/* Two-column layout with animated content */}
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(300px,0.72fr)] lg:gap-8">
                     <motion.div
                         key={currentStep}
                         initial={{ opacity: 0, y: 16 }}
@@ -123,7 +124,7 @@ export default function WizardLayout({
                             duration: 0.35,
                             ease: "easeOut",
                         }}
-                        className="lg:col-span-3"
+                        className="border solid-border solid-border-warm bg-white p-6 md:p-8"
                     >
                         {children}
                     </motion.div>
@@ -137,13 +138,13 @@ export default function WizardLayout({
                                 ease: "easeOut",
                                 delay: 0.1,
                             }}
-                            className="lg:col-span-2"
+                            className="space-y-4"
                         >
                             {sidebar}
                         </motion.div>
                     )}
                 </div>
             </div>
-        </div>
+        </section>
     );
 }

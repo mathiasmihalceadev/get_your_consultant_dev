@@ -62,9 +62,9 @@ export default function ReportStatus({
     const [reportData, setReportData] = useState<Report>(initialReport);
 
     const typeLabels: Record<ReportType, string> = {
-        rental_living: t("type_rental_living"),
+        rental_living: t("rental"),
         rental_business: t("type_rental_business"),
-        buying_living: t("type_buying_living"),
+        buying_living: t("buying"),
         buying_business: t("type_buying_business"),
     };
 
@@ -105,9 +105,9 @@ export default function ReportStatus({
     ];
 
     const sidebar = !isCompleted ? (
-        <div className="space-y-6">
-            <div className="bg-gray-50 border border-gray-200 p-6">
-                <h3 className="text-xs font-bold text-brand-primary uppercase tracking-widest mb-5">
+        <>
+            <div className="border solid-border solid-border-warm bg-white p-6">
+                <h3 className="mb-5 text-xs font-bold uppercase tracking-widest text-brand-secondary">
                     {t("sidebar_progress_title")}
                 </h3>
                 <div className="space-y-4">
@@ -115,10 +115,10 @@ export default function ReportStatus({
                         ({ icon: StepIcon, labelKey, done }, i) => (
                             <div key={i} className="flex items-center gap-3">
                                 <div
-                                    className={`w-8 h-8 flex items-center justify-center flex-shrink-0 ${
+                                    className={`flex h-8 w-8 flex-shrink-0 items-center justify-center ${
                                         done
-                                            ? "bg-brand-secondary"
-                                            : "bg-gray-200"
+                                            ? "bg-brand-primary"
+                                            : "bg-slate-100"
                                     }`}
                                 >
                                     <StepIcon
@@ -127,15 +127,15 @@ export default function ReportStatus({
                                         className={
                                             done
                                                 ? "text-white"
-                                                : "text-gray-500"
+                                                : "text-brand-primary/55"
                                         }
                                     />
                                 </div>
                                 <p
-                                    className={`text-sm font-medium ${
+                                    className={`text-sm font-semibold ${
                                         done
                                             ? "text-brand-primary"
-                                            : "text-gray-400"
+                                            : "text-brand-primary/55"
                                     }`}
                                 >
                                     {t(labelKey)}
@@ -146,12 +146,12 @@ export default function ReportStatus({
                 </div>
             </div>
 
-            <div className="border border-gray-200 p-6">
-                <p className="text-xs text-brand-neutral leading-relaxed">
+            <div className="border solid-border solid-border-warm bg-[linear-gradient(180deg,#ffffff_0%,#fff7f1_100%)] p-6">
+                <p className="text-sm leading-[1.7] text-brand-primary">
                     {t("auto_update_note")}
                 </p>
             </div>
-        </div>
+        </>
     ) : undefined;
 
     return (
@@ -164,10 +164,13 @@ export default function ReportStatus({
                             {typeLabels[reportData.report_type]}
                         </span>
                     </div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-brand-primary mb-2 tracking-tight">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                        {t("wizard_step_status")}
+                    </p>
+                    <h2 className="mb-2 text-[2rem] font-bold tracking-[-0.035em] text-brand-primary md:text-[2.45rem]">
                         {t("report_status")}
                     </h2>
-                    <p className="text-sm text-brand-neutral mb-8 break-all">
+                    <p className="mb-8 break-all text-sm leading-[1.7] text-brand-primary">
                         {reportData.url}
                     </p>
 

@@ -18,7 +18,7 @@ function BlurredReportPreview() {
     return (
         <div className="relative select-none pointer-events-none">
             <div
-                className="bg-white border border-gray-200 shadow-sm p-5 space-y-4"
+                className="border solid-border solid-border-warm bg-white p-5 space-y-4"
                 style={{ filter: "blur(4px)" }}
             >
                 {/* Header */}
@@ -55,7 +55,7 @@ function BlurredReportPreview() {
                 </div>
 
                 {/* Final score */}
-                <div className="border-2 border-brand-primary/30 rounded p-3 text-center">
+                <div className="border-[1.5px] border-brand-primary/35 rounded p-3 text-center">
                     <div className="w-12 h-8 bg-brand-primary/40 rounded mx-auto mb-1" />
                     <div className="w-20 h-3 bg-gray-200 rounded mx-auto" />
                     <div className="w-16 h-5 bg-green-300 rounded mx-auto mt-2" />
@@ -64,7 +64,7 @@ function BlurredReportPreview() {
 
             {/* Overlay icon */}
             <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-white/90 backdrop-blur-sm shadow-lg px-5 py-3 flex items-center gap-2 border border-gray-200">
+                <div className="flex items-center gap-2 border solid-border solid-border-warm-strong bg-white px-5 py-3">
                     <FilePdf
                         size={24}
                         weight="fill"
@@ -90,9 +90,9 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
     const [processing, setProcessing] = useState(false);
 
     const typeLabels: Record<ReportType, string> = {
-        rental_living: t("type_rental_living"),
+        rental_living: t("rental"),
         rental_business: t("type_rental_business"),
-        buying_living: t("type_buying_living"),
+        buying_living: t("buying"),
         buying_business: t("type_buying_business"),
     };
 
@@ -107,10 +107,10 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
     };
 
     const sidebar = (
-        <div className="space-y-6">
-            <div className="bg-gray-50 border border-gray-200 p-6">
+        <>
+            <div className="border solid-border solid-border-warm bg-white p-6">
                 <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-brand-tertiary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-[linear-gradient(180deg,#ffffff_0%,#fff7f1_100%)]">
                         <Envelope
                             size={22}
                             weight="fill"
@@ -121,16 +121,16 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                         <h4 className="text-sm font-bold text-brand-primary mb-1">
                             {t("sidebar_fast_title")}
                         </h4>
-                        <p className="text-xs text-brand-neutral leading-relaxed">
+                        <p className="text-sm leading-[1.7] text-brand-primary">
                             {t("sidebar_fast_desc")}
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div className="border border-gray-200 p-6">
+            <div className="border solid-border solid-border-warm bg-[linear-gradient(180deg,#ffffff_0%,#fff7f1_100%)] p-6">
                 <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-brand-secondary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-white">
                         <ShieldCheck
                             size={22}
                             weight="fill"
@@ -141,13 +141,13 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                         <h4 className="text-sm font-bold text-brand-primary mb-1">
                             {t("sidebar_secure_title")}
                         </h4>
-                        <p className="text-xs text-brand-neutral leading-relaxed">
+                        <p className="text-sm leading-[1.7] text-brand-primary">
                             {t("sidebar_secure_desc")}
                         </p>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 
     return (
@@ -155,7 +155,10 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
             <Head title={t("your_email")} />
             <WizardLayout currentStep={3} sidebar={sidebar}>
                 <div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-brand-primary mb-2 tracking-tight">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                        {t("wizard_step_email")}
+                    </p>
+                    <h2 className="mb-2 text-[2rem] font-bold tracking-[-0.035em] text-brand-primary md:text-[2.45rem]">
                         {t("almost_there")}
                     </h2>
 
@@ -164,7 +167,7 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                             {typeLabels[report.report_type]}
                         </span>
                     </div>
-                    <p className="text-sm text-brand-neutral mb-6 break-all">
+                    <p className="mb-6 break-all text-sm leading-[1.7] text-brand-primary">
                         {report.url}
                     </p>
 
@@ -188,9 +191,11 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className={
-                                    errors?.email ? "border-red-500" : ""
-                                }
+                                className={`solid-border text-brand-primary placeholder:text-brand-primary/55 ${
+                                    errors?.email
+                                        ? "border-red-500"
+                                        : "border-brand-primary/30"
+                                }`}
                             />
                             {errors?.email && (
                                 <p className="text-sm text-red-600 mt-1.5">
@@ -215,7 +220,7 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                         </div>
                     </form>
 
-                    <p className="text-xs text-brand-neutral mt-6">
+                    <p className="mt-6 text-sm leading-[1.7] text-brand-primary">
                         {t("report_delivery_note")}
                     </p>
                 </div>

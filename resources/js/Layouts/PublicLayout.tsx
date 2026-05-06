@@ -12,17 +12,17 @@ export default function PublicLayout({ children }: PropsWithChildren) {
     const { t, locale, localePath, localizedUrls } = useTranslation();
     const otherLocale = locale === "en" ? "ro" : "en";
     const navItems = [
+        {
+            key: "landing_nav_example",
+            href: localePath("/#report-example"),
+        },
+        {
+            key: "landing_nav_problem",
+            href: localePath("/#problem"),
+        },
         { key: "how_it_works", href: localePath("/#how-it-works") },
-        {
-            key: "landing_nav_features",
-            href: localePath("/#report-content"),
-        },
-        {
-            key: "landing_nav_comparison",
-            href: localePath("/#consultant-vs-report"),
-        },
         { key: "pricing", href: localePath("/#pricing") },
-        { key: "contact", href: localePath("/#contact") },
+        { key: "landing_nav_trust", href: localePath("/#trust") },
     ];
 
     const switchLocale = () => {
@@ -59,7 +59,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                 <a
                                     key={item.key}
                                     href={item.href}
-                                    className="truncate px-3 py-1.5 text-sm font-medium text-brand-neutral hover:text-brand-primary hover:bg-gray-100 transition-colors"
+                                    className="truncate px-3 py-1.5 text-sm font-medium text-brand-primary hover:text-brand-primary hover:bg-[#fcfaf6] transition-colors"
                                 >
                                     {t(item.key)}
                                 </a>
@@ -76,7 +76,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
 
                             <button
                                 onClick={switchLocale}
-                                className="flex items-center gap-1.5 text-sm font-semibold text-brand-neutral hover:text-brand-primary transition-colors cursor-pointer border border-gray-200 px-3 py-2"
+                                className="flex items-center gap-1.5 text-sm font-semibold text-brand-primary hover:text-brand-primary transition-colors cursor-pointer border border-gray-200 px-3 py-2"
                             >
                                 <Globe size={16} />
                                 {otherLocale.toUpperCase()}
@@ -89,7 +89,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                             <a
                                 key={item.key}
                                 href={item.href}
-                                className="shrink-0 px-3 py-1.5 text-xs sm:text-sm font-medium text-brand-neutral hover:text-brand-primary hover:bg-gray-100 transition-colors"
+                                className="shrink-0 px-3 py-1.5 text-xs sm:text-sm font-medium text-brand-primary hover:text-brand-primary hover:bg-[#fcfaf6] transition-colors"
                             >
                                 {t(item.key)}
                             </a>
@@ -112,8 +112,8 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                 alt={t("site_name")}
                                 className="h-10 w-auto object-contain mb-4"
                             />
-                            <p className="text-sm text-white/60 max-w-md">
-                                {t("landing_cta_desc")}
+                            <p className="max-w-md text-sm text-white/80">
+                                {t("landing_footer_desc")}
                             </p>
                         </div>
 
@@ -127,7 +127,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="Facebook"
-                                    className="w-9 h-9 border border-white/20 text-white/80 hover:text-white hover:border-white/40 flex items-center justify-center transition-colors"
+                                    className="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white"
                                 >
                                     <FacebookLogo size={18} weight="duotone" />
                                 </a>
@@ -136,7 +136,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="Instagram"
-                                    className="w-9 h-9 border border-white/20 text-white/80 hover:text-white hover:border-white/40 flex items-center justify-center transition-colors"
+                                    className="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white"
                                 >
                                     <InstagramLogo size={18} weight="duotone" />
                                 </a>
@@ -145,7 +145,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="LinkedIn"
-                                    className="w-9 h-9 border border-white/20 text-white/80 hover:text-white hover:border-white/40 flex items-center justify-center transition-colors"
+                                    className="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white"
                                 >
                                     <LinkedinLogo size={18} weight="duotone" />
                                 </a>
@@ -153,35 +153,35 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                         </div>
                     </div>
 
-                    <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="flex flex-col gap-4 border-t border-white/10 pt-6 md:flex-row md:items-center md:justify-between">
                         <div className="flex flex-wrap gap-4 text-sm">
                             <a
-                                href={localePath("/#contact")}
-                                className="text-white/60 hover:text-white transition-colors"
+                                href={localePath("/#hero-form")}
+                                className="text-white/70 transition-colors hover:text-white"
                             >
-                                {t("contact")}
+                                {t("get_report")}
                             </a>
                             <a
                                 href={localePath("/#privacy-policy")}
-                                className="text-white/60 hover:text-white transition-colors"
+                                className="text-white/70 transition-colors hover:text-white"
                             >
                                 {t("privacy")}
                             </a>
                             <a
                                 href={localePath("/#terms-and-conditions")}
-                                className="text-white/60 hover:text-white transition-colors"
+                                className="text-white/70 transition-colors hover:text-white"
                             >
                                 {t("terms")}
                             </a>
                             <a
                                 href={localePath("/#cookie-policy")}
-                                className="text-white/60 hover:text-white transition-colors"
+                                className="text-white/70 transition-colors hover:text-white"
                             >
                                 {t("cookie_policy")}
                             </a>
                         </div>
 
-                        <p className="text-sm text-white/40">
+                        <p className="text-sm text-white/50">
                             &copy; {new Date().getFullYear()} {t("site_name")}.{" "}
                             {t("all_rights_reserved")}
                         </p>
