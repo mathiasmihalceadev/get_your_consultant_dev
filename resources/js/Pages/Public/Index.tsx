@@ -1,36 +1,30 @@
 import { useState } from "react";
 import { Head, router } from "@inertiajs/react";
 import { Button } from "@/Components/ui/button";
-import {
-    Key,
-    House,
-    ArrowRight,
-    Icon,
-    CheckCircle,
-    ShieldCheck,
-} from "@phosphor-icons/react";
+import { ArrowRight, CheckCircle, ShieldCheck } from "@phosphor-icons/react";
 import PublicLayout from "@/Layouts/PublicLayout";
 import WizardLayout from "@/Components/WizardLayout";
 import { useTranslation } from "@/hooks/useTranslation";
+import { landingAssets } from "@/lib/landingAssets";
 import { ReportType } from "@/types";
 
 const typeOptions: {
     type: ReportType;
-    icon: Icon;
     labelKey: string;
     descKey: string;
+    imageSrc: string;
 }[] = [
     {
         type: "rental_living",
-        icon: Key,
         labelKey: "rental",
         descKey: "rental_living_desc",
+        imageSrc: landingAssets.pricingRentalImageSrc,
     },
     {
         type: "buying_living",
-        icon: House,
         labelKey: "buying",
         descKey: "buying_living_desc",
+        imageSrc: landingAssets.pricingBuyingImageSrc,
     },
 ];
 
@@ -56,7 +50,7 @@ export default function Index() {
     const sidebar = (
         <>
             <div className="border solid-border solid-border-warm bg-white p-6">
-                <h3 className="mb-5 text-xs font-bold uppercase tracking-widest text-brand-secondary">
+                <h3 className="mb-5 text-xs font-bold uppercase tracking-tightcaps text-brand-secondary">
                     {t("sidebar_how_title")}
                 </h3>
                 <div className="space-y-4">
@@ -77,7 +71,7 @@ export default function Index() {
                 </div>
             </div>
 
-            <div className="border solid-border solid-border-warm bg-[linear-gradient(180deg,#ffffff_0%,#fff7f1_100%)] p-6">
+            <div className="border solid-border solid-border-warm bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)] p-6">
                 <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 items-center justify-center bg-white">
                         <ShieldCheck
@@ -102,11 +96,12 @@ export default function Index() {
     return (
         <PublicLayout>
             <Head title={t("home_title")} />
-            <WizardLayout currentStep={1} sidebar={sidebar}>
+            <WizardLayout
+                currentStep={1}
+                sidebar={sidebar}
+                reportType={selectedType}
+            >
                 <div>
-                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
-                        {t("landing_badge")}
-                    </p>
                     <h2 className="mb-2 text-[2.1rem] font-bold tracking-[-0.035em] text-brand-primary md:text-[2.6rem]">
                         {t("select_report_type")}
                     </h2>
@@ -116,7 +111,7 @@ export default function Index() {
 
                     <div className="space-y-4">
                         {typeOptions.map(
-                            ({ type, icon: TypeIcon, labelKey, descKey }) => {
+                            ({ type, labelKey, descKey, imageSrc }) => {
                                 const isActive = selectedType === type;
 
                                 return (
@@ -130,23 +125,6 @@ export default function Index() {
                                         }`}
                                     >
                                         <div className="flex items-start gap-4">
-                                            <div
-                                                className={`flex h-11 w-11 items-center justify-center ${
-                                                    isActive
-                                                        ? "bg-white/10"
-                                                        : "bg-brand-primary/5"
-                                                }`}
-                                            >
-                                                <TypeIcon
-                                                    size={22}
-                                                    weight="duotone"
-                                                    className={
-                                                        isActive
-                                                            ? "text-white"
-                                                            : "text-brand-secondary"
-                                                    }
-                                                />
-                                            </div>
                                             <div className="flex-1">
                                                 <p className="text-lg font-semibold">
                                                     {t(labelKey)}
@@ -160,6 +138,14 @@ export default function Index() {
                                                 >
                                                     {t(descKey)}
                                                 </p>
+                                            </div>
+                                            <div className="relative hidden h-28 w-32 shrink-0 overflow-hidden md:block">
+                                                <div className="absolute inset-x-2 bottom-2 h-8 rounded-full bg-brand-primary/12 blur-2xl" />
+                                                <img
+                                                    src={imageSrc}
+                                                    alt={t(labelKey)}
+                                                    className="relative z-10 h-full w-full scale-[1.14] object-contain"
+                                                />
                                             </div>
                                         </div>
                                     </button>

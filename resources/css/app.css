@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/outfit";
+@import "@fontsource-variable/inter";
 
 @theme inline {
     --color-background: var(--background);
@@ -36,14 +36,14 @@
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-brand-primary: #34306a;
-    --color-brand-secondary: #f68c56;
+    --color-brand-secondary: #4e59b7;
     --color-brand-tertiary: #7380d9;
     --color-brand-neutral: #667085;
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);
     --radius-xl: calc(var(--radius) + 4px);
-    --font-sans: "Outfit Variable", sans-serif;
+    --font-sans: "Inter Variable", sans-serif;
 }
 
 @layer base {
@@ -56,30 +56,30 @@
         --popover-foreground: oklch(0.145 0 0);
         --primary: #34306a;
         --primary-foreground: #ffffff;
-        --secondary: oklch(0.97 0 0);
+        --secondary: #eef1ff;
         --secondary-foreground: #34306a;
         --muted: oklch(0.97 0 0);
         --muted-foreground: #667085;
-        --accent: oklch(0.97 0 0);
+        --accent: #eef1ff;
         --accent-foreground: #34306a;
         --destructive: oklch(0.577 0.245 27.325);
         --border: oklch(0.922 0 0);
         --input: oklch(0.922 0 0);
-        --ring: #f68c56;
+        --ring: #7380d9;
         --chart-1: #34306a;
-        --chart-2: #f68c56;
+        --chart-2: #4e59b7;
         --chart-3: #7380d9;
         --chart-4: #667085;
         --chart-5: oklch(0.269 0 0);
         --radius: 0.125rem;
         --sidebar: #34306a;
         --sidebar-foreground: #ffffff;
-        --sidebar-primary: #f68c56;
+        --sidebar-primary: #7380d9;
         --sidebar-primary-foreground: #ffffff;
         --sidebar-accent: #433f82;
         --sidebar-accent-foreground: #ffffff;
         --sidebar-border: #433f82;
-        --sidebar-ring: #f68c56;
+        --sidebar-ring: #7380d9;
     }
     html {
         scroll-behavior: smooth;
@@ -90,28 +90,32 @@
     }
     body {
         @apply bg-background text-foreground font-medium;
-        letter-spacing: -0.022em;
+        letter-spacing: -0.02em;
     }
 }
 
 @layer utilities {
+    .tracking-tightcaps {
+        letter-spacing: 0.08em;
+    }
+
     .solid-border {
         border-width: 1.5px;
     }
 
     .solid-border-warm {
-        border-color: #d7cec3;
+        border-color: #d9ddef;
     }
 
     .solid-border-warm-strong {
-        border-color: #c7bdae;
+        border-color: #c2c8e4;
     }
 
     .solid-divider {
-        border-color: #d7cec3;
+        border-color: #d9ddef;
     }
 
     .solid-divider-strong {
-        border-color: #c7bdae;
+        border-color: #c2c8e4;
     }
 }

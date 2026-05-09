@@ -1,5 +1,7 @@
 import { useTranslation } from "@/hooks/useTranslation";
+import { landingAssets } from "@/lib/landingAssets";
 import { Check } from "@phosphor-icons/react";
+import { ReportType } from "@/types";
 import {
     AnimatePresence,
     motion,
@@ -46,15 +48,33 @@ interface WizardLayoutProps {
     currentStep: number;
     children: React.ReactNode;
     sidebar?: React.ReactNode;
+    reportType?: ReportType | null;
 }
 
 export default function WizardLayout({
     currentStep,
     children,
     sidebar,
+    reportType = null,
 }: WizardLayoutProps) {
     const { t } = useTranslation();
     const shouldReduceMotion = useReducedMotion();
+    const textureImageSrc = landingAssets.textureImageSrc;
+
+    const reportTypeVisuals: Partial<
+        Record<ReportType, { imageSrc: string; imageAlt: string }>
+    > = {
+        rental_living: {
+            imageSrc: landingAssets.pricingRentalImageSrc,
+            imageAlt: t("landing_pricing_rental_visual_label"),
+        },
+        buying_living: {
+            imageSrc: landingAssets.pricingBuyingImageSrc,
+            imageAlt: t("landing_pricing_buying_visual_label"),
+        },
+    };
+
+    const selectedVisual = reportType ? reportTypeVisuals[reportType] : null;
 
     const sectionMotionProps = shouldReduceMotion
         ? { initial: false }
@@ -62,12 +82,18 @@ export default function WizardLayout({
 
     return (
         <motion.section
-            className="border-b solid-divider bg-[linear-gradient(180deg,#ffffff_0%,#fff7f1_100%)]"
+            className="relative overflow-hidden border-b solid-divider bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)]"
             variants={wizardSectionVariants}
             {...sectionMotionProps}
         >
+            <img
+                src={textureImageSrc}
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.06] mix-blend-multiply"
+            />
             <motion.div
-                className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14 lg:px-8"
+                className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14 lg:px-8"
                 variants={wizardItemVariants}
             >
                 {/* Step Indicator */}
@@ -194,7 +220,7 @@ export default function WizardLayout({
                             {children}
                         </motion.div>
                     </AnimatePresence>
-                    {sidebar && (
+                    {(selectedVisual || sidebar) && (
                         <AnimatePresence
                             mode="wait"
                             initial={!shouldReduceMotion}
@@ -219,7 +245,28 @@ export default function WizardLayout({
                                 }}
                                 className="space-y-4"
                             >
-                                {sidebar}
+                                {selectedVisual ? (
+                                    <div className="relative overflow-hidden border solid-border solid-border-warm bg-white p-4">
+                                        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(242,245,255,0.94))]" />
+                                        <div className="absolute inset-0 opacity-[0.08] mix-blend-multiply">
+                                            <img
+                                                src={textureImageSrc}
+                                                alt=""
+                                                aria-hidden="true"
+                                                className="h-full w-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="relative h-56 overflow-hidden">
+                                            <div className="absolute inset-x-8 bottom-3 h-12 rounded-full bg-brand-primary/12 blur-2xl" />
+                                            <img
+                                                src={selectedVisual.imageSrc}
+                                                alt={selectedVisual.imageAlt}
+                                                className="relative z-10 h-full w-full scale-[1.05] object-contain drop-shadow-[0_22px_38px_rgba(52,48,106,0.18)]"
+                                            />
+                                        </div>
+                                    </div>
+                                ) : null}
+                                {!selectedVisual ? sidebar : null}
                             </motion.div>
                         </AnimatePresence>
                     )}

@@ -17,12 +17,12 @@ export default function PublicLayout({ children }: PropsWithChildren) {
             href: localePath("/#report-example"),
         },
         {
-            key: "landing_nav_problem",
-            href: localePath("/#problem"),
+            key: "landing_nav_why",
+            href: localePath("/#why-check"),
         },
         { key: "how_it_works", href: localePath("/#how-it-works") },
+        { key: "landing_nav_reviews", href: localePath("/#reviews") },
         { key: "pricing", href: localePath("/#pricing") },
-        { key: "landing_nav_trust", href: localePath("/#trust") },
     ];
 
     const switchLocale = () => {
@@ -59,7 +59,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                 <a
                                     key={item.key}
                                     href={item.href}
-                                    className="truncate px-3 py-1.5 text-sm font-medium text-brand-primary hover:text-brand-primary hover:bg-[#fcfaf6] transition-colors"
+                                    className="truncate px-3 py-1.5 text-[14px] font-semibold text-brand-primary/76 hover:text-brand-primary hover:bg-[#eef1ff] transition-colors md:text-base"
                                 >
                                     {t(item.key)}
                                 </a>
@@ -69,14 +69,14 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                         <div className="shrink-0 flex items-center gap-2.5">
                             <Link
                                 href={localePath("/get-report")}
-                                className="inline-flex items-center justify-center bg-brand-secondary text-white text-sm font-semibold px-4 py-2 hover:bg-brand-secondary/90 transition-colors"
+                                className="inline-flex items-center justify-center bg-brand-primary px-4 py-2 text-[14px] font-semibold text-white hover:bg-brand-primary/90 transition-colors md:text-base"
                             >
                                 {t("get_report")}
                             </Link>
 
                             <button
                                 onClick={switchLocale}
-                                className="flex items-center gap-1.5 text-sm font-semibold text-brand-primary hover:text-brand-primary transition-colors cursor-pointer border border-gray-200 px-3 py-2"
+                                className="flex items-center gap-1.5 border border-gray-200 px-3 py-2 text-[14px] font-semibold text-brand-primary/76 transition-colors cursor-pointer hover:text-brand-primary md:text-base"
                             >
                                 <Globe size={16} />
                                 {otherLocale.toUpperCase()}
@@ -89,7 +89,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                             <a
                                 key={item.key}
                                 href={item.href}
-                                className="shrink-0 px-3 py-1.5 text-xs sm:text-sm font-medium text-brand-primary hover:text-brand-primary hover:bg-[#fcfaf6] transition-colors"
+                                className="shrink-0 px-3 py-1.5 text-[14px] font-semibold text-brand-primary/76 hover:text-brand-primary hover:bg-[#eef1ff] transition-colors md:text-base"
                             >
                                 {t(item.key)}
                             </a>
@@ -112,13 +112,13 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                 alt={t("site_name")}
                                 className="h-10 w-auto object-contain mb-4"
                             />
-                            <p className="max-w-md text-sm text-white/80">
+                            <p className="max-w-md text-[14px] text-white/80 md:text-base">
                                 {t("landing_footer_desc")}
                             </p>
                         </div>
 
                         <div>
-                            <h4 className="text-xs font-bold text-brand-secondary uppercase tracking-widest mb-3">
+                            <h4 className="mb-3 text-[14px] text-white/80 md:text-base">
                                 {t("footer_follow_us")}
                             </h4>
                             <div className="flex items-center gap-2">
@@ -154,7 +154,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                     </div>
 
                     <div className="flex flex-col gap-4 border-t border-white/10 pt-6 md:flex-row md:items-center md:justify-between">
-                        <div className="flex flex-wrap gap-4 text-sm">
+                        <div className="flex flex-wrap gap-4 text-[14px] md:text-base">
                             <a
                                 href={localePath("/#hero-form")}
                                 className="text-white/70 transition-colors hover:text-white"
@@ -181,7 +181,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                             </a>
                         </div>
 
-                        <p className="text-sm text-white/50">
+                        <p className="text-[14px] text-white/50 md:text-base">
                             &copy; {new Date().getFullYear()} {t("site_name")}.{" "}
                             {t("all_rights_reserved")}
                         </p>

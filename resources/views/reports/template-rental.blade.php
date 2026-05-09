@@ -6,7 +6,7 @@
     <title>Raport AnalizÄƒ Proprietate</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <style>
         @page { size: A4; margin: 10mm 0 20mm 0; }
@@ -14,10 +14,10 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --primary: #303048;
-            --primary-light: #3d3b5c;
-            --secondary: #f5915d;
-            --tertiary: #0073f0;
+            --primary: #34306a;
+            --primary-light: #45418a;
+            --secondary: #4e59b7;
+            --tertiary: #7380d9;
             --neutral: #64748b;
             --green: #00A556;
             --green-light: #ecfdf5;
@@ -30,15 +30,15 @@
             --red-border: #fecaca;
             --bg: #ffffff;
             --card: #ffffff;
-            --border: #e2e0f0;
-            --text: #1e1b4b;
+            --border: #dfe3f3;
+            --text: #231f57;
             --text-muted: #64748b;
             --text-light: #94a3b8;
-            --gradient-accent: linear-gradient(90deg, var(--tertiary), var(--secondary));
+            --gradient-accent: linear-gradient(90deg, var(--secondary), var(--tertiary));
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             color: var(--text);
             background: var(--bg);
             font-size: 12px;
@@ -74,7 +74,7 @@
 
         /* â”€â”€ HEADER BAR â”€â”€ */
         .header-bar {
-            background: linear-gradient(135deg, var(--primary) 0%, #252440 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, #28255a 100%);
             padding: 10px 28px;
             display: flex;
             align-items: center;
@@ -105,7 +105,7 @@
         .hero-address { font-size: 11px; color: var(--text-muted); }
         .hero-price-box {
             text-align: right;
-            background: linear-gradient(135deg, var(--tertiary), #0059cc);
+            background: linear-gradient(135deg, var(--secondary), var(--tertiary));
             color: #fff; padding: 10px 16px; border-radius: 8px;
             min-width: 130px;
         }
@@ -113,7 +113,7 @@
         .hero-price-label { font-size: 9px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; }
         .hero-tagline {
             font-size: 11px; font-style: italic; color: var(--tertiary);
-            padding: 4px 12px; background: rgba(0,115,240,0.05);
+            padding: 4px 12px; background: rgba(115,128,217,0.08);
             border-radius: 4px; margin-bottom: 8px; display: inline-block;
         }
         .hero-grid { display: flex; flex-wrap: wrap; gap: 0; }
@@ -210,19 +210,19 @@
 
         /* â”€â”€ VERDICT (Page 1) â”€â”€ */
         .verdict-card {
-            background: linear-gradient(135deg, var(--primary) 0%, #1a1930 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, #22204b 100%);
             border-radius: 12px; padding: 10px 18px; color: #fff;
             position: relative; overflow: hidden;
         }
         .verdict-card::before {
             content: ''; position: absolute; top: -40px; right: -20px;
             width: 120px; height: 120px;
-            background: radial-gradient(circle, rgba(245,145,93,0.15) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(115,128,217,0.18) 0%, transparent 70%);
         }
         .verdict-card::after {
             content: ''; position: absolute; bottom: -30px; left: -20px;
             width: 100px; height: 100px;
-            background: radial-gradient(circle, rgba(0,115,240,0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(78,89,183,0.18) 0%, transparent 70%);
         }
         .verdict-top { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; position: relative; z-index: 1; }
         .verdict-score-circle {
@@ -340,7 +340,7 @@
             padding: 2px 0; font-size: 10.5px; color: #713f12;
             display: flex; gap: 5px;
         }
-        .negotiation-list li::before { content: 'ðŸ’¬'; font-size: 10px; flex-shrink: 0; }
+        .negotiation-list li::before { content: '-'; font-size: 10px; flex-shrink: 0; }
 
         /* Cost items table */
         .cost-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 10.5px; border-radius: 8px; overflow: hidden; }
@@ -478,7 +478,7 @@
             color: #334155; break-inside: avoid; margin-bottom: 4px;
         }
         .viewing-list li::before {
-            content: 'ðŸ”'; position: absolute; left: 0; top: 2px; font-size: 9px;
+            content: '-'; position: absolute; left: 0; top: 2px; font-size: 9px;
         }
 
         /* Next steps */
@@ -529,7 +529,7 @@
         .final-verdict-card::before {
             content: ''; position: absolute; top: -30px; right: -30px;
             width: 120px; height: 120px;
-            background: radial-gradient(circle, rgba(245,145,93,0.15) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(115,128,217,0.18) 0%, transparent 70%);
         }
         .final-score { font-size: 52px; font-weight: 900; color: #fff; line-height: 1; }
         .final-score span { font-size: 22px; opacity: 0.6; }
@@ -558,7 +558,7 @@
             display: flex; align-items: flex-start; gap: 5px;
             padding: 2px 0; font-size: 10px; color: #334155;
         }
-        .action-items li::before { content: 'â˜'; color: var(--tertiary); font-size: 11px; flex-shrink: 0; }
+        .action-items li::before { content: '-'; color: var(--tertiary); font-size: 11px; flex-shrink: 0; }
 
         .warning-box {
             font-size: 10px; color: #854d0e; background: var(--yellow-light);
@@ -633,7 +633,7 @@
     $pages = $data['pages'] ?? [];
     $meta = $data['report_meta'] ?? [];
 
-    $donutColors = ['#303048', '#0073f0', '#f5915d', '#64748b', '#e05252'];
+    $donutColors = ['#34306a', '#4e59b7', '#7380d9', '#64748b', '#e05252'];
 
     $barChart = $donutChart = $hBarChart = $radarChart = $pollutionChart = null;
     foreach ($charts as $c) {
@@ -732,7 +732,7 @@
                     $isInverted = ($kpi['id'] ?? '') === 'risk_score';
                     $kpiColor = gradeColor($kpi['value'], $isInverted);
                     $kpiClass = gradeClass($kpi['value'], $isInverted);
-                    $trendSymbol = match($kpi['trend'] ?? 'stable') { 'up' => 'â†‘', 'down' => 'â†“', default => 'â†’' };
+                    $trendSymbol = match($kpi['trend'] ?? 'stable') { 'up' => '+', 'down' => '-', default => '=' };
                 @endphp
                 <div class="kpi-card">
                     <div class="kpi-circle {{ $kpiClass }}">
@@ -785,11 +785,11 @@
                     </div>
                 </div>
                 <div class="env-metrics">
-                    <div class="env-row"><span class="env-key">ðŸŒ¬ï¸ Calitate aer</span><span class="env-val">{{ $pd['air_quality_label'] ?? ($pd['aqi_label'] ?? 'â€“') }}</span></div>
-                    <div class="env-row"><span class="env-key">ðŸ”‡ Zgomot</span><span class="env-val">{{ $pd['noise_label'] ?? 'â€“' }} ({{ $pd['noise_db'] ?? 'â€“' }} dB)</span></div>
-                    <div class="env-row"><span class="env-key">ðŸŒ¿ SpaÈ›ii verzi</span><span class="env-val">{{ $pd['green_coverage_pct'] ?? 'â€“' }}%</span></div>
-                    <div class="env-row"><span class="env-key">ðŸ­ Surse poluare</span><span class="env-val">{{ $pd['pollution_sources'] ?? 'Niciuna Ã®n apropiere' }}</span></div>
-                    <div class="env-row"><span class="env-key">ðŸš¶ Walkability</span><span class="env-val">{{ $pd['walkability_label'] ?? 'â€“' }}</span></div>
+                    <div class="env-row"><span class="env-key">Calitate aer</span><span class="env-val">{{ $pd['air_quality_label'] ?? ($pd['aqi_label'] ?? 'â€“') }}</span></div>
+                    <div class="env-row"><span class="env-key">Zgomot</span><span class="env-val">{{ $pd['noise_label'] ?? 'â€“' }} ({{ $pd['noise_db'] ?? 'â€“' }} dB)</span></div>
+                    <div class="env-row"><span class="env-key">Spatii verzi</span><span class="env-val">{{ $pd['green_coverage_pct'] ?? 'â€“' }}%</span></div>
+                    <div class="env-row"><span class="env-key">Surse poluare</span><span class="env-val">{{ $pd['pollution_sources'] ?? 'Niciuna Ã®n apropiere' }}</span></div>
+                    <div class="env-row"><span class="env-key">Walkability</span><span class="env-val">{{ $pd['walkability_label'] ?? 'â€“' }}</span></div>
                 </div>
             </div>
             @endif
@@ -820,16 +820,16 @@
                 <div class="badge-item {{ ($badge['positive'] ?? true) ? 'badge-positive' : 'badge-negative' }}">
                     <span class="badge-icon">
                         @switch($badge['icon'] ?? '')
-                            @case('parking') ðŸ…¿ @break
-                            @case('bus') ðŸšŒ @break
-                            @case('eye') ðŸ‘ @break
-                            @case('map') ðŸ—º @break
-                            @case('wind') ðŸŒ¬ @break
-                            @case('arrow-up') â†• @break
-                            @case('home') ðŸ  @break
-                            @case('zap') âš¡ @break
-                            @case('heart') â¤ @break
-                            @default â—
+                            @case('parking') P @break
+                            @case('bus') T @break
+                            @case('eye') V @break
+                            @case('map') Z @break
+                            @case('wind') A @break
+                            @case('arrow-up') U @break
+                            @case('home') C @break
+                            @case('zap') E @break
+                            @case('heart') I @break
+                            @default - @break
                         @endswitch
                     </span>
                     <span>{{ $badge['label'] ?? '' }}: <strong>{{ $badge['value'] ?? '' }}</strong></span>
@@ -853,7 +853,7 @@
             <div class="verdict-top">
                 <div class="verdict-score-circle" style="background: {{ $verdictScoreColor }};">{{ $verdict['overall_score'] ?? '' }}<small>/10</small></div>
                 <div>
-                    <div class="verdict-rec-label">ðŸ† Recomandare finalÄƒ</div>
+                    <div class="verdict-rec-label">Recomandare finala</div>
                     <div class="verdict-rec {{ $recClass }}">{{ $verdict['recommendation'] ?? '' }}</div>
                 </div>
             </div>
@@ -861,14 +861,14 @@
             <div class="verdict-lists">
                 @if(!empty($verdict['ideal_for']))
                 <div class="verdict-list positive">
-                    <div class="verdict-list-title">âœ… Ideal pentru</div>
-                    <ul>@foreach($verdict['ideal_for'] as $item)<li><span class="vl-icon">âœ“</span> {{ $item }}</li>@endforeach</ul>
+                    <div class="verdict-list-title">Ideal pentru</div>
+                    <ul>@foreach($verdict['ideal_for'] as $item)<li><span class="vl-icon">-</span> {{ $item }}</li>@endforeach</ul>
                 </div>
                 @endif
                 @if(!empty($verdict['not_ideal_for']))
                 <div class="verdict-list negative">
-                    <div class="verdict-list-title">âŒ Nu se recomandÄƒ</div>
-                    <ul>@foreach($verdict['not_ideal_for'] as $item)<li><span class="vl-icon">âœ—</span> {{ $item }}</li>@endforeach</ul>
+                    <div class="verdict-list-title">Nu se recomanda</div>
+                    <ul>@foreach($verdict['not_ideal_for'] as $item)<li><span class="vl-icon">-</span> {{ $item }}</li>@endforeach</ul>
                 </div>
                 @endif
             </div>
@@ -918,36 +918,12 @@
         @endif
 
         @foreach(($pg['sections'] ?? []) as $section)
-            @if(str_contains(strtolower($section['heading'] ?? ''), 'instalaÈ›ii') || str_contains(strtolower($section['heading'] ?? ''), 'instalati'))
-                @continue
-            @endif
             <div class="section-block">
                 <div class="section-heading">
                     @php
                         $hLower = strtolower($section['heading'] ?? '');
-                        $sIcon = match(true) {
-                            str_contains($hLower, 'preÈ›') || str_contains($hLower, 'cost') || str_contains($hLower, 'chiri') => 'ðŸ’°',
-                            str_contains($hLower, 'locali') || str_contains($hLower, 'zonÄƒ') || str_contains($hLower, 'transport') => 'ðŸ“',
-                            str_contains($hLower, 'risc') || str_contains($hLower, 'pericol') => 'âš ï¸',
-                            str_contains($hLower, 'avantaj') || str_contains($hLower, 'cresc') || str_contains($hLower, 'pozitiv') => 'âœ…',
-                            str_contains($hLower, 'dezavantaj') || str_contains($hLower, 'scad') || str_contains($hLower, 'negativ') => 'âŒ',
-                            str_contains($hLower, 'negoci') => 'ðŸ¤',
-                            str_contains($hLower, 'instala') || str_contains($hLower, 'stare') || str_contains($hLower, 'tehnic') => 'ðŸ”§',
-                            str_contains($hLower, 'contract') || str_contains($hLower, 'clauz') || str_contains($hLower, 'juridic') => 'ðŸ“‹',
-                            str_contains($hLower, 'chiriaÈ™') || str_contains($hLower, 'profil') || str_contains($hLower, 'tenant') => 'ðŸ‘¤',
-                            str_contains($hLower, 'concuren') || str_contains($hLower, 'piaÈ›Äƒ') || str_contains($hLower, 'competit') => 'ðŸ“Š',
-                            str_contains($hLower, 'investiÈ›i') || str_contains($hLower, 'randament') || str_contains($hLower, 'roi') => 'ðŸ“ˆ',
-                            str_contains($hLower, 'recomanda') || str_contains($hLower, 'verdict') || str_contains($hLower, 'concluzi') => 'ðŸ†',
-                            str_contains($hLower, 'Ã®ntrebare') || str_contains($hLower, 'question') => 'â“',
-                            str_contains($hLower, 'paÈ™i') || str_contains($hLower, 'acÈ›iun') || str_contains($hLower, 'next') => 'ðŸŽ¯',
-                            str_contains($hLower, 'vizionare') || str_contains($hLower, 'checklist') => 'ðŸ”',
-                            str_contains($hLower, 'ieÈ™ire') || str_contains($hLower, 'exit') || str_contains($hLower, 'reziliere') => 'ðŸšª',
-                            str_contains($hLower, 'mediu') || str_contains($hLower, 'aer') || str_contains($hLower, 'zgomot') => 'ðŸŒ¿',
-                            str_contains($hLower, 'scenari') || str_contains($hLower, 'business') => 'ðŸ’¼',
-                            default => 'ðŸ“Œ',
-                        };
                     @endphp
-                    {{ $sIcon }} {{ $section['heading'] ?? '' }}
+                    {{ $section['heading'] ?? '' }}
                 </div>
 
                 @if(!empty($section['body']))
@@ -993,14 +969,14 @@
                 {{-- Cost items table --}}
                 @if(!empty($section['cost_items']))
                     <table class="cost-table">
-                        <thead><tr><th>ðŸ’³ Cost</th><th style="text-align:right">SumÄƒ</th><th style="text-align:center">Inclus Ã®n chirie</th></tr></thead>
+                        <thead><tr><th>Cost</th><th style="text-align:right">Suma</th><th style="text-align:center">Inclus in chirie</th></tr></thead>
                         <tbody>
                             @foreach($section['cost_items'] as $ci)
                                 <tr>
                                     <td>{{ $ci['label'] ?? '' }}</td>
                                     <td style="text-align:right;font-weight:600;">â‚¬{{ $ci['value'] ?? 0 }}/lunÄƒ</td>
                                     <td style="text-align:center;" class="{{ ($ci['included_in_rent'] ?? false) ? 'included' : 'not-included' }}">
-                                        {{ ($ci['included_in_rent'] ?? false) ? 'âœ“ Da' : 'âœ— Nu' }}
+                                        {{ ($ci['included_in_rent'] ?? false) ? 'Da' : 'Nu' }}
                                     </td>
                                 </tr>
                             @endforeach
@@ -1017,7 +993,7 @@
                 @if(!empty($section['negotiation_arguments']))
                     <div class="negotiation-box">
                         @if(!empty($section['target_rent']))
-                            <div class="negotiation-target">ðŸŽ¯ Chirie È›intÄƒ: <span>â‚¬{{ number_format($section['target_rent']) }}/lunÄƒ</span></div>
+                            <div class="negotiation-target">Chirie tinta: <span>â‚¬{{ number_format($section['target_rent']) }}/lunÄƒ</span></div>
                         @endif
                         <ul class="negotiation-list">
                             @foreach($section['negotiation_arguments'] as $arg)<li>{{ $arg }}</li>@endforeach
@@ -1029,14 +1005,14 @@
                 @if(!empty($section['transport']))
                     @php $tr = $section['transport']; @endphp
                     <div class="data-grid">
-                        <div class="data-cell"><span class="data-label">ðŸšŒ Transport public</span><span class="data-value">{{ ($tr['public_transport'] ?? false) ? 'Da' : 'Nu' }}</span></div>
-                        <div class="data-cell"><span class="data-label">â± FrecvenÈ›Äƒ</span><span class="data-value">{{ $tr['frequency_minutes'] ?? '' }} min</span></div>
-                        <div class="data-cell"><span class="data-label">ðŸ™ Centrul oraÈ™ului</span><span class="data-value">{{ $tr['city_center_minutes'] ?? '' }} min</span></div>
-                        <div class="data-cell"><span class="data-label">ðŸ…¿ï¸ Parcare</span><span class="data-value">{{ $tr['parking_spaces'] ?? 0 }} loc{{ ($tr['parking_included_in_rent'] ?? false) ? ' (inclus)' : '' }}{{ (!($tr['parking_included_in_rent'] ?? false) && !empty($tr['parking_extra_cost_eur'])) ? ' (â‚¬'.$tr['parking_extra_cost_eur'].'/lunÄƒ)' : '' }}</span></div>
+                        <div class="data-cell"><span class="data-label">Transport public</span><span class="data-value">{{ ($tr['public_transport'] ?? false) ? 'Da' : 'Nu' }}</span></div>
+                        <div class="data-cell"><span class="data-label">Frecventa</span><span class="data-value">{{ $tr['frequency_minutes'] ?? '' }} min</span></div>
+                        <div class="data-cell"><span class="data-label">Centrul orasului</span><span class="data-value">{{ $tr['city_center_minutes'] ?? '' }} min</span></div>
+                        <div class="data-cell"><span class="data-label">Parcare</span><span class="data-value">{{ $tr['parking_spaces'] ?? 0 }} loc{{ ($tr['parking_included_in_rent'] ?? false) ? ' (inclus)' : '' }}{{ (!($tr['parking_included_in_rent'] ?? false) && !empty($tr['parking_extra_cost_eur'])) ? ' (â‚¬'.$tr['parking_extra_cost_eur'].'/lunÄƒ)' : '' }}</span></div>
                     </div>
                     @if(!empty($tr['nearest_stop_minutes_walk']))
-                        <div style="font-size:10px;color:#334155;margin:4px 0 6px;">ðŸš¶ Cea mai apropiatÄƒ staÈ›ie: <strong>{{ $tr['nearest_stop_minutes_walk'] }} min mers pe jos</strong>
-                            @if(!empty($tr['bike_friendly'])) Â· ðŸš² Prietenos biciclete @endif
+                        <div style="font-size:10px;color:#334155;margin:4px 0 6px;">Cea mai apropiata statie: <strong>{{ $tr['nearest_stop_minutes_walk'] }} min mers pe jos</strong>
+                            @if(!empty($tr['bike_friendly'])) Â· Prietenos biciclete @endif
                         </div>
                     @endif
                     @if(!empty($tr['transport_lines']))
@@ -1052,7 +1028,7 @@
                         @foreach($section['amenities'] as $key => $am)
                             @if(is_array($am) && ($am['exists'] ?? false))
                                 <div class="amenity-chip">
-                                    âœ“ {{ $am['details'] ?? ucfirst(str_replace('_', ' ', $key)) }}
+                                    - {{ $am['details'] ?? ucfirst(str_replace('_', ' ', $key)) }}
                                     @if(!empty($am['distance_minutes_walk']))
                                         <span class="amenity-dist">{{ $am['distance_minutes_walk'] }} min</span>
                                     @endif
@@ -1064,13 +1040,13 @@
 
                 {{-- Positive/negative developments --}}
                 @if(!empty($section['positive_developments']))
-                    <div class="dev-positive">ðŸ“ˆ Factori pozitivi:</div>
+                    <div class="dev-positive">Factori pozitivi:</div>
                     <ul class="item-list green-border">
                         @foreach($section['positive_developments'] as $pd)<li>{{ $pd }}</li>@endforeach
                     </ul>
                 @endif
                 @if(!empty($section['negative_developments']))
-                    <div class="dev-negative">âš  Factori de risc:</div>
+                    <div class="dev-negative">Factori de risc:</div>
                     <ul class="item-list red-border">
                         @foreach($section['negative_developments'] as $nd)<li>{{ $nd }}</li>@endforeach
                     </ul>
@@ -1078,11 +1054,11 @@
 
                 {{-- Legacy: trend_drivers / risk_factors --}}
                 @if(!empty($section['trend_drivers']))
-                    <div class="dev-positive">ðŸ“ˆ Factori pozitivi:</div>
+                    <div class="dev-positive">Factori pozitivi:</div>
                     <ul class="item-list green-border">@foreach($section['trend_drivers'] as $td)<li>{{ $td }}</li>@endforeach</ul>
                 @endif
                 @if(!empty($section['risk_factors']))
-                    <div class="dev-negative">âš  Factori de risc:</div>
+                    <div class="dev-negative">Factori de risc:</div>
                     <ul class="item-list red-border">@foreach($section['risk_factors'] as $rf)<li>{{ $rf }}</li>@endforeach</ul>
                 @endif
 
@@ -1094,7 +1070,7 @@
                     </div>
                     @if(!empty($section['potential_issues']))
                         @foreach($section['potential_issues'] as $pi)
-                            <div class="warning-box">âš  {{ $pi }}</div>
+                            <div class="warning-box">{{ $pi }}</div>
                         @endforeach
                     @endif
                 @endif
@@ -1102,7 +1078,7 @@
                 {{-- Installations table --}}
                 @if(!empty($section['installations']))
                     <table class="install-table">
-                        <thead><tr><th>ðŸ”§ Element</th><th>Stare</th><th>Detalii</th></tr></thead>
+                        <thead><tr><th>Element</th><th>Stare</th><th>Detalii</th></tr></thead>
                         <tbody>
                             @foreach($section['installations'] as $inst)
                                 @php
@@ -1140,7 +1116,7 @@
                 {{-- Not recommended for --}}
                 @if(!empty($section['not_recommended_for']))
                     <div style="margin-top:5px;margin-bottom:5px;">
-                        <div style="font-size:10px;font-weight:700;color:#991b1b;margin-bottom:4px;">ðŸš« Nu se recomandÄƒ:</div>
+                        <div style="font-size:10px;font-weight:700;color:#991b1b;margin-bottom:4px;">Nu se recomanda:</div>
                         <ul class="not-rec-list">
                             @foreach($section['not_recommended_for'] as $nr)
                                 <li>
@@ -1166,7 +1142,7 @@
                 @endif
                 @if(!empty($section['not_recommended']))
                     <div style="margin-top:5px;margin-bottom:5px;">
-                        <div style="font-size:10px;font-weight:700;color:#991b1b;margin-bottom:4px;">ðŸš« Nu se recomandÄƒ:</div>
+                        <div style="font-size:10px;font-weight:700;color:#991b1b;margin-bottom:4px;">Nu se recomanda:</div>
                         <ul class="not-rec-list">
                             @foreach($section['not_recommended'] as $nr)
                                 <li><span class="not-rec-name">{{ $nr['type'] ?? '' }}</span><div class="not-rec-reason">{{ $nr['reason'] ?? '' }}</div></li>
@@ -1191,7 +1167,7 @@
                                     <div style="font-size:8px;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Cost amenajare</div>
                                 </div>
                                 <div style="flex:1;text-align:center;padding:6px;background:var(--card);border-radius:6px;border:1px solid var(--border);">
-                                    <div style="font-size:15px;font-weight:800;color:#0073f0;">{{ $sc['break_even_months'] ?? '' }} luni</div>
+                                    <div style="font-size:15px;font-weight:800;color:#4e59b7;">{{ $sc['break_even_months'] ?? '' }} luni</div>
                                     <div style="font-size:8px;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Break-even</div>
                                 </div>
                             </div>
@@ -1204,7 +1180,7 @@
                     <ul class="item-list orange-border">@foreach($section['competitor_types'] as $ct)<li>{{ $ct }}</li>@endforeach</ul>
                     @if(!empty($section['competitive_advantage_possible']))
                         <div style="font-size:10px;color:#166534;background:var(--green-light);padding:6px 8px;border-radius:6px;margin-bottom:8px;">
-                            <strong>ðŸŒŸ Oportunitate:</strong> {{ $section['competitive_advantage_possible'] }}
+                            <strong>Oportunitate:</strong> {{ $section['competitive_advantage_possible'] }}
                         </div>
                     @endif
                 @endif
@@ -1253,9 +1229,9 @@
                 @if(!empty($section['exit_conditions']))
                     @php $ex = $section['exit_conditions']; @endphp
                     <div class="exit-box">
-                        <div class="exit-row"><span class="exit-label">ðŸ“† Preaviz reziliere</span><span class="exit-value">{{ $ex['notice_period_months'] ?? '' }} lunÄƒ</span></div>
-                        <div class="exit-row"><span class="exit-label">ðŸ’¸ Penalizare estimatÄƒ</span><span class="exit-value" style="font-size:10px;">{{ $ex['penalty_estimate'] ?? '' }}</span></div>
-                        <div class="exit-row"><span class="exit-label">ðŸ” Returnare garanÈ›ie</span><span class="exit-value" style="font-size:10px;">{{ $ex['deposit_return_conditions'] ?? '' }}</span></div>
+                        <div class="exit-row"><span class="exit-label">Preaviz reziliere</span><span class="exit-value">{{ $ex['notice_period_months'] ?? '' }} lunÄƒ</span></div>
+                        <div class="exit-row"><span class="exit-label">Penalizare estimata</span><span class="exit-value" style="font-size:10px;">{{ $ex['penalty_estimate'] ?? '' }}</span></div>
+                        <div class="exit-row"><span class="exit-label">Returnare garantie</span><span class="exit-value" style="font-size:10px;">{{ $ex['deposit_return_conditions'] ?? '' }}</span></div>
                     </div>
                 @endif
 
@@ -1263,7 +1239,7 @@
                 @if(!empty($section['verdict']))
                     <div class="final-verdict-card">
                         <div class="final-score">{{ $section['overall_score'] ?? '' }}<span>/10</span></div>
-                        <div class="final-verdict-label">ðŸ† Scor General</div>
+                        <div class="final-verdict-label">Scor general</div>
                         @php
                             $recClass = match(strtoupper($section['verdict'] ?? '')) {
                                 'NEGOCIAZÄ‚' => 'negotiate',
@@ -1293,8 +1269,8 @@
                         <div class="step-item">
                             <div class="step-number">{{ $step['step'] ?? '' }}</div>
                             <div class="step-content">
-                                <div class="step-action">âž¡ï¸ {{ $step['action'] ?? '' }}</div>
-                                <div class="step-timeline">â± {{ $step['timeline'] ?? '' }} <span class="priority-badge priority-{{ strtolower($step['priority'] ?? 'recomandat') }}" style="margin-left:3px;">{{ $step['priority'] ?? '' }}</span></div>
+                                <div class="step-action">Actiune: {{ $step['action'] ?? '' }}</div>
+                                <div class="step-timeline">Orizont: {{ $step['timeline'] ?? '' }} <span class="priority-badge priority-{{ strtolower($step['priority'] ?? 'recomandat') }}" style="margin-left:3px;">{{ $step['priority'] ?? '' }}</span></div>
                             </div>
                         </div>
                     @endforeach
@@ -1320,7 +1296,7 @@
         @if(!empty($pg['action_items']))
             <div class="action-items">
                 <div class="action-items-title">
-                    âœ… AcÈ›iuni Recomandate
+                    Actiuni recomandate
                 </div>
                 <ul>@foreach($pg['action_items'] as $ai)<li>{{ $ai }}</li>@endforeach</ul>
             </div>
@@ -1335,7 +1311,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     document.fonts.ready.then(function() {
-    Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+    Chart.defaults.font.family = "'Inter', sans-serif";
     Chart.defaults.font.size = 12;
     Chart.defaults.color = '#64748b';
     Chart.defaults.plugins.legend.display = false;
@@ -1357,7 +1333,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var values = @json($barChart['data']['values'] ?? []);
         var hiIdx = {{ $barChart['data']['highlight_index'] ?? -1 }};
         var colors = values.map(function(v, i) {
-            return i === hiIdx ? '#0073f0' : (i === 0 ? '#303048' : '#94a3b8');
+            return i === hiIdx ? '#7380d9' : (i === 0 ? '#34306a' : '#94a3b8');
         });
         new Chart(ctx, {
             type: 'bar',
@@ -1405,13 +1381,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 afterDraw: function(chart) {
                     var ctx2 = chart.ctx;
                     ctx2.save();
-                    ctx2.font = '700 10px "Plus Jakarta Sans", sans-serif';
+                    ctx2.font = '700 10px "Inter", sans-serif';
                     ctx2.textAlign = 'center';
                     ctx2.textBaseline = 'bottom';
                     chart.data.datasets[0].data.forEach(function(val, i) {
                         var meta = chart.getDatasetMeta(0);
                         var bar = meta.data[i];
-                        ctx2.fillStyle = '#303048';
+                        ctx2.fillStyle = '#34306a';
                         ctx2.fillText('â‚¬' + val, bar.x, bar.y - 4);
                     });
                     ctx2.restore();
@@ -1428,7 +1404,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var segs = @json($donutChart['data']['segments'] ?? []);
         var labels = segs.map(function(s) { return s.label; });
         var values = segs.map(function(s) { return s.value; });
-        var colors = ['#303048', '#0073f0', '#f5915d', '#64748b', '#e05252'];
+        var colors = ['#34306a', '#4e59b7', '#7380d9', '#64748b', '#e05252'];
         var total = values.reduce(function(a, b) { return a + b; }, 0);
         new Chart(ctx, {
             type: 'doughnut',
@@ -1478,14 +1454,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 afterDraw: function(chart) {
                     var width = chart.width, height = chart.height, ctx2 = chart.ctx;
                     ctx2.save();
-                    ctx2.font = '800 16px "Plus Jakarta Sans", sans-serif';
-                    ctx2.fillStyle = '#303048';
+                    ctx2.font = '800 16px "Inter", sans-serif';
+                    ctx2.fillStyle = '#34306a';
                     ctx2.textAlign = 'center';
                     ctx2.textBaseline = 'middle';
                     var centerX = (chart.chartArea.left + chart.chartArea.right) / 2;
                     var centerY = (chart.chartArea.top + chart.chartArea.bottom) / 2;
                     ctx2.fillText('â‚¬' + total, centerX, centerY - 6);
-                    ctx2.font = '500 8px "Plus Jakarta Sans", sans-serif';
+                    ctx2.font = '500 8px "Inter", sans-serif';
                     ctx2.fillStyle = '#94a3b8';
                     ctx2.fillText('total/lunÄƒ', centerX, centerY + 10);
                     ctx2.restore();
@@ -1508,7 +1484,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     data: values,
                     backgroundColor: 'rgba(0, 115, 240, 0.12)',
-                    borderColor: '#0073f0',
+                    borderColor: '#7380d9',
                     borderWidth: 2,
                     pointBackgroundColor: values.map(function(v) { return gradeColor(v); }),
                     pointBorderColor: '#fff',
@@ -1534,7 +1510,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         },
                         pointLabels: {
                             font: { size: 9, weight: '600' },
-                            color: '#303048',
+                            color: '#34306a',
                             padding: 18
                         },
                         grid: { color: '#e5e7eb' },
@@ -1547,7 +1523,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 afterDraw: function(chart) {
                     var ctx2 = chart.ctx;
                     ctx2.save();
-                    ctx2.font = '800 10px "Plus Jakarta Sans", sans-serif';
+                    ctx2.font = '800 10px "Inter", sans-serif';
                     ctx2.textAlign = 'center';
                     ctx2.textBaseline = 'middle';
                     var meta = chart.getDatasetMeta(0);
@@ -1631,7 +1607,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 afterDraw: function(chart) {
                     var ctx2 = chart.ctx;
                     ctx2.save();
-                    ctx2.font = '700 9px "Plus Jakarta Sans", sans-serif';
+                    ctx2.font = '700 9px "Inter", sans-serif';
                     ctx2.textAlign = 'left';
                     ctx2.textBaseline = 'middle';
                     chart.getDatasetMeta(0).data.forEach(function(bar, i) {

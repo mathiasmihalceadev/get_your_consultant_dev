@@ -79,7 +79,7 @@ export default function SubmitUrl({ reportType, errors }: SubmitUrlProps) {
     const sidebar = (
         <>
             <div className="border solid-border solid-border-warm bg-white p-6">
-                <h3 className="mb-5 text-xs font-bold uppercase tracking-widest text-brand-secondary">
+                <h3 className="mb-5 text-xs font-bold uppercase tracking-tightcaps text-brand-secondary">
                     {t("sidebar_report_title")}
                 </h3>
                 <div className="space-y-3">
@@ -103,7 +103,7 @@ export default function SubmitUrl({ reportType, errors }: SubmitUrlProps) {
                 </div>
             </div>
 
-            <div className="border solid-border solid-border-warm bg-[linear-gradient(180deg,#ffffff_0%,#fff7f1_100%)] p-6">
+            <div className="border solid-border solid-border-warm bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)] p-6">
                 <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-white">
                         <Clock
@@ -128,7 +128,11 @@ export default function SubmitUrl({ reportType, errors }: SubmitUrlProps) {
     return (
         <PublicLayout>
             <Head title={typeLabels[reportType]} />
-            <WizardLayout currentStep={2} sidebar={sidebar}>
+            <WizardLayout
+                currentStep={2}
+                sidebar={sidebar}
+                reportType={reportType}
+            >
                 <div>
                     <a
                         href={localePath("/get-report")}
@@ -136,13 +140,13 @@ export default function SubmitUrl({ reportType, errors }: SubmitUrlProps) {
                             e.preventDefault();
                             router.visit(localePath("/get-report"));
                         }}
-                        className="mb-6 inline-flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-brand-primary/70 transition-colors hover:text-brand-primary"
+                        className="mb-6 inline-flex items-center gap-1 text-xs font-medium uppercase tracking-tightcaps text-brand-primary/70 transition-colors hover:text-brand-primary"
                     >
                         <ArrowLeft size={14} />
                         {t("back_to_selection")}
                     </a>
 
-                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                    <p className="mb-3 text-sm font-semibold text-brand-secondary">
                         {t("wizard_step_property")}
                     </p>
                     <h2 className="mb-2 text-[2rem] font-bold tracking-[-0.035em] text-brand-primary md:text-[2.45rem]">

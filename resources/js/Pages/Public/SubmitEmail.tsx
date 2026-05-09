@@ -110,7 +110,7 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
         <>
             <div className="border solid-border solid-border-warm bg-white p-6">
                 <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-[linear-gradient(180deg,#ffffff_0%,#fff7f1_100%)]">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)]">
                         <Envelope
                             size={22}
                             weight="fill"
@@ -128,7 +128,7 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                 </div>
             </div>
 
-            <div className="border solid-border solid-border-warm bg-[linear-gradient(180deg,#ffffff_0%,#fff7f1_100%)] p-6">
+            <div className="border solid-border solid-border-warm bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)] p-6">
                 <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-white">
                         <ShieldCheck
@@ -153,9 +153,13 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
     return (
         <PublicLayout>
             <Head title={t("your_email")} />
-            <WizardLayout currentStep={3} sidebar={sidebar}>
+            <WizardLayout
+                currentStep={3}
+                sidebar={sidebar}
+                reportType={report.report_type}
+            >
                 <div>
-                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                    <p className="mb-3 text-sm font-semibold text-brand-secondary">
                         {t("wizard_step_email")}
                     </p>
                     <h2 className="mb-2 text-[2rem] font-bold tracking-[-0.035em] text-brand-primary md:text-[2.45rem]">

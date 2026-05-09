@@ -77,7 +77,7 @@ class AdminSettingsController extends Controller
             mkdir($dir, 0755, true);
         }
 
-        $footerHtml = '<div style="width:100%;text-align:center;font-family:Plus Jakarta Sans,sans-serif;padding:0 40px;line-height:1.4;">'
+        $footerHtml = '<div style="width:100%;text-align:center;font-family:Inter,sans-serif;padding:0 40px;line-height:1.4;">'
             . '<div style="font-size:8px;color:#9CA3AF;font-style:italic;">Raport informativ generat prin analiza datelor publice disponibile È™i utilizarea unor modele statistice proprietare dezvoltate de Get Your Consultant.</div>'
             . '<div style="font-size:8px;color:#9CA3AF;font-style:italic;">Datele prezentate au caracter informativ È™i pot necesita verificare independentÄƒ.</div>'
             . '<div style="font-size:7px;color:#B0B0B0;margin-top:2px;">Â© 2026 Get Your Consultant. Toate drepturile rezervate.</div>'

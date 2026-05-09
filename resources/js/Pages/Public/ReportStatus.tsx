@@ -18,7 +18,7 @@ function GeneratingAnimation() {
                             i % 3 === 0
                                 ? "#34306A"
                                 : i % 3 === 1
-                                  ? "#F68C56"
+                                  ? "#4E59B7"
                                   : "#7380D9",
                         animation: `bubbleBounce 1.4s ease-in-out ${i * 0.2}s infinite`,
                     }}
@@ -107,7 +107,7 @@ export default function ReportStatus({
     const sidebar = !isCompleted ? (
         <>
             <div className="border solid-border solid-border-warm bg-white p-6">
-                <h3 className="mb-5 text-xs font-bold uppercase tracking-widest text-brand-secondary">
+                <h3 className="mb-5 text-xs font-bold uppercase tracking-tightcaps text-brand-secondary">
                     {t("sidebar_progress_title")}
                 </h3>
                 <div className="space-y-4">
@@ -146,7 +146,7 @@ export default function ReportStatus({
                 </div>
             </div>
 
-            <div className="border solid-border solid-border-warm bg-[linear-gradient(180deg,#ffffff_0%,#fff7f1_100%)] p-6">
+            <div className="border solid-border solid-border-warm bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)] p-6">
                 <p className="text-sm leading-[1.7] text-brand-primary">
                     {t("auto_update_note")}
                 </p>
@@ -157,14 +157,18 @@ export default function ReportStatus({
     return (
         <PublicLayout>
             <Head title={t("report_status")} />
-            <WizardLayout currentStep={4} sidebar={sidebar}>
+            <WizardLayout
+                currentStep={4}
+                sidebar={sidebar}
+                reportType={reportData.report_type}
+            >
                 <div className="text-center lg:text-left">
                     <div className="mb-1">
                         <span className="inline-flex items-center px-2.5 py-0.5 bg-brand-primary/10 text-brand-primary text-xs font-semibold">
                             {typeLabels[reportData.report_type]}
                         </span>
                     </div>
-                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                    <p className="mb-3 text-sm font-semibold text-brand-secondary">
                         {t("wizard_step_status")}
                     </p>
                     <h2 className="mb-2 text-[2rem] font-bold tracking-[-0.035em] text-brand-primary md:text-[2.45rem]">
