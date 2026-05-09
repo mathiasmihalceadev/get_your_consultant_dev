@@ -49,7 +49,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                             className="shrink-0 flex items-center gap-2.5 text-brand-primary font-bold text-lg hover:opacity-80 transition-opacity"
                         >
                             <img
-                                className="h-10 w-auto object-contain"
+                                className="h-10 w-auto object-contain md:h-12"
                                 src="/images/logo-white.jpg"
                             />
                         </Link>
@@ -110,7 +110,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                             <img
                                 src="/images/logo-dark.jpg"
                                 alt={t("site_name")}
-                                className="h-10 w-auto object-contain mb-4"
+                                className="h-10 w-auto object-contain mb-4 md:h-12"
                             />
                             <p className="max-w-md text-[14px] text-white/80 md:text-base">
                                 {t("landing_footer_desc")}

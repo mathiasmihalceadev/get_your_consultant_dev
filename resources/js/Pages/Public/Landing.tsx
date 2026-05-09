@@ -366,7 +366,7 @@ export default function Landing() {
 
             <motion.section
                 id="report-example"
-                className="relative overflow-hidden border-b solid-divider bg-white pb-16 pt-12 md:py-18"
+                className="relative overflow-hidden solid-divider bg-white pb-16 pt-12 md:py-18"
                 variants={sectionVariants}
                 {...revealMotionProps}
             >
@@ -432,7 +432,7 @@ export default function Landing() {
 
             <motion.section
                 id="how-it-works"
-                className="border-b solid-divider bg-[linear-gradient(180deg,#ffffff_0%,#f8faff_100%)] py-16 md:py-18"
+                className="solid-divider bg-[linear-gradient(180deg,#ffffff_0%,#f8faff_100%)] py-16 md:pt-0 md:pb-16"
                 variants={sectionVariants}
                 {...revealMotionProps}
             >
@@ -669,7 +669,7 @@ export default function Landing() {
 
             <motion.section
                 id="final-cta"
-                className="relative overflow-hidden border-b solid-divider bg-[linear-gradient(180deg,#eaf1ff_0%,#f5f8ff_100%)] py-16 md:py-18"
+                className="relative overflow-hidden border-b solid-divider bg-[linear-gradient(180deg,#eaf1ff_0%,#f5f8ff_100%)] py-16 md:py-8"
                 variants={sectionVariants}
                 {...revealMotionProps}
             >
