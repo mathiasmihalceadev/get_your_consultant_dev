@@ -44,6 +44,43 @@ const stepKeys = [
     "wizard_step_status",
 ];
 
+const reportTypeDetails: Partial<
+    Record<ReportType, { titleKey: string; detailKeys: string[] }>
+> = {
+    rental_living: {
+        titleKey: "rental",
+        detailKeys: [
+            "landing_rental_detail_1",
+            "landing_rental_detail_2",
+            "landing_rental_detail_3",
+        ],
+    },
+    rental_business: {
+        titleKey: "rental",
+        detailKeys: [
+            "landing_rental_detail_1",
+            "landing_rental_detail_2",
+            "landing_rental_detail_3",
+        ],
+    },
+    buying_living: {
+        titleKey: "buying",
+        detailKeys: [
+            "landing_buying_detail_1",
+            "landing_buying_detail_2",
+            "landing_buying_detail_3",
+        ],
+    },
+    buying_business: {
+        titleKey: "buying",
+        detailKeys: [
+            "landing_buying_detail_1",
+            "landing_buying_detail_2",
+            "landing_buying_detail_3",
+        ],
+    },
+};
+
 interface WizardLayoutProps {
     currentStep: number;
     children: React.ReactNode;
@@ -75,6 +112,9 @@ export default function WizardLayout({
     };
 
     const selectedVisual = reportType ? reportTypeVisuals[reportType] : null;
+    const selectedDetails = reportType ? reportTypeDetails[reportType] : null;
+    const showSelectedReportCard =
+        currentStep === 1 && selectedVisual && selectedDetails;
 
     const sectionMotionProps = shouldReduceMotion
         ? { initial: false }
@@ -82,7 +122,7 @@ export default function WizardLayout({
 
     return (
         <motion.section
-            className="relative overflow-hidden border-b solid-divider bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)]"
+            className="relative flex min-h-full flex-1 flex-col overflow-hidden border-b solid-divider bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)]"
             variants={wizardSectionVariants}
             {...sectionMotionProps}
         >
@@ -93,7 +133,7 @@ export default function WizardLayout({
                 className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.06] mix-blend-multiply"
             />
             <motion.div
-                className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14 lg:px-8"
+                className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-10 sm:px-6 md:py-14 lg:px-8"
                 variants={wizardItemVariants}
             >
                 {/* Step Indicator */}
@@ -163,7 +203,7 @@ export default function WizardLayout({
                                         )}
                                     </motion.div>
                                     <span
-                                        className={`hidden text-sm font-semibold sm:inline ${
+                                        className={`hidden text-[14px] leading-[1.3] font-semibold sm:inline ${
                                             isCompleted || isActive
                                                 ? "text-brand-primary"
                                                 : "text-brand-primary/70"
@@ -215,7 +255,7 @@ export default function WizardLayout({
                                 duration: 0.26,
                                 ease: wizardEase,
                             }}
-                            className="border solid-border solid-border-warm bg-white p-6 md:p-8"
+                            className="border solid-border solid-border-warm bg-white p-6 md:p-8 lg:p-9"
                         >
                             {children}
                         </motion.div>
@@ -245,28 +285,46 @@ export default function WizardLayout({
                                 }}
                                 className="space-y-4"
                             >
-                                {selectedVisual ? (
-                                    <div className="relative overflow-hidden border solid-border solid-border-warm bg-white p-4">
-                                        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(242,245,255,0.94))]" />
-                                        <div className="absolute inset-0 opacity-[0.08] mix-blend-multiply">
-                                            <img
-                                                src={textureImageSrc}
-                                                alt=""
-                                                aria-hidden="true"
-                                                className="h-full w-full object-cover"
-                                            />
-                                        </div>
-                                        <div className="relative h-56 overflow-hidden">
-                                            <div className="absolute inset-x-8 bottom-3 h-12 rounded-full bg-brand-primary/12 blur-2xl" />
+                                {showSelectedReportCard ? (
+                                    <div className="border solid-border solid-border-warm bg-white p-5 shadow-[0_22px_54px_rgba(52,48,106,0.08)] md:p-6">
+                                        <div className="flex h-60 items-center justify-center bg-white">
                                             <img
                                                 src={selectedVisual.imageSrc}
                                                 alt={selectedVisual.imageAlt}
-                                                className="relative z-10 h-full w-full scale-[1.05] object-contain drop-shadow-[0_22px_38px_rgba(52,48,106,0.18)]"
+                                                className="h-full w-full object-contain drop-shadow-[0_18px_34px_rgba(52,48,106,0.14)]"
                                             />
+                                        </div>
+                                        <div className="mt-5 border-t border-brand-primary/10 pt-4">
+                                            <p className="text-[13px] font-semibold leading-[1.35] text-brand-primary/64">
+                                                {t("sidebar_report_title")}
+                                            </p>
+                                            <h3 className="mt-1 text-[1.6rem] font-bold leading-[1.02] tracking-[-0.035em] text-brand-primary">
+                                                {t(selectedDetails.titleKey)}
+                                            </h3>
+                                            <ul className="mt-4 space-y-3">
+                                                {selectedDetails.detailKeys.map(
+                                                    (detailKey) => (
+                                                        <li
+                                                            key={detailKey}
+                                                            className="flex items-start gap-3"
+                                                        >
+                                                            <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#eef1ff] text-brand-secondary">
+                                                                <Check
+                                                                    size={12}
+                                                                    weight="bold"
+                                                                />
+                                                            </span>
+                                                            <span className="text-[14px] leading-[1.65] text-brand-primary/78">
+                                                                {t(detailKey)}
+                                                            </span>
+                                                        </li>
+                                                    ),
+                                                )}
+                                            </ul>
                                         </div>
                                     </div>
                                 ) : null}
-                                {!selectedVisual ? sidebar : null}
+                                {!showSelectedReportCard ? sidebar : null}
                             </motion.div>
                         </AnimatePresence>
                     )}

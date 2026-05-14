@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Head } from "@inertiajs/react";
 import { CheckCircle, FilePdf, ChartBar, MapPin } from "@phosphor-icons/react";
-import { Report, ReportType, ReportStatus as ReportStatusType } from "@/types";
+import { Report } from "@/types";
 import PublicLayout from "@/Layouts/PublicLayout";
 import WizardLayout from "@/Components/WizardLayout";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -61,13 +61,6 @@ export default function ReportStatus({
     const { t } = useTranslation();
     const [reportData, setReportData] = useState<Report>(initialReport);
 
-    const typeLabels: Record<ReportType, string> = {
-        rental_living: t("rental"),
-        rental_business: t("type_rental_business"),
-        buying_living: t("buying"),
-        buying_business: t("type_buying_business"),
-    };
-
     useEffect(() => {
         if (
             reportData.status === "sent" ||
@@ -107,7 +100,7 @@ export default function ReportStatus({
     const sidebar = !isCompleted ? (
         <>
             <div className="border solid-border solid-border-warm bg-white p-6">
-                <h3 className="mb-5 text-xs font-bold uppercase tracking-tightcaps text-brand-secondary">
+                <h3 className="mb-5 text-[0.85rem] font-semibold leading-[1.35] tracking-[-0.02em] text-brand-primary">
                     {t("sidebar_progress_title")}
                 </h3>
                 <div className="space-y-4">
@@ -115,7 +108,7 @@ export default function ReportStatus({
                         ({ icon: StepIcon, labelKey, done }, i) => (
                             <div key={i} className="flex items-center gap-3">
                                 <div
-                                    className={`flex h-8 w-8 flex-shrink-0 items-center justify-center ${
+                                    className={`flex h-8 w-8 shrink-0 items-center justify-center ${
                                         done
                                             ? "bg-brand-primary"
                                             : "bg-slate-100"
@@ -132,7 +125,7 @@ export default function ReportStatus({
                                     />
                                 </div>
                                 <p
-                                    className={`text-sm font-semibold ${
+                                    className={`text-[14px] leading-[1.4] font-semibold ${
                                         done
                                             ? "text-brand-primary"
                                             : "text-brand-primary/55"
@@ -163,18 +156,10 @@ export default function ReportStatus({
                 reportType={reportData.report_type}
             >
                 <div className="text-center lg:text-left">
-                    <div className="mb-1">
-                        <span className="inline-flex items-center px-2.5 py-0.5 bg-brand-primary/10 text-brand-primary text-xs font-semibold">
-                            {typeLabels[reportData.report_type]}
-                        </span>
-                    </div>
-                    <p className="mb-3 text-sm font-semibold text-brand-secondary">
-                        {t("wizard_step_status")}
-                    </p>
-                    <h2 className="mb-2 text-[2rem] font-bold tracking-[-0.035em] text-brand-primary md:text-[2.45rem]">
+                    <h2 className="mb-2 text-[2.1rem] font-bold leading-[0.98] tracking-[-0.04em] text-brand-primary md:text-[2.7rem]">
                         {t("report_status")}
                     </h2>
-                    <p className="mb-8 break-all text-sm leading-[1.7] text-brand-primary">
+                    <p className="mb-8 break-all text-[14px] leading-[1.68] text-brand-primary/78">
                         {reportData.url}
                     </p>
 

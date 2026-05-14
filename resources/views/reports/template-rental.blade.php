@@ -1,23 +1,27 @@
+@php
+    $viewLocale = strtolower((string) ($locale ?? ($data['report_meta']['locale'] ?? ($data['locale'] ?? 'ro'))));
+    $viewLocale = $viewLocale === 'en' ? 'en' : 'ro';
+@endphp
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="{{ $viewLocale }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raport AnalizÄƒ Proprietate</title>
+    <title>{{ $viewLocale === 'en' ? 'Property Analysis Report' : 'Raport Analiză Proprietate' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <style>
-        @page { size: A4; margin: 10mm 0 20mm 0; }
+        @page { size: A4; margin: 10mm 0 22mm 0; }
         @page :first { margin-top: 0; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
             --primary: #34306a;
             --primary-light: #45418a;
-            --secondary: #4e59b7;
-            --tertiary: #7380d9;
+            --secondary: #45418a;
+            --tertiary: #d8def8;
             --neutral: #64748b;
             --green: #00A556;
             --green-light: #ecfdf5;
@@ -30,19 +34,29 @@
             --red-border: #fecaca;
             --bg: #ffffff;
             --card: #ffffff;
+            --card-soft: #f8f9fc;
             --border: #dfe3f3;
-            --text: #231f57;
-            --text-muted: #64748b;
-            --text-light: #94a3b8;
-            --gradient-accent: linear-gradient(90deg, var(--secondary), var(--tertiary));
+            --text: #334155;
+            --text-strong: #1f2a44;
+            --text-muted: #667085;
+            --text-light: #98a2b3;
+            --gradient-accent: linear-gradient(90deg, var(--primary), var(--primary-light));
+            --font-display: 18px;
+            --font-heading: 14px;
+            --font-section: var(--font-heading);
+            --font-body: 11px;
+            --font-small: 9px;
+            --font-caption: var(--font-small);
+            --line-body: 1.5;
+            --line-tight: 1.4;
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             color: var(--text);
             background: var(--bg);
-            font-size: 12px;
-            line-height: 1.5;
+            font-size: var(--font-body);
+            line-height: var(--line-body);
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
@@ -58,7 +72,7 @@
         }
         .page:last-child { page-break-after: avoid; }
         .page-inner-first {
-            padding: 6px 16px 4px;
+            padding: 6px 16px 2px;
         }
 
         /* â”€â”€ ARTICLE FLOW (detail pages) â”€â”€ */
@@ -80,19 +94,19 @@
             align-items: center;
             justify-content: space-between;
         }
-        .header-logo { height: 44px; }
+        .header-logo { height: 50px; }
         .header-left { display: flex; align-items: center; }
         .header-badge-gen {
-            font-size: 9px; color: rgba(255,255,255,0.4);
-            font-weight: 500;
+            font-size: var(--font-small); color: rgba(255,255,255,0.68);
+            font-weight: 500; line-height: var(--line-body);
         }
 
         /* â”€â”€ HERO â”€â”€ */
         .hero-card {
             background: var(--card);
             border-radius: 12px;
-            padding: 10px 20px;
-            margin-bottom: 6px;
+            padding: 9px 18px;
+            margin-bottom: 5px;
             border: 1px solid var(--border);
             position: relative;
             overflow: hidden;
@@ -100,38 +114,38 @@
         .hero-card::before {
             display: none;
         }
-        .hero-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-        .hero-name { font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
-        .hero-address { font-size: 11px; color: var(--text-muted); }
+        .hero-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .hero-name { font-size: var(--font-heading); font-weight: 700; color: var(--primary); margin-bottom: 3px; line-height: var(--line-body); }
+        .hero-address { font-size: var(--font-body); color: var(--text-muted); line-height: var(--line-body); }
         .hero-price-box {
             text-align: right;
-            background: linear-gradient(135deg, var(--secondary), var(--tertiary));
-            color: #fff; padding: 10px 16px; border-radius: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: #fff; padding: 8px 14px; border-radius: 7px;
             min-width: 130px;
         }
-        .hero-price { font-size: 24px; font-weight: 900; line-height: 1; }
-        .hero-price-label { font-size: 9px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; }
+        .hero-price { font-size: var(--font-display); font-weight: 800; line-height: 1.15; }
+        .hero-price-label { font-size: var(--font-caption); opacity: 0.86; font-weight: 600; line-height: var(--line-body); }
         .hero-tagline {
-            font-size: 11px; font-style: italic; color: var(--tertiary);
-            padding: 4px 12px; background: rgba(115,128,217,0.08);
+            font-size: var(--font-body); font-style: italic; color: var(--primary-light);
+            padding: 4px 12px; background: #eef1ff;
             border-radius: 4px; margin-bottom: 8px; display: inline-block;
         }
         .hero-grid { display: flex; flex-wrap: wrap; gap: 0; }
-        .hero-stat { width: 16.666%; padding: 6px 8px; border-right: 1px solid var(--border); }
+        .hero-stat { width: 16.666%; padding: 5px 8px; border-right: 1px solid var(--border); }
         .hero-stat:last-child { border-right: none; }
         .hero-stat-label {
-            font-size: 8px; color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: 0.3px; font-weight: 600;
+            font-size: var(--font-body); color: var(--text-strong);
+            font-weight: 700; line-height: var(--line-body);
         }
-        .hero-stat-value { font-size: 13px; font-weight: 700; color: var(--primary); }
+        .hero-stat-value { font-size: var(--font-body); font-weight: 500; color: var(--text); line-height: var(--line-body); }
 
         /* â”€â”€ KPI ROW â”€â”€ */
         .kpi-row {
-            display: flex; gap: 6px; margin-bottom: 6px;
+            display: flex; gap: 5px; margin-bottom: 5px;
         }
         .kpi-card {
             flex: 1; background: var(--card); border-radius: 10px;
-            padding: 8px 8px; text-align: center;
+            padding: 7px 8px; text-align: center;
             border: 1px solid var(--border);
             position: relative; overflow: hidden;
             display: flex; flex-direction: column; align-items: center;
@@ -140,40 +154,39 @@
             display: none;
         }
         .kpi-circle {
-            width: 52px; height: 52px; border-radius: 50%;
+            width: 48px; height: 48px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             margin-bottom: 6px;
         }
         .kpi-circle.grade-green { background: var(--green-light); border: 2px solid var(--green-border); }
         .kpi-circle.grade-amber { background: var(--amber-light); border: 2px solid var(--amber-border); }
         .kpi-circle.grade-red { background: var(--red-light); border: 2px solid var(--red-border); }
-        .kpi-score { font-size: 18px; font-weight: 900; line-height: 1; }
-        .kpi-max { font-size: 10px; font-weight: 500; color: var(--text-light); }
+        .kpi-score { font-size: var(--font-display); font-weight: 800; line-height: 1.15; color: var(--text-strong); }
+        .kpi-max { font-size: var(--font-small); font-weight: 500; color: var(--text-light); }
         .kpi-label {
-            font-size: 8.5px; font-weight: 700; color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px;
+            font-size: var(--font-body); font-weight: 700; color: var(--text-strong);
+            margin-top: 3px; line-height: var(--line-body);
         }
-        .kpi-trend { font-size: 9px; margin-top: 2px; }
-        .trend-up { color: var(--green); }
-        .trend-stable { color: var(--neutral); }
-        .trend-down { color: var(--red); }
+        .kpi-trend { font-size: var(--font-body); margin-top: 2px; font-weight: 500; line-height: var(--line-body); color: var(--text); }
+        .trend-up { color: var(--text); }
+        .trend-stable { color: var(--text); }
+        .trend-down { color: var(--text); }
 
         /* â”€â”€ CHARTS â”€â”€ */
         .charts-grid {
-            display: flex; gap: 6px; margin-bottom: 4px;
+            display: flex; gap: 5px; margin-bottom: 4px;
         }
         .chart-box {
             flex: 1; min-width: 0; background: var(--card); border-radius: 10px;
-            padding: 10px; border: 1px solid var(--border);
+            padding: 8px; border: 1px solid var(--border);
             position: relative; overflow: hidden;
         }
         .chart-box::before {
             display: none;
         }
         .chart-title {
-            font-size: 10px; font-weight: 700; color: var(--primary);
-            text-transform: uppercase; letter-spacing: 0.4px;
-            margin-bottom: 6px; text-align: center;
+            font-size: var(--font-body); font-weight: 700; color: var(--text-strong);
+            margin-bottom: 6px; text-align: center; line-height: var(--line-body);
         }
         .chart-canvas-wrap { position: relative; }
 
@@ -185,33 +198,33 @@
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
         }
-        .env-aqi-val { font-size: 14px; font-weight: 800; }
+        .env-aqi-val { font-size: var(--font-heading); font-weight: 700; line-height: var(--line-body); }
         .env-aqi-meta { display: flex; flex-direction: column; }
-        .env-aqi-label { font-size: 10px; font-weight: 700; color: var(--primary); }
+        .env-aqi-label { font-size: var(--font-small); font-weight: 600; color: var(--text-strong); line-height: var(--line-body); }
         .env-metrics { display: flex; flex-direction: column; gap: 3px; }
         .env-row {
             display: flex; justify-content: space-between; align-items: center;
             padding: 3px 0; border-bottom: 1px solid var(--border); font-size: 9px;
         }
         .env-row:last-child { border-bottom: none; }
-        .env-key { font-weight: 600; color: var(--neutral); }
-        .env-val { font-weight: 700; color: var(--primary); }
+        .env-key { font-weight: 600; color: var(--text-muted); }
+        .env-val { font-weight: 700; color: var(--text-strong); }
 
         /* â”€â”€ BADGES â”€â”€ */
         .badges-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
         .badge-item {
             display: flex; align-items: center; gap: 5px;
             padding: 5px 10px; border-radius: 20px;
-            font-size: 10px; font-weight: 600;
+            font-size: var(--font-small); font-weight: 600; line-height: var(--line-body);
         }
         .badge-positive { background: var(--green-light); color: #065f46; border: 1px solid var(--green-border); }
         .badge-negative { background: var(--red-light); color: #991b1b; border: 1px solid var(--red-border); }
-        .badge-icon { font-size: 13px; }
+        .badge-icon { font-size: var(--font-heading); }
 
         /* â”€â”€ VERDICT (Page 1) â”€â”€ */
         .verdict-card {
-            background: linear-gradient(135deg, var(--primary) 0%, #22204b 100%);
-            border-radius: 12px; padding: 10px 18px; color: #fff;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 12px; padding: 8px 16px; color: #fff;
             position: relative; overflow: hidden;
         }
         .verdict-card::before {
@@ -224,33 +237,32 @@
             width: 100px; height: 100px;
             background: radial-gradient(circle, rgba(78,89,183,0.18) 0%, transparent 70%);
         }
-        .verdict-top { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; position: relative; z-index: 1; }
+        .verdict-top { display: flex; align-items: center; gap: 14px; margin-bottom: 5px; position: relative; z-index: 1; }
         .verdict-score-circle {
-            width: 56px; height: 56px; border-radius: 50%;
+            width: 52px; height: 52px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 22px; font-weight: 900; color: #fff;
+            font-size: var(--font-display); font-weight: 800; color: #fff;
             border: 2px solid rgba(255,255,255,0.3);
             flex-shrink: 0;
         }
-        .verdict-score-circle small { font-size: 11px; font-weight: 600; opacity: 0.7; }
-        .verdict-rec-label { font-size: 8px; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.5; }
-        .verdict-rec { font-size: 22px; font-weight: 900; letter-spacing: 1.5px; }
+        .verdict-score-circle small { font-size: var(--font-small); font-weight: 600; opacity: 0.76; }
+        .verdict-rec-label { font-size: var(--font-small); font-weight: 600; opacity: 0.72; line-height: var(--line-body); }
+        .verdict-rec { font-size: var(--font-heading); font-weight: 700; line-height: var(--line-body); }
         .verdict-rec.buy { color: #4ade80; }
         .verdict-rec.negotiate { color: var(--secondary); }
         .verdict-rec.avoid { color: #f87171; }
-        .verdict-oneliner { font-size: 11px; opacity: 0.85; margin-bottom: 4px; line-height: 1.5; position: relative; z-index: 1; }
-        .verdict-lists { display: flex; gap: 18px; position: relative; z-index: 1; }
+        .verdict-oneliner { font-size: var(--font-body); opacity: 0.9; margin-bottom: 4px; line-height: var(--line-body); position: relative; z-index: 1; }
+        .verdict-lists { display: flex; gap: 14px; position: relative; z-index: 1; }
         .verdict-list { flex: 1; }
         .verdict-list-title {
-            font-size: 9px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.8px;
-            opacity: 0.5; margin-bottom: 5px;
+            font-size: var(--font-body); font-weight: 700;
+            color: rgba(255,255,255,0.94); margin-bottom: 5px; line-height: var(--line-body);
         }
         .verdict-list ul { list-style: none; padding: 0; }
         .verdict-list li {
-            font-size: 10px; padding: 2px 0; display: flex; align-items: flex-start; gap: 4px; line-height: 1.35;
+            font-size: var(--font-small); padding: 2px 0; display: flex; align-items: flex-start; gap: 4px; line-height: var(--line-body);
         }
-        .verdict-list li .vl-icon { flex-shrink: 0; font-size: 11px; }
+        .verdict-list li .vl-icon { flex-shrink: 0; font-size: var(--font-body); }
         .verdict-list.positive .vl-icon { color: #4ade80; }
         .verdict-list.negative .vl-icon { color: #f87171; }
 
@@ -268,34 +280,34 @@
             width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
         }
         .ch-icon svg { width: 18px; height: 18px; fill: none; stroke: var(--primary); stroke-width: 2; }
-        .ch-title { font-size: 16px; font-weight: 800; color: var(--primary); letter-spacing: 0.3px; }
-        .ch-number { margin-left: auto; font-size: 10px; color: var(--text-muted); font-weight: 600; }
+        .ch-title { font-size: var(--font-heading); font-weight: 800; color: var(--primary); line-height: var(--line-tight); }
+        .ch-number { margin-left: auto; font-size: var(--font-small); color: var(--text-muted); font-weight: 600; }
 
         .chapter-content {
-            padding: 14px 0 6px;
+            padding: 12px 0 5px;
         }
 
         .summary-box {
-            background: linear-gradient(135deg, #f0f4ff 0%, #e8ecff 100%);
-            border-left: 3px solid var(--tertiary);
+            background: #f5f7ff;
+            border-left: 3px solid var(--primary-light);
             border-radius: 0 8px 8px 0;
-            padding: 12px 16px; font-size: 11px; line-height: 1.55;
-            color: var(--text); margin-bottom: 16px;
+            padding: 11px 14px; font-size: var(--font-body); line-height: var(--line-body);
+            color: var(--text); margin-bottom: 14px;
         }
 
         .section-block {
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
         .section-heading {
-            font-size: 13px; font-weight: 700; color: var(--primary);
-            margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+            font-size: var(--font-section); font-weight: 700; color: var(--primary);
+            margin-bottom: 6px; display: flex; align-items: center; gap: 6px; line-height: var(--line-body);
         }
         .section-heading::before {
             content: ''; width: 3px; height: 14px;
-            background: var(--tertiary); border-radius: 2px; flex-shrink: 0;
+            background: var(--primary-light); border-radius: 2px; flex-shrink: 0;
         }
-        .section-body { font-size: 11px; line-height: 1.55; color: #334155; margin-bottom: 8px; }
+        .section-body { font-size: var(--font-body); line-height: var(--line-body); color: var(--text); margin-bottom: 8px; }
 
         /* Data grid */
         .data-grid {
@@ -304,24 +316,24 @@
             overflow: hidden; margin-bottom: 12px; background: var(--card);
         }
         .data-cell {
-            width: 50%; padding: 7px 14px;
+            width: 50%; padding: 6px 12px;
             border-bottom: 1px solid var(--border);
             display: flex; justify-content: space-between; align-items: center;
         }
         .data-cell:nth-child(odd) { border-right: 1px solid var(--border); }
         .data-cell:nth-last-child(-n+2) { border-bottom: none; }
         .data-cell.full-width { width: 100%; border-right: none; }
-        .data-cell.highlight-yellow { background: #FEF9C3; }
-        .data-label { font-size: 10px; color: var(--text-muted); font-weight: 500; }
-        .data-value { font-size: 11.5px; font-weight: 700; color: var(--primary); }
-        .data-value .unit { font-weight: 500; font-size: 10px; color: var(--text-muted); }
+        .data-cell.highlight-yellow { background: #fff8dd; }
+        .data-label { font-size: var(--font-small); color: var(--text-muted); font-weight: 500; }
+        .data-value { font-size: var(--font-body); font-weight: 700; color: var(--text-strong); }
+        .data-value .unit { font-weight: 500; font-size: var(--font-small); color: var(--text-muted); }
 
         /* Item lists */
         .item-list { padding: 0; margin: 0 0 10px; list-style: none; }
         .item-list li {
-            padding: 5px 10px 5px 12px; border-left: 3px solid var(--tertiary);
-            margin-bottom: 3px; font-size: 11px; line-height: 1.45;
-            background: #f8f9fb; border-radius: 0 4px 4px 0; color: #334155;
+            padding: 5px 10px 5px 12px; border-left: 3px solid var(--primary-light);
+            margin-bottom: 3px; font-size: var(--font-body); line-height: var(--line-body);
+            background: var(--card-soft); border-radius: 0 4px 4px 0; color: var(--text);
         }
         .item-list.green-border li { border-left-color: var(--green); }
         .item-list.red-border li { border-left-color: var(--red); }
@@ -329,28 +341,28 @@
 
         /* Negotiation */
         .negotiation-box {
-            background: linear-gradient(135deg, #fef9c3 0%, #fef3c7 100%);
+            background: #fff7ed;
             border: 1px solid #fde68a; border-radius: 8px;
-            padding: 12px 14px; margin-bottom: 12px;
+            padding: 10px 12px; margin-bottom: 10px;
         }
-        .negotiation-target { font-size: 11px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
-        .negotiation-target span { font-size: 17px; color: var(--green); }
+        .negotiation-target { font-size: var(--font-body); font-weight: 700; color: var(--text-strong); margin-bottom: 6px; line-height: var(--line-body); }
+        .negotiation-target span { font-size: var(--font-heading); color: var(--green); }
         .negotiation-list { list-style: none; padding: 0; }
         .negotiation-list li {
-            padding: 2px 0; font-size: 10.5px; color: #713f12;
+            padding: 2px 0; font-size: var(--font-small); color: #713f12; line-height: var(--line-body);
             display: flex; gap: 5px;
         }
-        .negotiation-list li::before { content: '-'; font-size: 10px; flex-shrink: 0; }
+        .negotiation-list li::before { content: '-'; font-size: var(--font-small); flex-shrink: 0; }
 
         /* Cost items table */
-        .cost-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 10.5px; border-radius: 8px; overflow: hidden; }
+        .cost-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: var(--font-body); border-radius: 8px; overflow: hidden; }
         .cost-table th {
             background: var(--primary); color: #fff;
             padding: 6px 12px; text-align: left;
-            font-size: 9px; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 700;
+            font-size: var(--font-caption); font-weight: 700;
         }
         .cost-table td { padding: 6px 12px; border-bottom: 1px solid var(--border); }
-        .cost-table tr:nth-child(even) td { background: #f8f9fb; }
+        .cost-table tr:nth-child(even) td { background: var(--card-soft); }
         .cost-table .included { color: var(--green); font-weight: 600; }
         .cost-table .not-included { color: var(--red); font-weight: 600; }
         .cost-table tfoot td {
@@ -359,28 +371,31 @@
         }
 
         /* Risk table */
-        .risk-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 10.5px; }
+        .risk-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: var(--font-body); }
         .risk-table th {
             background: var(--primary); color: #fff;
             padding: 6px 12px; text-align: left;
-            font-size: 9px; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 700;
+            font-size: var(--font-caption); font-weight: 700;
         }
         .risk-table td { padding: 6px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
-        .risk-table tr:nth-child(even) td { background: #f8f9fb; }
+        .risk-table tr:nth-child(even) td { background: var(--card-soft); }
         .severity-badge {
             display: inline-block; padding: 2px 8px; border-radius: 10px;
-            font-size: 9px; font-weight: 700; text-transform: uppercase;
+            font-size: var(--font-caption); font-weight: 700;
         }
         .severity-mic { background: var(--green-light); color: #065f46; }
         .severity-mediu { background: var(--amber-light); color: #92400e; }
         .severity-mare { background: var(--red-light); color: #991b1b; }
+        .severity-low { background: var(--green-light); color: #065f46; }
+        .severity-medium { background: var(--amber-light); color: #92400e; }
+        .severity-high { background: var(--red-light); color: #991b1b; }
 
         /* Checklist */
         .checklist { list-style: none; padding: 0; margin-bottom: 12px; }
         .checklist li {
             display: flex; align-items: flex-start; gap: 7px;
             padding: 6px 12px; margin-bottom: 3px; border-radius: 6px;
-            font-size: 11px; background: #f8f9fb;
+            font-size: var(--font-body); background: var(--card-soft);
         }
         .checklist-checkbox {
             width: 13px; height: 13px; border: 2px solid var(--border);
@@ -388,16 +403,18 @@
         }
         .priority-badge {
             display: inline-block; padding: 2px 7px; border-radius: 8px;
-            font-size: 8px; font-weight: 700; text-transform: uppercase; flex-shrink: 0;
+            font-size: var(--font-caption); font-weight: 700; flex-shrink: 0;
         }
         .priority-urgent { background: var(--red-light); color: #991b1b; }
-        .priority-important { background: var(--yellow-light); color: #854d0e; }
+        .priority-important { background: var(--amber-light); color: #854d0e; }
         .priority-recomandat { background: #dbeafe; color: #1e40af; }
+        .priority-critical { background: #fee2e2; color: #7f1d1d; border: 1px solid var(--red-border); }
+        .priority-recommended { background: #dbeafe; color: #1e40af; }
 
         /* Clauses */
         .clauses-list { list-style: none; padding: 0; margin-bottom: 12px; }
         .clauses-list li {
-            padding: 3px 0 3px 18px; font-size: 10.5px; color: #334155; position: relative;
+            padding: 3px 0 3px 18px; font-size: var(--font-small); color: var(--text); position: relative; line-height: var(--line-body);
         }
         .clauses-list li::before {
             content: 'Â§'; position: absolute; left: 3px;
@@ -409,76 +426,76 @@
         .amenity-chip {
             display: flex; align-items: center; gap: 4px;
             padding: 4px 10px; border-radius: 20px;
-            font-size: 10px; font-weight: 500;
+            font-size: var(--font-small); font-weight: 500;
             background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;
         }
         .amenity-chip .amenity-dist {
-            font-size: 9px; color: #15803d; font-weight: 700;
+            font-size: var(--font-small); color: #15803d; font-weight: 700;
         }
 
         /* Transport lines */
         .transport-lines { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 12px; }
         .transport-line {
-            background: #dbeafe; color: #1e40af;
+            background: #eef1ff; color: var(--primary);
             padding: 3px 9px; border-radius: 12px;
-            font-size: 10px; font-weight: 600;
+            font-size: var(--font-small); font-weight: 600;
         }
 
         /* Installations table */
-        .install-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 10.5px; }
+        .install-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: var(--font-body); }
         .install-table th {
             background: var(--primary); color: #fff;
             padding: 6px 12px; text-align: left;
-            font-size: 9px; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 700;
+            font-size: var(--font-caption); font-weight: 700;
         }
         .install-table td { padding: 6px 12px; border-bottom: 1px solid var(--border); }
-        .install-table tr:nth-child(even) td { background: #f8f9fb; }
+        .install-table tr:nth-child(even) td { background: var(--card-soft); }
         .condition-badge {
             display: inline-block; padding: 2px 8px; border-radius: 10px;
-            font-size: 9px; font-weight: 700;
+            font-size: var(--font-small); font-weight: 700;
         }
         .condition-bun { background: var(--green-light); color: #166534; }
-        .condition-medie { background: var(--yellow-light); color: #854d0e; }
+        .condition-medie { background: var(--amber-light); color: #854d0e; }
         .condition-vechi { background: var(--red-light); color: #991b1b; }
 
         /* Tenant profiles */
         .profile-card {
             display: flex; align-items: center; padding: 10px 14px;
             margin-bottom: 6px; background: var(--card); border-radius: 8px;
-            border-left: 3px solid var(--tertiary); gap: 10px;
-            border: 1px solid var(--border); border-left: 3px solid var(--tertiary);
+            border-left: 3px solid var(--primary-light); gap: 10px;
+            border: 1px solid var(--border); border-left: 3px solid var(--primary-light);
         }
-        .profile-score { font-size: 20px; font-weight: 900; color: var(--primary); min-width: 34px; text-align: center; }
+        .profile-score { font-size: 26px; font-weight: 800; color: var(--primary); min-width: 34px; text-align: center; }
         .profile-info { flex: 1; }
-        .profile-name { font-size: 11px; font-weight: 700; color: var(--primary); }
-        .profile-reason { font-size: 10px; color: var(--text-muted); line-height: 1.35; }
+        .profile-name { font-size: var(--font-body); font-weight: 700; color: var(--text-strong); }
+        .profile-reason { font-size: var(--font-small); color: var(--text-muted); line-height: var(--line-body); }
 
         .not-rec-list { list-style: none; padding: 0; margin-bottom: 10px; }
         .not-rec-list li {
-            padding: 5px 12px; font-size: 10px; color: #991b1b;
+            padding: 5px 12px; font-size: var(--font-small); color: #991b1b; line-height: var(--line-body);
             background: #fef2f2; border-radius: 4px; margin-bottom: 3px;
             border-left: 3px solid var(--red);
         }
         .not-rec-list li .not-rec-name { font-weight: 700; }
-        .not-rec-list li .not-rec-reason { font-size: 9px; color: var(--text-muted); }
+        .not-rec-list li .not-rec-reason { font-size: var(--font-small); color: var(--text-muted); }
 
         /* Exit conditions */
         .exit-box {
             background: var(--card); border: 1px solid var(--border);
             border-radius: 8px; padding: 12px 14px; margin-bottom: 12px;
         }
-        .exit-box .exit-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 10.5px; }
+        .exit-box .exit-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: var(--font-body); }
         .exit-box .exit-label { color: var(--text-muted); }
         .exit-box .exit-value { font-weight: 600; color: var(--primary); }
 
         /* Viewing checklist */
         .viewing-list { list-style: none; padding: 0; margin-bottom: 12px; columns: 2; column-gap: 14px; }
         .viewing-list li {
-            font-size: 10px; padding: 2px 0 2px 16px; position: relative;
-            color: #334155; break-inside: avoid; margin-bottom: 4px;
+            font-size: var(--font-small); padding: 2px 0 2px 16px; position: relative;
+            color: var(--text); break-inside: avoid; margin-bottom: 4px; line-height: var(--line-body);
         }
         .viewing-list li::before {
-            content: '-'; position: absolute; left: 0; top: 2px; font-size: 9px;
+            content: '-'; position: absolute; left: 0; top: 2px; font-size: var(--font-small);
         }
 
         /* Next steps */
@@ -489,24 +506,24 @@
         .step-number {
             width: 22px; height: 22px; background: var(--primary); color: #fff;
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 10px; font-weight: 800; flex-shrink: 0;
+            font-size: var(--font-small); font-weight: 800; flex-shrink: 0;
         }
         .step-content { flex: 1; }
-        .step-action { font-size: 11px; font-weight: 600; color: var(--primary); }
-        .step-timeline { font-size: 9px; color: var(--text-muted); }
+        .step-action { font-size: var(--font-body); font-weight: 600; color: var(--text-strong); }
+        .step-timeline { font-size: var(--font-small); color: var(--text-muted); }
 
         /* Questions */
         .question-list { list-style: none; padding: 0; counter-reset: q; }
         .question-list li {
             counter-increment: q; padding: 6px 12px 6px 30px;
-            font-size: 11px; color: #334155; position: relative;
-            margin-bottom: 4px; background: #f8f9fb;
-            border-radius: 6px; line-height: 1.45;
+            font-size: var(--font-body); color: var(--text); position: relative;
+            margin-bottom: 4px; background: var(--card-soft);
+            border-radius: 6px; line-height: var(--line-body);
         }
         .question-list li::before {
             content: counter(q); position: absolute; left: 8px; top: 6px;
-            width: 18px; height: 18px; background: var(--tertiary); color: #fff;
-            border-radius: 50%; font-size: 9px; font-weight: 700;
+            width: 18px; height: 18px; background: var(--primary-light); color: #fff;
+            border-radius: 50%; font-size: var(--font-small); font-weight: 700;
             display: flex; align-items: center; justify-content: center;
         }
 
@@ -516,13 +533,13 @@
             flex: 1; text-align: center; background: var(--card);
             border-radius: 8px; padding: 12px 6px; border: 1px solid var(--border);
         }
-        .score-dim-value { font-size: 22px; font-weight: 900; color: var(--primary); }
-        .score-dim-label { font-size: 9px; color: var(--text-muted); font-weight: 600; }
-        .score-dim-weight { font-size: 8px; color: var(--text-light); margin-top: 2px; }
+        .score-dim-value { font-size: 26px; font-weight: 800; color: var(--primary); }
+        .score-dim-label { font-size: var(--font-small); color: var(--text-muted); font-weight: 600; }
+        .score-dim-weight { font-size: var(--font-small); color: var(--text-light); margin-top: 2px; }
 
         /* Final verdict */
         .final-verdict-card {
-            background: linear-gradient(135deg, var(--primary) 0%, #1a1930 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
             border-radius: 12px; padding: 22px; color: #fff;
             text-align: center; margin: 16px 0; position: relative; overflow: hidden;
         }
@@ -531,17 +548,17 @@
             width: 120px; height: 120px;
             background: radial-gradient(circle, rgba(115,128,217,0.18) 0%, transparent 70%);
         }
-        .final-score { font-size: 52px; font-weight: 900; color: #fff; line-height: 1; }
-        .final-score span { font-size: 22px; opacity: 0.6; }
-        .final-verdict-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; margin-top: 2px; }
-        .final-rec { font-size: 24px; font-weight: 900; margin-top: 8px; letter-spacing: 2px; }
+        .final-score { font-size: 34px; font-weight: 800; color: #fff; line-height: 1.1; }
+        .final-score span { font-size: var(--font-heading); opacity: 0.72; }
+        .final-verdict-label { font-size: var(--font-small); opacity: 0.76; margin-top: 2px; line-height: var(--line-body); }
+        .final-rec { font-size: var(--font-heading); font-weight: 700; margin-top: 7px; line-height: var(--line-body); }
         .final-rec.negotiate { color: var(--secondary); }
         .final-rec.buy { color: #4ade80; }
         .final-rec.avoid { color: #f87171; }
 
         /* Positive/negative developments */
-        .dev-positive { margin-bottom: 5px; font-size: 10px; font-weight: 700; color: var(--green); }
-        .dev-negative { margin-bottom: 5px; font-size: 10px; font-weight: 700; color: var(--red); }
+        .dev-positive { margin-bottom: 5px; font-size: var(--font-small); font-weight: 700; color: var(--green); }
+        .dev-negative { margin-bottom: 5px; font-size: var(--font-small); font-weight: 700; color: var(--red); }
 
         /* Action items */
         .action-items {
@@ -549,20 +566,20 @@
             border-top: 2px solid var(--border);
         }
         .action-items-title {
-            font-size: 10px; font-weight: 700; color: var(--primary);
-            text-transform: uppercase; letter-spacing: 0.5px;
+            font-size: var(--font-small); font-weight: 700; color: var(--primary);
+
             margin-bottom: 7px; display: flex; align-items: center; gap: 4px;
         }
         .action-items ul { list-style: none; padding: 0; }
         .action-items li {
             display: flex; align-items: flex-start; gap: 5px;
-            padding: 2px 0; font-size: 10px; color: #334155;
+            padding: 2px 0; font-size: var(--font-small); color: var(--text); line-height: var(--line-body);
         }
-        .action-items li::before { content: '-'; color: var(--tertiary); font-size: 11px; flex-shrink: 0; }
+        .action-items li::before { content: '-'; color: var(--primary-light); font-size: var(--font-body); flex-shrink: 0; }
 
         .warning-box {
-            font-size: 10px; color: #854d0e; background: var(--yellow-light);
-            padding: 7px 10px; border-radius: 6px; margin-bottom: 10px;
+            font-size: var(--font-small); color: #854d0e; background: var(--amber-light);
+            padding: 7px 10px; border-radius: 6px; margin-bottom: 10px; line-height: var(--line-body);
         }
 
         .air-quality-box {
@@ -571,11 +588,11 @@
         .air-quality-box .aq-badge {
             background: var(--green-light); color: #166534;
             padding: 10px 16px; border-radius: 8px; text-align: center;
-            font-weight: 700; font-size: 14px; min-width: 70px;
+            font-weight: 700; font-size: var(--font-heading); min-width: 70px;
             display: flex; flex-direction: column; justify-content: center;
         }
-        .air-quality-box .aq-badge small { font-size: 8px; font-weight: 600; text-transform: uppercase; }
-        .air-quality-box .aq-text { flex: 1; font-size: 10px; color: #334155; line-height: 1.45; }
+        .air-quality-box .aq-badge small { font-size: var(--font-caption); font-weight: 600; }
+        .air-quality-box .aq-text { flex: 1; font-size: var(--font-small); color: var(--text); line-height: var(--line-body); }
 
         /* â”€â”€ PRINT PAGE-BREAK RULES â”€â”€ */
         .verdict-card,
@@ -620,9 +637,9 @@
 <body>
 
 @php
-    $logoPath = public_path('images/logo-dark.jpg');
+    $logoPath = public_path('images/logo-report.png');
     $logoBase64 = file_exists($logoPath)
-        ? 'data:image/jpeg;base64,' . base64_encode(file_get_contents($logoPath))
+        ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
         : '';
 
     $hero = $data['page_one']['hero'] ?? [];
@@ -632,6 +649,215 @@
     $verdict = $data['page_one']['verdict'] ?? [];
     $pages = $data['pages'] ?? [];
     $meta = $data['report_meta'] ?? [];
+
+    $viewTranslations = [
+        'ro' => [
+            'asking_rent_month' => 'Chirie cerută / lună',
+            'estimated_rent_month' => 'Chirie estimată / lună',
+            'surface' => 'Suprafață',
+            'rooms' => 'Camere',
+            'floor' => 'Etaj',
+            'condition' => 'Stare',
+            'year_built_short' => 'An constr.',
+            'available' => 'Disponibil',
+            'trend_stable' => 'stabil',
+            'environmental_indicators' => 'Indicatori de mediu',
+            'air_quality' => 'Calitate aer',
+            'noise' => 'Zgomot',
+            'green_spaces' => 'Spatii verzi',
+            'pollution_sources' => 'Surse poluare',
+            'no_sources_nearby' => 'Niciuna in apropiere',
+            'walkability' => 'Walkability',
+            'final_recommendation' => 'Recomandare finala',
+            'ideal_for' => 'Ideal pentru',
+            'not_recommended' => 'Nu se recomanda',
+            'cost' => 'Cost',
+            'amount' => 'Suma',
+            'included_in_rent' => 'Inclus in chirie',
+            'yes' => 'Da',
+            'no' => 'Nu',
+            'total_estimated' => 'Total estimat',
+            'target_rent' => 'Chirie tinta',
+            'public_transport' => 'Transport public',
+            'frequency' => 'Frecventa',
+            'city_center' => 'Centrul orasului',
+            'parking' => 'Parcare',
+            'parking_unit' => 'loc',
+            'included_short' => 'inclus',
+            'nearest_stop' => 'Cea mai apropiata statie',
+            'on_foot' => 'mers pe jos',
+            'bike_friendly' => 'Prietenos biciclete',
+            'positive_factors' => 'Factori pozitivi:',
+            'risk_factors' => 'Factori de risc:',
+            'element' => 'Element',
+            'details' => 'Detalii',
+            'monthly_revenue' => 'Venituri lunare',
+            'setup_cost' => 'Cost amenajare',
+            'break_even' => 'Break-even',
+            'opportunity' => 'Oportunitate',
+            'category' => 'Categorie',
+            'severity' => 'Severitate',
+            'description' => 'Descriere',
+            'mitigation' => 'Mitigare',
+            'termination_notice' => 'Preaviz reziliere',
+            'estimated_penalty' => 'Penalizare estimata',
+            'deposit_return' => 'Returnare garantie',
+            'overall_score' => 'Scor general',
+            'weight' => 'Pondere',
+            'action' => 'Actiune',
+            'timeline' => 'Orizont',
+            'recommended_actions' => 'Actiuni recomandate',
+            'total_per_month' => 'total/luna',
+            'per_month' => '/luna',
+            'month' => 'luna',
+            'months' => 'luni',
+        ],
+        'en' => [
+            'asking_rent_month' => 'Asking rent / month',
+            'estimated_rent_month' => 'Estimated rent / month',
+            'surface' => 'Surface',
+            'rooms' => 'Rooms',
+            'floor' => 'Floor',
+            'condition' => 'Condition',
+            'year_built_short' => 'Year built',
+            'available' => 'Available',
+            'trend_stable' => 'stable',
+            'environmental_indicators' => 'Environmental indicators',
+            'air_quality' => 'Air quality',
+            'noise' => 'Noise',
+            'green_spaces' => 'Green spaces',
+            'pollution_sources' => 'Pollution sources',
+            'no_sources_nearby' => 'None nearby',
+            'walkability' => 'Walkability',
+            'final_recommendation' => 'Final recommendation',
+            'ideal_for' => 'Ideal for',
+            'not_recommended' => 'Not recommended',
+            'cost' => 'Cost',
+            'amount' => 'Amount',
+            'included_in_rent' => 'Included in rent',
+            'yes' => 'Yes',
+            'no' => 'No',
+            'total_estimated' => 'Estimated total',
+            'target_rent' => 'Target rent',
+            'public_transport' => 'Public transport',
+            'frequency' => 'Frequency',
+            'city_center' => 'City center',
+            'parking' => 'Parking',
+            'parking_unit' => 'spots',
+            'included_short' => 'included',
+            'nearest_stop' => 'Nearest stop',
+            'on_foot' => 'on foot',
+            'bike_friendly' => 'Bike friendly',
+            'positive_factors' => 'Positive factors:',
+            'risk_factors' => 'Risk factors:',
+            'element' => 'Element',
+            'details' => 'Details',
+            'monthly_revenue' => 'Monthly revenue',
+            'setup_cost' => 'Setup cost',
+            'break_even' => 'Break-even',
+            'opportunity' => 'Opportunity',
+            'category' => 'Category',
+            'severity' => 'Severity',
+            'description' => 'Description',
+            'mitigation' => 'Mitigation',
+            'termination_notice' => 'Termination notice',
+            'estimated_penalty' => 'Estimated penalty',
+            'deposit_return' => 'Deposit return',
+            'overall_score' => 'Overall score',
+            'weight' => 'Weight',
+            'action' => 'Action',
+            'timeline' => 'Timeline',
+            'recommended_actions' => 'Recommended actions',
+            'total_per_month' => 'total/month',
+            'per_month' => '/month',
+            'month' => 'month',
+            'months' => 'months',
+        ],
+    ];
+
+    $t = function (string $key, array $replace = []) use ($viewTranslations, $viewLocale) {
+        $text = $viewTranslations[$viewLocale][$key] ?? $viewTranslations['ro'][$key] ?? $key;
+
+        foreach ($replace as $name => $value) {
+            $text = str_replace(':' . $name, (string) $value, $text);
+        }
+
+        return $text;
+    };
+
+    $normalizeText = function (?string $value): string {
+        $value = mb_strtolower(trim((string) $value), 'UTF-8');
+
+        return strtr($value, [
+            'ă' => 'a',
+            'â' => 'a',
+            'î' => 'i',
+            'ș' => 's',
+            'ş' => 's',
+            'ț' => 't',
+            'ţ' => 't',
+        ]);
+    };
+
+    $matchesAny = function (?string $value, array $needles) use ($normalizeText): bool {
+        $normalizedValue = $normalizeText($value);
+
+        foreach ($needles as $needle) {
+            if (str_contains($normalizedValue, $normalizeText($needle))) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    $titleCase = function (?string $value): string {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return '';
+        }
+
+        return mb_strtoupper(mb_substr($value, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($value, 1, null, 'UTF-8');
+    };
+
+    $recommendationClass = function (?string $value) use ($matchesAny): string {
+        return match (true) {
+            $matchesAny($value, ['negociaza', 'negotiation', 'negotiate']) => 'negotiate',
+            $matchesAny($value, ['evita', 'avoid']) => 'avoid',
+            $matchesAny($value, ['cumpara', 'buy', 'inchiriaza', 'rent']) => 'buy',
+            default => 'negotiate',
+        };
+    };
+
+    $conditionBadgeClass = function (?string $value) use ($matchesAny): string {
+        return match (true) {
+            $matchesAny($value, ['bun', 'nou', 'renovat', 'recently renovated', 'new', 'good', 'excellent']) => 'condition-bun',
+            $matchesAny($value, ['medi', 'average', 'partial', 'partially', 'decent', 'fair']) => 'condition-medie',
+            $matchesAny($value, ['vechi', 'absent', 'old', 'poor', 'worn', 'missing', 'bad']) => 'condition-vechi',
+            default => 'condition-medie',
+        };
+    };
+
+    $isHighlightedDataPoint = function (?string $label) use ($matchesAny): bool {
+        return $matchesAny($label, [
+            'corecta',
+            'pret / mp',
+            'pret / m2',
+            'price / sqm',
+            'price per square meter',
+            'estimated fair rent',
+            'fair rent',
+        ]);
+    };
+
+    $resolveItemListClass = function (?string $heading) use ($matchesAny): string {
+        return match (true) {
+            $matchesAny($heading, ['cresc', 'ce creste', 'increase', 'increases', 'positive']) => 'green-border',
+            $matchesAny($heading, ['scad', 'ascuns', 'ce scade', 'hidden', 'reduce', 'reduces', 'negative', 'risk']) => 'red-border',
+            default => '',
+        };
+    };
 
     $donutColors = ['#34306a', '#4e59b7', '#7380d9', '#64748b', '#e05252'];
 
@@ -646,17 +872,21 @@
     }
 
     // Color mapping: 0-6 red, 6-8 amber, 8-10 green
-    function gradeColor($value, $invert = false) {
-        if ($invert) $value = 10 - $value;
-        if ($value >= 8) return '#00A556';
-        if ($value >= 6) return '#d97706';
-        return '#e05252';
+    if (!function_exists('gradeColor')) {
+        function gradeColor($value, $invert = false) {
+            if ($invert) $value = 10 - $value;
+            if ($value >= 8) return '#00A556';
+            if ($value >= 6) return '#d97706';
+            return '#e05252';
+        }
     }
-    function gradeClass($value, $invert = false) {
-        if ($invert) $value = 10 - $value;
-        if ($value >= 8) return 'grade-green';
-        if ($value >= 6) return 'grade-amber';
-        return 'grade-red';
+    if (!function_exists('gradeClass')) {
+        function gradeClass($value, $invert = false) {
+            if ($invert) $value = 10 - $value;
+            if ($value >= 8) return 'grade-green';
+            if ($value >= 6) return 'grade-amber';
+            return 'grade-red';
+        }
     }
 @endphp
 
@@ -683,13 +913,13 @@
                 </div>
                 <div style="display: flex; gap: 8px; align-items: flex-end;">
                     <div class="hero-price-box" style="padding: 8px 12px; min-width: 110px;">
-                        <div class="hero-price" style="font-size: 18px;">â‚¬{{ number_format($hero['asking_rent_monthly'] ?? 0) }}</div>
-                        <div class="hero-price-label">Chirie cerutÄƒ / lunÄƒ</div>
+                        <div class="hero-price">&euro;{{ number_format($hero['asking_rent_monthly'] ?? 0) }}</div>
+                        <div class="hero-price-label">{{ $t('asking_rent_month') }}</div>
                     </div>
                     @if(!empty($hero['estimated_rent']))
-                    <div class="hero-price-box" style="background: linear-gradient(135deg, var(--green), #047857); min-width: 160px; padding: 12px 18px;">
-                        <div class="hero-price" style="font-size: 32px;">â‚¬{{ number_format($hero['estimated_rent']) }}</div>
-                        <div class="hero-price-label">Chirie estimatÄƒ / lunÄƒ</div>
+                    <div class="hero-price-box" style="background: linear-gradient(135deg, var(--green), #047857); min-width: 140px; padding: 10px 16px;">
+                        <div class="hero-price">&euro;{{ number_format($hero['estimated_rent']) }}</div>
+                        <div class="hero-price-label">{{ $t('estimated_rent_month') }}</div>
                     </div>
                     @endif
                 </div>
@@ -699,27 +929,27 @@
             @endif
             <div class="hero-grid">
                 <div class="hero-stat">
-                    <div class="hero-stat-label">SuprafaÈ›Äƒ</div>
-                    <div class="hero-stat-value">{{ $hero['size_sqm'] ?? '' }} mÂ²</div>
+                    <div class="hero-stat-label">{{ $t('surface') }}</div>
+                    <div class="hero-stat-value">{{ $hero['size_sqm'] ?? '' }} m²</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-label">Camere</div>
+                    <div class="hero-stat-label">{{ $t('rooms') }}</div>
                     <div class="hero-stat-value">{{ $hero['rooms'] ?? '-' }}</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-label">Etaj</div>
+                    <div class="hero-stat-label">{{ $t('floor') }}</div>
                     <div class="hero-stat-value">{{ $hero['floor'] ?? '' }}@if(!empty($hero['total_floors']))/{{ $hero['total_floors'] }}@endif</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-label">Stare</div>
-                    <div class="hero-stat-value">{{ ucfirst($hero['condition'] ?? '') }}</div>
+                    <div class="hero-stat-label">{{ $t('condition') }}</div>
+                    <div class="hero-stat-value">{{ $titleCase($hero['condition'] ?? '') }}</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-label">An constr.</div>
+                    <div class="hero-stat-label">{{ $t('year_built_short') }}</div>
                     <div class="hero-stat-value">{{ $hero['year_built'] ?? '-' }}</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-label">Disponibil</div>
+                    <div class="hero-stat-label">{{ $t('available') }}</div>
                     <div class="hero-stat-value">{{ $hero['available_from'] ?? '' }}</div>
                 </div>
             </div>
@@ -739,7 +969,7 @@
                         <div class="kpi-score" style="color: {{ $kpiColor }};">{{ $kpi['value'] }}<span class="kpi-max">/{{ $kpi['max'] ?? 10 }}</span></div>
                     </div>
                     <div class="kpi-label">{{ $kpi['label'] ?? '' }}</div>
-                    <div class="kpi-trend trend-{{ $kpi['trend'] ?? 'stable' }}">{{ $trendSymbol }} {{ ucfirst($kpi['trend'] ?? 'stabil') }}</div>
+                    <div class="kpi-trend trend-{{ $kpi['trend'] ?? 'stable' }}">{{ $trendSymbol }} {{ $titleCase($kpi['trend'] ?? $t('trend_stable')) }}</div>
                 </div>
             @endforeach
         </div>
@@ -775,21 +1005,21 @@
                 $aqiColor = $aqiVal <= 50 ? '#00A556' : ($aqiVal <= 100 ? '#d97706' : '#e05252');
             @endphp
             <div class="chart-box pollution-widget" style="flex: 0.7;">
-                <div class="chart-title">{{ $pollutionChart['title'] ?? 'Indicatori de mediu' }}</div>
+                <div class="chart-title">{{ $pollutionChart['title'] ?? $t('environmental_indicators') }}</div>
                 <div class="env-aqi">
                     <div class="env-aqi-circle {{ $aqiClass }}">
                         <span class="env-aqi-val" style="color: {{ $aqiColor }};">{{ $aqiVal }}</span>
                     </div>
                     <div class="env-aqi-meta">
-                        <span class="env-aqi-label">AQI â€” {{ $pd['aqi_label'] ?? '' }}</span>
+                        <span class="env-aqi-label">AQI &mdash; {{ $pd['aqi_label'] ?? '' }}</span>
                     </div>
                 </div>
                 <div class="env-metrics">
-                    <div class="env-row"><span class="env-key">Calitate aer</span><span class="env-val">{{ $pd['air_quality_label'] ?? ($pd['aqi_label'] ?? 'â€“') }}</span></div>
-                    <div class="env-row"><span class="env-key">Zgomot</span><span class="env-val">{{ $pd['noise_label'] ?? 'â€“' }} ({{ $pd['noise_db'] ?? 'â€“' }} dB)</span></div>
-                    <div class="env-row"><span class="env-key">Spatii verzi</span><span class="env-val">{{ $pd['green_coverage_pct'] ?? 'â€“' }}%</span></div>
-                    <div class="env-row"><span class="env-key">Surse poluare</span><span class="env-val">{{ $pd['pollution_sources'] ?? 'Niciuna Ã®n apropiere' }}</span></div>
-                    <div class="env-row"><span class="env-key">Walkability</span><span class="env-val">{{ $pd['walkability_label'] ?? 'â€“' }}</span></div>
+                    <div class="env-row"><span class="env-key">{{ $t('air_quality') }}</span><span class="env-val">{{ $pd['air_quality_label'] ?? ($pd['aqi_label'] ?? 'â€“') }}</span></div>
+                    <div class="env-row"><span class="env-key">{{ $t('noise') }}</span><span class="env-val">{{ $pd['noise_label'] ?? 'â€“' }} ({{ $pd['noise_db'] ?? 'â€“' }} dB)</span></div>
+                    <div class="env-row"><span class="env-key">{{ $t('green_spaces') }}</span><span class="env-val">{{ $pd['green_coverage_pct'] ?? 'â€“' }}%</span></div>
+                    <div class="env-row"><span class="env-key">{{ $t('pollution_sources') }}</span><span class="env-val">{{ $pd['pollution_sources'] ?? $t('no_sources_nearby') }}</span></div>
+                    <div class="env-row"><span class="env-key">{{ $t('walkability') }}</span><span class="env-val">{{ $pd['walkability_label'] ?? 'â€“' }}</span></div>
                 </div>
             </div>
             @endif
@@ -841,19 +1071,14 @@
         {{-- Verdict --}}
         @if(!empty($verdict))
         @php
-            $recClass = match(strtoupper($verdict['recommendation'] ?? '')) {
-                'NEGOCIAZÄ‚' => 'negotiate',
-                'CUMPÄ‚RÄ‚', 'ÃŽNCHIRIAZÄ‚' => 'buy',
-                'EVITÄ‚' => 'avoid',
-                default => 'negotiate',
-            };
+            $recClass = $recommendationClass($verdict['recommendation'] ?? '');
             $verdictScoreColor = gradeColor($verdict['overall_score'] ?? 0);
         @endphp
         <div class="verdict-card">
             <div class="verdict-top">
                 <div class="verdict-score-circle" style="background: {{ $verdictScoreColor }};">{{ $verdict['overall_score'] ?? '' }}<small>/10</small></div>
                 <div>
-                    <div class="verdict-rec-label">Recomandare finala</div>
+                    <div class="verdict-rec-label">{{ $t('final_recommendation') }}</div>
                     <div class="verdict-rec {{ $recClass }}">{{ $verdict['recommendation'] ?? '' }}</div>
                 </div>
             </div>
@@ -861,13 +1086,13 @@
             <div class="verdict-lists">
                 @if(!empty($verdict['ideal_for']))
                 <div class="verdict-list positive">
-                    <div class="verdict-list-title">Ideal pentru</div>
+                    <div class="verdict-list-title">{{ $t('ideal_for') }}</div>
                     <ul>@foreach($verdict['ideal_for'] as $item)<li><span class="vl-icon">-</span> {{ $item }}</li>@endforeach</ul>
                 </div>
                 @endif
                 @if(!empty($verdict['not_ideal_for']))
                 <div class="verdict-list negative">
-                    <div class="verdict-list-title">Nu se recomanda</div>
+                    <div class="verdict-list-title">{{ $t('not_recommended') }}</div>
                     <ul>@foreach($verdict['not_ideal_for'] as $item)<li><span class="vl-icon">-</span> {{ $item }}</li>@endforeach</ul>
                 </div>
                 @endif
@@ -878,7 +1103,7 @@
 </div>
 
 {{-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• --}}
-{{--  DETAIL PAGES â€” CONTINUOUS ARTICLE FLOW                  --}}
+{{--  DETAIL PAGES — CONTINUOUS ARTICLE FLOW                  --}}
 {{-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• --}}
 <div class="article-flow">
 @foreach($pages as $pageIdx => $pg)
@@ -935,8 +1160,7 @@
                     <div class="data-grid">
                         @foreach($section['data_points'] as $dp)
                             @php
-                                $dpLabel = strtolower($dp['label'] ?? '');
-                                $isHighlight = str_contains($dpLabel, 'corectÄƒ') || str_contains($dpLabel, 'preÈ› / mp');
+                                $isHighlight = $isHighlightedDataPoint($dp['label'] ?? '');
                             @endphp
                             <div class="data-cell{{ count($section['data_points']) % 2 !== 0 && $loop->last ? ' full-width' : '' }}{{ $isHighlight ? ' highlight-yellow' : '' }}">
                                 <span class="data-label">{{ $dp['label'] ?? '' }}</span>
@@ -956,10 +1180,7 @@
                 {{-- Item lists --}}
                 @if(!empty($section['items']))
                     @php
-                        $lc = '';
-                        $hLow = strtolower($section['heading'] ?? '');
-                        if (str_contains($hLow, 'cresc') || str_contains($hLow, 'ce creÈ™te')) $lc = 'green-border';
-                        elseif (str_contains($hLow, 'scad') || str_contains($hLow, 'ascuns') || str_contains($hLow, 'ce scade')) $lc = 'red-border';
+                        $lc = $resolveItemListClass($section['heading'] ?? '');
                     @endphp
                     <ul class="item-list {{ $lc }}">
                         @foreach($section['items'] as $item)<li>{{ $item }}</li>@endforeach
@@ -969,21 +1190,21 @@
                 {{-- Cost items table --}}
                 @if(!empty($section['cost_items']))
                     <table class="cost-table">
-                        <thead><tr><th>Cost</th><th style="text-align:right">Suma</th><th style="text-align:center">Inclus in chirie</th></tr></thead>
+                        <thead><tr><th>{{ $t('cost') }}</th><th style="text-align:right">{{ $t('amount') }}</th><th style="text-align:center">{{ $t('included_in_rent') }}</th></tr></thead>
                         <tbody>
                             @foreach($section['cost_items'] as $ci)
                                 <tr>
                                     <td>{{ $ci['label'] ?? '' }}</td>
-                                    <td style="text-align:right;font-weight:600;">â‚¬{{ $ci['value'] ?? 0 }}/lunÄƒ</td>
+                                    <td style="text-align:right;font-weight:600;">&euro;{{ $ci['value'] ?? 0 }}{{ $t('per_month') }}</td>
                                     <td style="text-align:center;" class="{{ ($ci['included_in_rent'] ?? false) ? 'included' : 'not-included' }}">
-                                        {{ ($ci['included_in_rent'] ?? false) ? 'Da' : 'Nu' }}
+                                        {{ ($ci['included_in_rent'] ?? false) ? $t('yes') : $t('no') }}
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                         @if(!empty($section['total_estimated_monthly_cost']))
                         <tfoot>
-                            <tr><td>Total estimat</td><td style="text-align:right;">â‚¬{{ number_format($section['total_estimated_monthly_cost']) }}/lunÄƒ</td><td></td></tr>
+                            <tr><td>{{ $t('total_estimated') }}</td><td style="text-align:right;">&euro;{{ number_format($section['total_estimated_monthly_cost']) }}{{ $t('per_month') }}</td><td></td></tr>
                         </tfoot>
                         @endif
                     </table>
@@ -993,7 +1214,7 @@
                 @if(!empty($section['negotiation_arguments']))
                     <div class="negotiation-box">
                         @if(!empty($section['target_rent']))
-                            <div class="negotiation-target">Chirie tinta: <span>â‚¬{{ number_format($section['target_rent']) }}/lunÄƒ</span></div>
+                            <div class="negotiation-target">{{ $t('target_rent') }}: <span>&euro;{{ number_format($section['target_rent']) }}{{ $t('per_month') }}</span></div>
                         @endif
                         <ul class="negotiation-list">
                             @foreach($section['negotiation_arguments'] as $arg)<li>{{ $arg }}</li>@endforeach
@@ -1005,14 +1226,14 @@
                 @if(!empty($section['transport']))
                     @php $tr = $section['transport']; @endphp
                     <div class="data-grid">
-                        <div class="data-cell"><span class="data-label">Transport public</span><span class="data-value">{{ ($tr['public_transport'] ?? false) ? 'Da' : 'Nu' }}</span></div>
-                        <div class="data-cell"><span class="data-label">Frecventa</span><span class="data-value">{{ $tr['frequency_minutes'] ?? '' }} min</span></div>
-                        <div class="data-cell"><span class="data-label">Centrul orasului</span><span class="data-value">{{ $tr['city_center_minutes'] ?? '' }} min</span></div>
-                        <div class="data-cell"><span class="data-label">Parcare</span><span class="data-value">{{ $tr['parking_spaces'] ?? 0 }} loc{{ ($tr['parking_included_in_rent'] ?? false) ? ' (inclus)' : '' }}{{ (!($tr['parking_included_in_rent'] ?? false) && !empty($tr['parking_extra_cost_eur'])) ? ' (â‚¬'.$tr['parking_extra_cost_eur'].'/lunÄƒ)' : '' }}</span></div>
+                        <div class="data-cell"><span class="data-label">{{ $t('public_transport') }}</span><span class="data-value">{{ ($tr['public_transport'] ?? false) ? $t('yes') : $t('no') }}</span></div>
+                        <div class="data-cell"><span class="data-label">{{ $t('frequency') }}</span><span class="data-value">{{ $tr['frequency_minutes'] ?? '' }} min</span></div>
+                        <div class="data-cell"><span class="data-label">{{ $t('city_center') }}</span><span class="data-value">{{ $tr['city_center_minutes'] ?? '' }} min</span></div>
+                        <div class="data-cell"><span class="data-label">{{ $t('parking') }}</span><span class="data-value">{{ $tr['parking_spaces'] ?? 0 }} {{ $t('parking_unit') }}{{ ($tr['parking_included_in_rent'] ?? false) ? ' (' . $t('included_short') . ')' : '' }}{{ (!($tr['parking_included_in_rent'] ?? false) && !empty($tr['parking_extra_cost_eur'])) ? ' (&euro;'.$tr['parking_extra_cost_eur'].$t('per_month').')' : '' }}</span></div>
                     </div>
                     @if(!empty($tr['nearest_stop_minutes_walk']))
-                        <div style="font-size:10px;color:#334155;margin:4px 0 6px;">Cea mai apropiata statie: <strong>{{ $tr['nearest_stop_minutes_walk'] }} min mers pe jos</strong>
-                            @if(!empty($tr['bike_friendly'])) Â· Prietenos biciclete @endif
+                        <div style="font-size:var(--font-small);color:var(--text);margin:4px 0 6px;line-height:var(--line-body);">{{ $t('nearest_stop') }}: <strong>{{ $tr['nearest_stop_minutes_walk'] }} min {{ $t('on_foot') }}</strong>
+                            @if(!empty($tr['bike_friendly'])) · {{ $t('bike_friendly') }} @endif
                         </div>
                     @endif
                     @if(!empty($tr['transport_lines']))
@@ -1040,13 +1261,13 @@
 
                 {{-- Positive/negative developments --}}
                 @if(!empty($section['positive_developments']))
-                    <div class="dev-positive">Factori pozitivi:</div>
+                    <div class="dev-positive">{{ $t('positive_factors') }}</div>
                     <ul class="item-list green-border">
                         @foreach($section['positive_developments'] as $pd)<li>{{ $pd }}</li>@endforeach
                     </ul>
                 @endif
                 @if(!empty($section['negative_developments']))
-                    <div class="dev-negative">Factori de risc:</div>
+                    <div class="dev-negative">{{ $t('risk_factors') }}</div>
                     <ul class="item-list red-border">
                         @foreach($section['negative_developments'] as $nd)<li>{{ $nd }}</li>@endforeach
                     </ul>
@@ -1054,18 +1275,18 @@
 
                 {{-- Legacy: trend_drivers / risk_factors --}}
                 @if(!empty($section['trend_drivers']))
-                    <div class="dev-positive">Factori pozitivi:</div>
+                    <div class="dev-positive">{{ $t('positive_factors') }}</div>
                     <ul class="item-list green-border">@foreach($section['trend_drivers'] as $td)<li>{{ $td }}</li>@endforeach</ul>
                 @endif
                 @if(!empty($section['risk_factors']))
-                    <div class="dev-negative">Factori de risc:</div>
+                    <div class="dev-negative">{{ $t('risk_factors') }}</div>
                     <ul class="item-list red-border">@foreach($section['risk_factors'] as $rf)<li>{{ $rf }}</li>@endforeach</ul>
                 @endif
 
                 {{-- Air quality --}}
                 @if(!empty($section['air_quality']))
                     <div class="air-quality-box">
-                        <div class="aq-badge"><span>{{ ucfirst($section['air_quality']) }}</span><small>Calitate aer</small></div>
+                        <div class="aq-badge"><span>{{ $titleCase($section['air_quality']) }}</span><small>{{ $t('air_quality') }}</small></div>
                         <div class="aq-text">{{ $section['impact_on_living'] ?? $section['impact_on_business'] ?? '' }}</div>
                     </div>
                     @if(!empty($section['potential_issues']))
@@ -1078,17 +1299,11 @@
                 {{-- Installations table --}}
                 @if(!empty($section['installations']))
                     <table class="install-table">
-                        <thead><tr><th>Element</th><th>Stare</th><th>Detalii</th></tr></thead>
+                        <thead><tr><th>{{ $t('element') }}</th><th>{{ $t('condition') }}</th><th>{{ $t('details') }}</th></tr></thead>
                         <tbody>
                             @foreach($section['installations'] as $inst)
                                 @php
-                                    $cond = strtolower($inst['condition'] ?? 'medie');
-                                    $condClass = match(true) {
-                                        str_contains($cond, 'bun') || str_contains($cond, 'nou') => 'condition-bun',
-                                        str_contains($cond, 'medi') => 'condition-medie',
-                                        str_contains($cond, 'vechi') || str_contains($cond, 'absent') => 'condition-vechi',
-                                        default => 'condition-medie',
-                                    };
+                                    $condClass = $conditionBadgeClass($inst['condition'] ?? 'medie');
                                 @endphp
                                 <tr>
                                     <td style="font-weight:600;">{{ $inst['item'] ?? '' }}</td>
@@ -1116,7 +1331,7 @@
                 {{-- Not recommended for --}}
                 @if(!empty($section['not_recommended_for']))
                     <div style="margin-top:5px;margin-bottom:5px;">
-                        <div style="font-size:10px;font-weight:700;color:#991b1b;margin-bottom:4px;">Nu se recomanda:</div>
+                        <div style="font-size:var(--font-small);font-weight:700;color:#991b1b;margin-bottom:4px;line-height:var(--line-body);">{{ $t('not_recommended') }}:</div>
                         <ul class="not-rec-list">
                             @foreach($section['not_recommended_for'] as $nr)
                                 <li>
@@ -1142,7 +1357,7 @@
                 @endif
                 @if(!empty($section['not_recommended']))
                     <div style="margin-top:5px;margin-bottom:5px;">
-                        <div style="font-size:10px;font-weight:700;color:#991b1b;margin-bottom:4px;">Nu se recomanda:</div>
+                        <div style="font-size:var(--font-small);font-weight:700;color:#991b1b;margin-bottom:4px;line-height:var(--line-body);">{{ $t('not_recommended') }}:</div>
                         <ul class="not-rec-list">
                             @foreach($section['not_recommended'] as $nr)
                                 <li><span class="not-rec-name">{{ $nr['type'] ?? '' }}</span><div class="not-rec-reason">{{ $nr['reason'] ?? '' }}</div></li>
@@ -1154,21 +1369,21 @@
                 {{-- Scenarios (legacy) --}}
                 @if(!empty($section['scenarios']))
                     @foreach($section['scenarios'] as $sc)
-                        <div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:linear-gradient(135deg,#f8f7fd 0%,#fff 100%);">
-                            <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:3px;">{{ $sc['scenario_name'] ?? '' }}</div>
-                            <div style="font-size:10px;color:#334155;margin-bottom:6px;line-height:1.45;">{{ $sc['description'] ?? '' }}</div>
+                        <div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:#f7f8fd;">
+                            <div style="font-size:var(--font-heading);font-weight:700;color:var(--primary);margin-bottom:3px;line-height:var(--line-body);">{{ $sc['scenario_name'] ?? '' }}</div>
+                            <div style="font-size:var(--font-body);color:var(--text);margin-bottom:6px;line-height:var(--line-body);">{{ $sc['description'] ?? '' }}</div>
                             <div style="display:flex;gap:8px;">
                                 <div style="flex:1;text-align:center;padding:6px;background:var(--card);border-radius:6px;border:1px solid var(--border);">
-                                    <div style="font-size:15px;font-weight:800;color:var(--green);">â‚¬{{ number_format($sc['estimated_monthly_revenue_potential'] ?? 0) }}</div>
-                                    <div style="font-size:8px;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Venituri lunare</div>
+                                    <div style="font-size:var(--font-heading);font-weight:700;color:var(--green);">&euro;{{ number_format($sc['estimated_monthly_revenue_potential'] ?? 0) }}</div>
+                                    <div style="font-size:var(--font-small);color:var(--text-muted);font-weight:600;line-height:var(--line-body);">{{ $t('monthly_revenue') }}</div>
                                 </div>
                                 <div style="flex:1;text-align:center;padding:6px;background:var(--card);border-radius:6px;border:1px solid var(--border);">
-                                    <div style="font-size:15px;font-weight:800;color:var(--primary);">â‚¬{{ number_format($sc['setup_cost_estimate'] ?? 0) }}</div>
-                                    <div style="font-size:8px;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Cost amenajare</div>
+                                    <div style="font-size:var(--font-heading);font-weight:700;color:var(--text-strong);">&euro;{{ number_format($sc['setup_cost_estimate'] ?? 0) }}</div>
+                                    <div style="font-size:var(--font-small);color:var(--text-muted);font-weight:600;line-height:var(--line-body);">{{ $t('setup_cost') }}</div>
                                 </div>
                                 <div style="flex:1;text-align:center;padding:6px;background:var(--card);border-radius:6px;border:1px solid var(--border);">
-                                    <div style="font-size:15px;font-weight:800;color:#4e59b7;">{{ $sc['break_even_months'] ?? '' }} luni</div>
-                                    <div style="font-size:8px;color:var(--text-muted);text-transform:uppercase;font-weight:600;">Break-even</div>
+                                    <div style="font-size:var(--font-heading);font-weight:700;color:var(--primary);">{{ $sc['break_even_months'] ?? '' }} {{ $t('months') }}</div>
+                                    <div style="font-size:var(--font-small);color:var(--text-muted);font-weight:600;line-height:var(--line-body);">{{ $t('break_even') }}</div>
                                 </div>
                             </div>
                         </div>
@@ -1179,8 +1394,8 @@
                 @if(!empty($section['competitor_types']))
                     <ul class="item-list orange-border">@foreach($section['competitor_types'] as $ct)<li>{{ $ct }}</li>@endforeach</ul>
                     @if(!empty($section['competitive_advantage_possible']))
-                        <div style="font-size:10px;color:#166534;background:var(--green-light);padding:6px 8px;border-radius:6px;margin-bottom:8px;">
-                            <strong>Oportunitate:</strong> {{ $section['competitive_advantage_possible'] }}
+                        <div style="font-size:var(--font-small);color:#166534;background:var(--green-light);padding:6px 8px;border-radius:6px;margin-bottom:8px;line-height:var(--line-body);">
+                            <strong>{{ $t('opportunity') }}:</strong> {{ $section['competitive_advantage_possible'] }}
                         </div>
                     @endif
                 @endif
@@ -1188,14 +1403,14 @@
                 {{-- Risks table --}}
                 @if(!empty($section['risks']))
                     <table class="risk-table">
-                        <thead><tr><th style="width:14%">Categorie</th><th style="width:11%">Severitate</th><th>Descriere</th><th style="width:24%">Mitigare</th></tr></thead>
+                        <thead><tr><th style="width:14%">{{ $t('category') }}</th><th style="width:11%">{{ $t('severity') }}</th><th>{{ $t('description') }}</th><th style="width:24%">{{ $t('mitigation') }}</th></tr></thead>
                         <tbody>
                             @foreach($section['risks'] as $risk)
                                 <tr>
-                                    <td style="font-weight:600;">{{ ucfirst($risk['category'] ?? '') }}</td>
+                                    <td style="font-weight:600;">{{ $titleCase($risk['category'] ?? '') }}</td>
                                     <td><span class="severity-badge severity-{{ strtolower($risk['severity'] ?? 'mic') }}">{{ $risk['severity'] ?? '' }}</span></td>
                                     <td>{{ $risk['description'] ?? '' }}</td>
-                                    <td style="font-size:10px;">{{ $risk['mitigation'] ?? '' }}</td>
+                                    <td style="font-size:var(--font-small);color:var(--text);line-height:var(--line-body);">{{ $risk['mitigation'] ?? '' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -1210,7 +1425,7 @@
                                 <div class="checklist-checkbox"></div>
                                 <div style="flex:1;">
                                     <div style="font-weight:600;">{{ $chk['item'] ?? '' }}</div>
-                                    <div style="font-size:9px;color:#64748b;">{{ $chk['why'] ?? '' }}</div>
+                                    <div style="font-size:var(--font-small);color:var(--text-muted);line-height:var(--line-body);">{{ $chk['why'] ?? '' }}</div>
                                 </div>
                                 <span class="priority-badge priority-{{ strtolower($chk['priority'] ?? 'recomandat') }}">{{ $chk['priority'] ?? '' }}</span>
                             </li>
@@ -1229,9 +1444,9 @@
                 @if(!empty($section['exit_conditions']))
                     @php $ex = $section['exit_conditions']; @endphp
                     <div class="exit-box">
-                        <div class="exit-row"><span class="exit-label">Preaviz reziliere</span><span class="exit-value">{{ $ex['notice_period_months'] ?? '' }} lunÄƒ</span></div>
-                        <div class="exit-row"><span class="exit-label">Penalizare estimata</span><span class="exit-value" style="font-size:10px;">{{ $ex['penalty_estimate'] ?? '' }}</span></div>
-                        <div class="exit-row"><span class="exit-label">Returnare garantie</span><span class="exit-value" style="font-size:10px;">{{ $ex['deposit_return_conditions'] ?? '' }}</span></div>
+                        <div class="exit-row"><span class="exit-label">{{ $t('termination_notice') }}</span><span class="exit-value">{{ $ex['notice_period_months'] ?? '' }} {{ $t('month') }}</span></div>
+                        <div class="exit-row"><span class="exit-label">{{ $t('estimated_penalty') }}</span><span class="exit-value">{{ $ex['penalty_estimate'] ?? '' }}</span></div>
+                        <div class="exit-row"><span class="exit-label">{{ $t('deposit_return') }}</span><span class="exit-value">{{ $ex['deposit_return_conditions'] ?? '' }}</span></div>
                     </div>
                 @endif
 
@@ -1239,14 +1454,9 @@
                 @if(!empty($section['verdict']))
                     <div class="final-verdict-card">
                         <div class="final-score">{{ $section['overall_score'] ?? '' }}<span>/10</span></div>
-                        <div class="final-verdict-label">Scor general</div>
+                        <div class="final-verdict-label">{{ $t('overall_score') }}</div>
                         @php
-                            $recClass = match(strtoupper($section['verdict'] ?? '')) {
-                                'NEGOCIAZÄ‚' => 'negotiate',
-                                'CUMPÄ‚RÄ‚', 'ÃŽNCHIRIAZÄ‚' => 'buy',
-                                'EVITÄ‚' => 'avoid',
-                                default => 'negotiate',
-                            };
+                            $recClass = $recommendationClass($section['verdict'] ?? '');
                         @endphp
                         <div class="final-rec {{ $recClass }}">{{ $section['verdict'] }}</div>
                     </div>
@@ -1256,7 +1466,7 @@
                                 <div class="score-dim">
                                     <div class="score-dim-value">{{ $sb['score'] ?? '' }}</div>
                                     <div class="score-dim-label">{{ $sb['dimension'] ?? '' }}</div>
-                                    <div class="score-dim-weight">Pondere: {{ $sb['weight_percent'] ?? '' }}%</div>
+                                    <div class="score-dim-weight">{{ $t('weight') }}: {{ $sb['weight_percent'] ?? '' }}%</div>
                                 </div>
                             @endforeach
                         </div>
@@ -1269,8 +1479,8 @@
                         <div class="step-item">
                             <div class="step-number">{{ $step['step'] ?? '' }}</div>
                             <div class="step-content">
-                                <div class="step-action">Actiune: {{ $step['action'] ?? '' }}</div>
-                                <div class="step-timeline">Orizont: {{ $step['timeline'] ?? '' }} <span class="priority-badge priority-{{ strtolower($step['priority'] ?? 'recomandat') }}" style="margin-left:3px;">{{ $step['priority'] ?? '' }}</span></div>
+                                <div class="step-action">{{ $t('action') }}: {{ $step['action'] ?? '' }}</div>
+                                <div class="step-timeline">{{ $t('timeline') }}: {{ $step['timeline'] ?? '' }} <span class="priority-badge priority-{{ strtolower($step['priority'] ?? 'recomandat') }}" style="margin-left:3px;">{{ $step['priority'] ?? '' }}</span></div>
                             </div>
                         </div>
                     @endforeach
@@ -1296,7 +1506,7 @@
         @if(!empty($pg['action_items']))
             <div class="action-items">
                 <div class="action-items-title">
-                    Actiuni recomandate
+                    {{ $t('recommended_actions') }}
                 </div>
                 <ul>@foreach($pg['action_items'] as $ai)<li>{{ $ai }}</li>@endforeach</ul>
             </div>
@@ -1312,8 +1522,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     document.fonts.ready.then(function() {
     Chart.defaults.font.family = "'Inter', sans-serif";
-    Chart.defaults.font.size = 12;
-    Chart.defaults.color = '#64748b';
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = '#334155';
     Chart.defaults.plugins.legend.display = false;
     Chart.defaults.devicePixelRatio = 3;
 
@@ -1323,6 +1533,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (v >= 8) return '#00A556';
         if (v >= 6) return '#d97706';
         return '#e05252';
+    }
+
+    function normalizeLabel(label) {
+        return (label || '')
+            .toString()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function isHiddenCostLabel(label) {
+        var normalized = normalizeLabel(label);
+        return normalized.indexOf('costuri ascunse') !== -1 || normalized.indexOf('hidden cost') !== -1;
     }
 
     @if($barChart)
@@ -1362,14 +1585,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         min: Math.min.apply(null, values) * 0.9,
                         grid: { color: '#f0f0f0' },
                         ticks: {
-                            callback: function(v) { return 'â‚¬' + v; },
-                            font: { size: 11 }
+                            callback: function(v) { return '\u20AC' + v; },
+                            font: { size: 11, weight: '500' }
                         }
                     },
                     x: {
                         grid: { display: false },
                         ticks: {
-                            font: { size: 9 },
+                            font: { size: 10, weight: '500' },
                             maxRotation: 0,
                             minRotation: 0
                         }
@@ -1381,14 +1604,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 afterDraw: function(chart) {
                     var ctx2 = chart.ctx;
                     ctx2.save();
-                    ctx2.font = '700 10px "Inter", sans-serif';
+                    ctx2.font = '600 10px "Inter", sans-serif';
                     ctx2.textAlign = 'center';
                     ctx2.textBaseline = 'bottom';
                     chart.data.datasets[0].data.forEach(function(val, i) {
                         var meta = chart.getDatasetMeta(0);
                         var bar = meta.data[i];
-                        ctx2.fillStyle = '#34306a';
-                        ctx2.fillText('â‚¬' + val, bar.x, bar.y - 4);
+                        ctx2.fillStyle = '#334155';
+                        ctx2.fillText('\u20AC' + val, bar.x, bar.y - 4);
                     });
                     ctx2.restore();
                 }
@@ -1431,12 +1654,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             boxWidth: 11,
                             boxHeight: 11,
                             padding: 7,
-                            font: { size: 10 },
+                            font: { size: 9, weight: '500' },
                             generateLabels: function(chart) {
                                 var data = chart.data;
                                 return data.labels.map(function(label, i) {
                                     return {
-                                        text: label + ' â‚¬' + data.datasets[0].data[i],
+                                        text: label + ' \u20AC' + data.datasets[0].data[i],
                                         fillStyle: colors[i],
                                         strokeStyle: '#fff',
                                         lineWidth: 0,
@@ -1454,16 +1677,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 afterDraw: function(chart) {
                     var width = chart.width, height = chart.height, ctx2 = chart.ctx;
                     ctx2.save();
-                    ctx2.font = '800 16px "Inter", sans-serif';
-                    ctx2.fillStyle = '#34306a';
+                    ctx2.font = '600 11px "Inter", sans-serif';
+                    ctx2.fillStyle = '#334155';
                     ctx2.textAlign = 'center';
                     ctx2.textBaseline = 'middle';
                     var centerX = (chart.chartArea.left + chart.chartArea.right) / 2;
                     var centerY = (chart.chartArea.top + chart.chartArea.bottom) / 2;
-                    ctx2.fillText('â‚¬' + total, centerX, centerY - 6);
-                    ctx2.font = '500 8px "Inter", sans-serif';
-                    ctx2.fillStyle = '#94a3b8';
-                    ctx2.fillText('total/lunÄƒ', centerX, centerY + 10);
+                    ctx2.fillText('\u20AC' + total, centerX, centerY - 6);
+                    ctx2.font = '500 9px "Inter", sans-serif';
+                    ctx2.fillStyle = '#667085';
+                    ctx2.fillText(@json($t('total_per_month')), centerX, centerY + 10);
                     ctx2.restore();
                 }
             }]
@@ -1509,8 +1732,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             backdropColor: 'transparent'
                         },
                         pointLabels: {
-                            font: { size: 9, weight: '600' },
-                            color: '#34306a',
+                            font: { size: 10, weight: '500' },
+                            color: '#334155',
                             padding: 18
                         },
                         grid: { color: '#e5e7eb' },
@@ -1523,14 +1746,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 afterDraw: function(chart) {
                     var ctx2 = chart.ctx;
                     ctx2.save();
-                    ctx2.font = '800 10px "Inter", sans-serif';
+                    ctx2.font = '600 9px "Inter", sans-serif';
                     ctx2.textAlign = 'center';
                     ctx2.textBaseline = 'middle';
                     var meta = chart.getDatasetMeta(0);
                     var scale = chart.scales.r;
                     meta.data.forEach(function(point, i) {
-                        var color = gradeColor(values[i]);
-                        ctx2.fillStyle = color;
+                        ctx2.fillStyle = '#334155';
                         // Push label outward from center, past the point
                         var angle = scale.getIndexAngle(i) - Math.PI / 2;
                         var cx = scale.xCenter;
@@ -1558,8 +1780,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var labels = rawLabels.map(function(l) { return l; });
         var values = @json($hBarChart['data']['values'] ?? []);
         var colors = values.map(function(v, i) {
-            // "Costuri ascunse estimate" always red
-            if (labels[i] === 'Costuri ascunse estimate') return '#dc2626';
+            if (isHiddenCostLabel(labels[i])) return '#dc2626';
             return gradeColor(v);
         });
         new Chart(ctx, {
@@ -1587,16 +1808,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         min: 0,
                         max: 10,
                         grid: { color: '#f0f0f0' },
-                        ticks: { font: { size: 10 } }
+                        ticks: { font: { size: 11, weight: '500' }, color: '#334155' }
                     },
                     y: {
                         grid: { display: false },
                         ticks: {
                             autoSkip: false,
-                            font: { size: 9, weight: '500' },
+                            font: { size: 10, weight: '500' },
                             color: function(context) {
-                                if (labels[context.index] === 'Costuri ascunse estimate') return '#dc2626';
-                                return '#64748b';
+                                if (isHiddenCostLabel(labels[context.index])) return '#dc2626';
+                                return '#334155';
                             }
                         }
                     }
@@ -1607,11 +1828,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 afterDraw: function(chart) {
                     var ctx2 = chart.ctx;
                     ctx2.save();
-                    ctx2.font = '700 9px "Inter", sans-serif';
+                    ctx2.font = '600 10px "Inter", sans-serif';
                     ctx2.textAlign = 'left';
                     ctx2.textBaseline = 'middle';
                     chart.getDatasetMeta(0).data.forEach(function(bar, i) {
-                        ctx2.fillStyle = colors[i];
+                        ctx2.fillStyle = '#334155';
                         ctx2.fillText(values[i].toString(), bar.x + 4, bar.y);
                     });
                     ctx2.restore();

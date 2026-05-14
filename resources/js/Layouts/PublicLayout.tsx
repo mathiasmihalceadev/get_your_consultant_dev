@@ -11,6 +11,19 @@ import { useTranslation } from "@/hooks/useTranslation";
 export default function PublicLayout({ children }: PropsWithChildren) {
     const { t, locale, localePath, localizedUrls } = useTranslation();
     const otherLocale = locale === "en" ? "ro" : "en";
+    const currentYear = new Date().getFullYear();
+    const legalPaths =
+        locale === "ro"
+            ? {
+                  privacy: "/politica-de-confidentialitate",
+                  terms: "/termeni-si-conditii",
+                  cookies: "/politica-de-cookie-uri",
+              }
+            : {
+                  privacy: "/privacy-policy",
+                  terms: "/terms-and-conditions",
+                  cookies: "/cookie-policy",
+              };
     const navItems = [
         {
             key: "landing_nav_example",
@@ -38,7 +51,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
     return (
         <div className="min-h-screen flex flex-col bg-white">
             {/* Top accent line */}
-            <div className="h-[3px] bg-brand-secondary" />
+            <div className="h-0.75 bg-brand-secondary" />
 
             {/* Header */}
             <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
@@ -99,18 +112,18 @@ export default function PublicLayout({ children }: PropsWithChildren) {
             </header>
 
             {/* Main content */}
-            <main className="flex-1">{children}</main>
+            <main className="flex flex-1 flex-col">{children}</main>
 
             {/* Footer */}
             <footer className="bg-brand-primary">
-                <div className="h-[3px] bg-brand-secondary" />
+                <div className="h-0.75 bg-brand-secondary" />
                 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
                     <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-8">
                         <div>
                             <img
-                                src="/images/logo-dark.jpg"
+                                src="/images/logo-footer.png"
                                 alt={t("site_name")}
-                                className="h-10 w-auto object-contain mb-4 md:h-12"
+                                className="mb-4 h-14 w-auto object-contain md:h-16"
                             />
                             <p className="max-w-md text-[14px] text-white/80 md:text-base">
                                 {t("landing_footer_desc")}
@@ -153,7 +166,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-4 border-t border-white/10 pt-6 md:flex-row md:items-center md:justify-between">
+                    <div className="flex flex-col gap-4 border-t border-white/10 pt-6 md:flex-row md:items-end md:justify-between">
                         <div className="flex flex-wrap gap-4 text-[14px] md:text-base">
                             <a
                                 href={localePath("/#hero-form")}
@@ -162,29 +175,32 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                 {t("get_report")}
                             </a>
                             <a
-                                href={localePath("/#privacy-policy")}
+                                href={localePath(legalPaths.privacy)}
                                 className="text-white/70 transition-colors hover:text-white"
                             >
                                 {t("privacy")}
                             </a>
                             <a
-                                href={localePath("/#terms-and-conditions")}
+                                href={localePath(legalPaths.terms)}
                                 className="text-white/70 transition-colors hover:text-white"
                             >
                                 {t("terms")}
                             </a>
                             <a
-                                href={localePath("/#cookie-policy")}
+                                href={localePath(legalPaths.cookies)}
                                 className="text-white/70 transition-colors hover:text-white"
                             >
                                 {t("cookie_policy")}
                             </a>
                         </div>
 
-                        <p className="text-[14px] text-white/50 md:text-base">
-                            &copy; {new Date().getFullYear()} {t("site_name")}.{" "}
-                            {t("all_rights_reserved")}
-                        </p>
+                        <div className="space-y-1 text-[13px] leading-[1.55] text-white/56 md:ml-auto md:max-w-none md:shrink-0 md:text-right md:text-sm md:leading-[1.65] lg:whitespace-nowrap">
+                            <p>{t("landing_footer_legal_note")}</p>
+                            <p>
+                                &copy; {currentYear} {t("site_name")}.{" "}
+                                {t("landing_footer_copyright_suffix")}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </footer>

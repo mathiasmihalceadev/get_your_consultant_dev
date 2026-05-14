@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Settings;
+use App\Support\ReportPdfFooter;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Spatie\LaravelPdf\Facades\Pdf;
 
@@ -20,14 +20,10 @@ class AdminSettingsController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'rental_living_prompt' => ['required', 'string'],
-            'rental_living_prompt_ro' => ['required', 'string'],
-            'rental_business_prompt' => ['required', 'string'],
-            'rental_business_prompt_ro' => ['required', 'string'],
-            'buying_living_prompt' => ['required', 'string'],
-            'buying_living_prompt_ro' => ['required', 'string'],
-            'buying_business_prompt' => ['required', 'string'],
-            'buying_business_prompt_ro' => ['required', 'string'],
+            'rental_living_ro' => ['required', 'string'],
+            'rental_living_eng' => ['required', 'string'],
+            'buying_living_ro' => ['required', 'string'],
+            'buying_living_eng' => ['required', 'string'],
             'auto_send' => ['boolean'],
         ]);
 
@@ -40,18 +36,32 @@ class AdminSettingsController extends Controller
 
     public function testPdf(Request $request)
     {
-        $type = $request->query('type', 'rental');
+        $type = $request->query('type', 'rental_living_ro');
 
         $config = match ($type) {
-            'buying' => [
+            'buying_living_ro' => [
                 'json' => 'buying_ro.json',
                 'template' => 'reports.template-buying',
-                'label' => 'buying',
+                'label' => 'buying-ro',
+                'locale' => 'ro',
+            ],
+            'buying_living_eng' => [
+                'json' => 'buying_eng.json',
+                'template' => 'reports.template-buying',
+                'label' => 'buying-eng',
+                'locale' => 'en',
+            ],
+            'rental_living_eng' => [
+                'json' => 'rental_eng.json',
+                'template' => 'reports.template-rental',
+                'label' => 'rental-eng',
+                'locale' => 'en',
             ],
             default => [
-                'json' => 'rental_ro_v2.json',
+                'json' => 'rental_ro.json',
                 'template' => 'reports.template-rental',
-                'label' => 'rental',
+                'label' => 'rental-ro',
+                'locale' => 'ro',
             ],
         };
 
@@ -77,13 +87,13 @@ class AdminSettingsController extends Controller
             mkdir($dir, 0755, true);
         }
 
-        $footerHtml = '<div style="width:100%;text-align:center;font-family:Inter,sans-serif;padding:0 40px;line-height:1.4;">'
-            . '<div style="font-size:8px;color:#9CA3AF;font-style:italic;">Raport informativ generat prin analiza datelor publice disponibile È™i utilizarea unor modele statistice proprietare dezvoltate de Get Your Consultant.</div>'
-            . '<div style="font-size:8px;color:#9CA3AF;font-style:italic;">Datele prezentate au caracter informativ È™i pot necesita verificare independentÄƒ.</div>'
-            . '<div style="font-size:7px;color:#B0B0B0;margin-top:2px;">Â© 2026 Get Your Consultant. Toate drepturile rezervate.</div>'
-            . '</div>';
+        $footerHtml = ReportPdfFooter::render(now());
 
-        $pdf = Pdf::view($template, ['data' => $data])
+        $pdf = Pdf::view($template, [
+            'data' => $data,
+            'locale' => $config['locale'],
+            'trans' => $this->loadTranslations($config['locale']),
+        ])
             ->format('a4')
             ->withBrowsershot(function ($browsershot) use ($footerHtml) {
                 $browsershot->waitUntilNetworkIdle()
@@ -97,6 +107,17 @@ class AdminSettingsController extends Controller
         return response()->download($path, $filename, [
             'Content-Type' => 'application/pdf',
         ]);
+    }
+
+    private function loadTranslations(string $locale): array
+    {
+        $path = lang_path("{$locale}.json");
+
+        if (!file_exists($path)) {
+            return [];
+        }
+
+        return json_decode(file_get_contents($path), true) ?? [];
     }
 }
 

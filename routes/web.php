@@ -12,6 +12,12 @@ Route::get('/get-report', [PublicReportController::class, 'index'])->name('get-r
 Route::get('/submit-url', [PublicReportController::class, 'showUrlForm'])->name('submit-url');
 Route::get('/submit-email', [PublicReportController::class, 'showEmailForm'])->name('submit-email');
 Route::get('/report/{pageToken}', [PublicReportController::class, 'status'])->name('report.status');
+Route::get('/privacy-policy', [PublicReportController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('/terms-and-conditions', [PublicReportController::class, 'termsAndConditions'])->name('terms-and-conditions');
+Route::get('/cookie-policy', [PublicReportController::class, 'cookiePolicy'])->name('cookie-policy');
+Route::get('/politica-de-confidentialitate', [PublicReportController::class, 'privacyPolicy']);
+Route::get('/termeni-si-conditii', [PublicReportController::class, 'termsAndConditions']);
+Route::get('/politica-de-cookie-uri', [PublicReportController::class, 'cookiePolicy']);
 
 Route::middleware('throttle:10,1')->group(function () {
     Route::post('/validate-url', [PublicReportController::class, 'validateUrl'])->name('validate-url');
@@ -31,7 +37,7 @@ Route::get('/locale-test', function (Request $request) {
 Route::get('/sitemap.xml', function () {
     abort_unless(config('seo.indexing'), 404);
 
-    $paths = ['/', '/get-report'];
+    $paths = ['/', '/get-report', '/privacy-policy', '/terms-and-conditions', '/cookie-policy'];
     $urls = collect(config('locales.supported', []))
         ->flatMap(fn (string $locale) => collect($paths)->map(fn (string $path) => LocalizedUrl::urlForLocale($locale, $path)))
         ->all();

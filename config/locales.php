@@ -34,5 +34,17 @@ return [
             'en' => '/',
             'ro' => '/',
         ],
+        '/privacy-policy' => [
+            'en' => '/privacy-policy',
+            'ro' => '/politica-de-confidentialitate',
+        ],
+        '/terms-and-conditions' => [
+            'en' => '/terms-and-conditions',
+            'ro' => '/termeni-si-conditii',
+        ],
+        '/cookie-policy' => [
+            'en' => '/cookie-policy',
+            'ro' => '/politica-de-cookie-uri',
+        ],
     ],
 ];

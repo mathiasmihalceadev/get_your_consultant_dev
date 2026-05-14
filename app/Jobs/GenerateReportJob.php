@@ -7,6 +7,7 @@ use App\Exceptions\OpenAIRequestException;
 use App\Mail\ReportMail;
 use App\Models\Report;
 use App\Models\Settings;
+use App\Support\ReportPdfFooter;
 use App\Services\OpenAIService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -42,17 +43,8 @@ class GenerateReportJob implements ShouldQueue
             'type' => $report->report_type,
         ]);
 
-        $locale = $report->locale ?? 'en';
-        $suffix = $locale === 'ro' ? '_ro' : '';
-
-        $baseField = match ($report->report_type) {
-            'rental_living' => 'rental_living_prompt',
-            'rental_business' => 'rental_business_prompt',
-            'buying_living' => 'buying_living_prompt',
-            'buying_business' => 'buying_business_prompt',
-        };
-
-        $prompt = Settings::get($baseField . $suffix) ?? Settings::get($baseField);
+        $locale = $report->locale === 'ro' ? 'ro' : 'en';
+        $prompt = $this->resolvePrompt($report, $locale);
 
         try {
             $reportData = $openAI->generateReportData($report->url, $prompt);
@@ -77,16 +69,16 @@ class GenerateReportJob implements ShouldQueue
             }
             $path = $dir . "/{$report->page_token}.pdf";
 
-            $footerHtml = '<div style="width:100%;text-align:center;font-family:Inter,sans-serif;padding:0 40px;line-height:1.4;">'
-                . '<div style="font-size:8px;color:#9CA3AF;font-style:italic;">Raport informativ generat prin analiza datelor publice disponibile È™i utilizarea unor modele statistice proprietare dezvoltate de Get Your Consultant.</div>'
-                . '<div style="font-size:8px;color:#9CA3AF;font-style:italic;">Datele prezentate au caracter informativ È™i pot necesita verificare independentÄƒ.</div>'
-                . '<div style="font-size:7px;color:#B0B0B0;margin-top:2px;">Â© 2026 Get Your Consultant. Toate drepturile rezervate.</div>'
-                . '</div>';
+            $footerHtml = ReportPdfFooter::render(now());
 
-            $reportType = $reportData['report_meta']['report_type'] ?? 'rental';
-            $templateView = $reportType === 'buying' ? 'reports.template-buying' : 'reports.template-rental';
+            $templateView = $this->resolveTemplateView($report);
 
-            Pdf::view($templateView, ['data' => $reportData, 'report' => $report, 'trans' => $this->loadTranslations($report->locale ?? 'en')])
+            Pdf::view($templateView, [
+                'data' => $reportData,
+                'report' => $report,
+                'locale' => $locale,
+                'trans' => $this->loadTranslations($locale),
+            ])
                 ->format('a4')
                 ->withBrowsershot(function ($browsershot) use ($footerHtml) {
                     $browsershot->waitUntilNetworkIdle()
@@ -110,7 +102,7 @@ class GenerateReportJob implements ShouldQueue
             return;
         }
 
-        $report->processed_at = now();
+        $report->setAttribute('processed_at', now());
 
         Log::channel('report')->info('PDF generated and stored', [
             'report_id' => $report->id,
@@ -139,6 +131,45 @@ class GenerateReportJob implements ShouldQueue
             return json_decode(file_get_contents($path), true) ?? [];
         }
         return [];
+    }
+
+    private function resolvePrompt(Report $report, string $locale): string
+    {
+        $keys = $this->resolvePromptKeys($report, $locale);
+
+        foreach ($keys as $key) {
+            $value = Settings::get($key);
+
+            if (is_string($value) && trim($value) !== '') {
+                return $value;
+            }
+        }
+
+        throw new OpenAIRequestException('No report prompt is configured for the selected report type and locale.');
+    }
+
+    private function resolvePromptKeys(Report $report, string $locale): array
+    {
+        $localeSuffix = $locale === 'ro' ? 'ro' : 'eng';
+
+        return match ($report->report_type) {
+            'buying_living', 'buying_business' => array_values(array_filter([
+                "buying_living_{$localeSuffix}",
+                $locale === 'ro' ? 'buying_living_prompt_ro' : 'buying_living_prompt',
+            ])),
+            default => array_values(array_filter([
+                "rental_living_{$localeSuffix}",
+                $locale === 'ro' ? 'rental_living_prompt_ro' : 'rental_living_prompt',
+            ])),
+        };
+    }
+
+    private function resolveTemplateView(Report $report): string
+    {
+        return match ($report->report_type) {
+            'buying_living', 'buying_business' => 'reports.template-buying',
+            default => 'reports.template-rental',
+        };
     }
 }
 

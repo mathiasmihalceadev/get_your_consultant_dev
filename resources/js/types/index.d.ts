@@ -42,14 +42,10 @@ export interface Report {
 }
 
 export interface Settings {
-    rental_living_prompt: string;
-    rental_living_prompt_ro: string;
-    rental_business_prompt: string;
-    rental_business_prompt_ro: string;
-    buying_living_prompt: string;
-    buying_living_prompt_ro: string;
-    buying_business_prompt: string;
-    buying_business_prompt_ro: string;
+    rental_living_ro: string;
+    rental_living_eng: string;
+    buying_living_ro: string;
+    buying_living_eng: string;
     auto_send: boolean;
     [key: string]: string | boolean;
 }

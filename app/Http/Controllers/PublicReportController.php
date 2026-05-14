@@ -24,11 +24,26 @@ class PublicReportController extends Controller
         return Inertia::render('Public/Index');
     }
 
+    public function privacyPolicy()
+    {
+        return $this->renderLegalDocument('privacy-policy');
+    }
+
+    public function termsAndConditions()
+    {
+        return $this->renderLegalDocument('terms-and-conditions');
+    }
+
+    public function cookiePolicy()
+    {
+        return $this->renderLegalDocument('cookie-policy');
+    }
+
     public function showUrlForm(Request $request)
     {
         $type = $request->query('type');
 
-        if (!in_array($type, ['rental_living', 'rental_business', 'buying_living', 'buying_business'])) {
+        if (!in_array($type, ['rental_living', 'buying_living'])) {
             return redirect()->route('home');
         }
 
@@ -42,7 +57,7 @@ class PublicReportController extends Controller
         $locale = app()->getLocale();
         $validated = $request->validate([
             'url' => ['required', 'url'],
-            'report_type' => ['required', 'in:rental_living,rental_business,buying_living,buying_business'],
+            'report_type' => ['required', 'in:rental_living,buying_living'],
         ]);
 
         $report = Report::create([
@@ -219,6 +234,70 @@ class PublicReportController extends Controller
         return response()->json([
             'status' => $report->status,
             'report_url' => $report->report_url,
+        ]);
+    }
+
+    private function renderLegalDocument(string $documentKey)
+    {
+        $locale = app()->getLocale();
+        $documents = [
+            'privacy-policy' => [
+                'title' => [
+                    'en' => 'Privacy Policy',
+                    'ro' => 'Politica de confidențialitate',
+                ],
+                'description' => [
+                    'en' => 'Learn how Get Your Consultant collects, uses, stores, and protects personal data across the website and report generation flow.',
+                    'ro' => 'Află cum Get Your Consultant colectează, utilizează, stochează și protejează datele personale pe website și în fluxul de generare a rapoartelor.',
+                ],
+                'file' => [
+                    'en' => 'GYC_Privacy-Policy.md',
+                    'ro' => 'GYC_Politica-de-Confidentialitate.md',
+                ],
+            ],
+            'terms-and-conditions' => [
+                'title' => [
+                    'en' => 'Terms and Conditions',
+                    'ro' => 'Termeni și condiții',
+                ],
+                'description' => [
+                    'en' => 'Read the contractual terms for using Get Your Consultant, ordering reports, payments, delivery, refunds, and digital-content rights.',
+                    'ro' => 'Consultă termenii contractuali pentru utilizarea Get Your Consultant, comandarea rapoartelor, plăți, livrare, rambursări și drepturile asupra conținutului digital.',
+                ],
+                'file' => [
+                    'en' => 'GYC_Terms-and-Conditions.md',
+                    'ro' => 'GYC_Termeni-si-Conditii.md',
+                ],
+            ],
+            'cookie-policy' => [
+                'title' => [
+                    'en' => 'Cookie Policy',
+                    'ro' => 'Politica de cookie-uri',
+                ],
+                'description' => [
+                    'en' => 'See what cookies Get Your Consultant uses, why they are used, how consent works, and how you can manage your preferences.',
+                    'ro' => 'Vezi ce cookie-uri folosește Get Your Consultant, de ce sunt folosite, cum funcționează consimțământul și cum îți poți gestiona preferințele.',
+                ],
+                'file' => [
+                    'en' => 'GYC_Cookie-Policy.md',
+                    'ro' => 'GYC_Politica-de-Cookies.md',
+                ],
+            ],
+        ];
+
+        abort_unless(isset($documents[$documentKey]), 404);
+
+        $document = $documents[$documentKey];
+        $filePath = storage_path('app/public/'.$document['file'][$locale]);
+
+        abort_unless(file_exists($filePath), 404);
+
+        $markdown = file_get_contents($filePath);
+
+        return Inertia::render('Public/LegalDocument', [
+            'title' => $document['title'][$locale],
+            'description' => $document['description'][$locale],
+            'markdown' => $markdown,
         ]);
     }
 }

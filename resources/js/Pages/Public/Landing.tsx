@@ -342,20 +342,23 @@ export default function Landing() {
                         </p>
                     </motion.div>
 
-                    <div className="mt-8 grid gap-4 md:mt-10 md:grid-cols-2 xl:grid-cols-4">
+                    <div className="mt-8 grid grid-cols-2 gap-3 md:mt-10 md:gap-4 xl:grid-cols-4">
                         {whyCards.map(({ icon: Icon, titleKey, bodyKey }) => (
                             <motion.div
                                 key={titleKey}
-                                className="bg-transparent px-5 py-6 text-center md:px-6 md:py-8"
+                                className="bg-transparent px-3 py-4 text-center md:px-6 md:py-8"
                                 variants={itemVariants}
                             >
                                 <div className="flex items-center justify-center text-white">
-                                    <Icon size={64} weight="bold" />
+                                    <Icon
+                                        weight="bold"
+                                        className="h-9 w-9 md:h-14 md:w-14"
+                                    />
                                 </div>
-                                <h3 className="mt-5 text-lg font-semibold leading-tight text-white md:mt-6 md:text-xl">
+                                <h3 className="mt-3 text-[0.95rem] font-semibold leading-[1.18] text-white md:mt-6 md:text-xl">
                                     {t(titleKey)}
                                 </h3>
-                                <p className="mt-2 text-[14px] leading-[1.6] text-white/78 md:mt-3 md:text-[1rem] md:leading-[1.68]">
+                                <p className="mt-1.5 text-[12px] leading-[1.45] text-white/78 md:mt-3 md:text-[1rem] md:leading-[1.68]">
                                     {t(bodyKey)}
                                 </p>
                             </motion.div>
@@ -654,7 +657,7 @@ export default function Landing() {
                                             onClick={() =>
                                                 selectTypeFromPage(type)
                                             }
-                                            className="mt-7 inline-flex items-center gap-2 bg-brand-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-primary/92"
+                                            className="mt-7 inline-flex cursor-pointer items-center gap-2 bg-brand-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-primary/92"
                                         >
                                             {t("landing_pricing_cta")}
                                             <ArrowRight size={16} />
