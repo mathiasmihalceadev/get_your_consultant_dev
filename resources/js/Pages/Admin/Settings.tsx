@@ -79,9 +79,7 @@ export default function Settings({ settings }: { settings: SettingsType }) {
         setIsPromptEditorOpen(false);
     };
 
-    const openPromptEditor = (
-        e: React.MouseEvent<HTMLButtonElement>,
-    ) => {
+    const openPromptEditor = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.currentTarget.blur();
         setIsPromptEditorOpen(true);
     };
@@ -149,8 +147,8 @@ export default function Settings({ settings }: { settings: SettingsType }) {
                                             {activePrompt?.label}
                                         </p>
                                         <p className="mt-1 text-xs text-brand-primary/60">
-                                            Apasă pentru a edita promptul într-un
-                                            modal dedicat.
+                                            Apasă pentru a edita promptul
+                                            într-un modal dedicat.
                                         </p>
                                     </div>
 
@@ -311,11 +309,12 @@ export default function Settings({ settings }: { settings: SettingsType }) {
 
                         <div className="flex items-center justify-between gap-4 text-xs text-brand-primary/60">
                             <span>
-                                Modificările rămân locale până apeși
-                                "Salvează Setările".
+                                Modificările rămân locale până apeși "Salvează
+                                Setările".
                             </span>
                             <span>
-                                {activePromptValue.length.toLocaleString()} caractere
+                                {activePromptValue.length.toLocaleString()}{" "}
+                                caractere
                             </span>
                         </div>
 
