@@ -55,10 +55,16 @@ class PublicReportController extends Controller
     public function validateUrl(Request $request, OpenAIService $openAI)
     {
         $locale = app()->getLocale();
-        $validated = $request->validate([
-            'url' => ['required', 'url'],
-            'report_type' => ['required', 'in:rental_living,buying_living'],
-        ]);
+        $validated = $request->validate(
+            [
+                'url' => ['required', 'url'],
+                'report_type' => ['required', 'in:rental_living,buying_living'],
+            ],
+            [
+                'url.required' => __('wizard_url_required'),
+                'url.url' => __('wizard_url_invalid'),
+            ],
+        );
 
         $report = Report::create([
             'url' => $validated['url'],
@@ -87,7 +93,7 @@ class PublicReportController extends Controller
             ]);
 
             return back()->withErrors([
-                'url' => 'This URL could not be accessed or does not appear to be a property listing.',
+                'url' => __('wizard_url_access_failed'),
             ]);
         }
 
@@ -103,7 +109,7 @@ class PublicReportController extends Controller
             ]);
 
             return back()->withErrors([
-                'url' => 'This URL could not be accessed or does not appear to be a property listing.',
+                'url' => __('wizard_url_access_failed'),
             ]);
         }
 
@@ -141,10 +147,16 @@ class PublicReportController extends Controller
 
     public function submitEmail(Request $request)
     {
-        $validated = $request->validate([
-            'email' => ['required', 'email'],
-            'report_id' => ['required', 'exists:reports,id'],
-        ]);
+        $validated = $request->validate(
+            [
+                'email' => ['required', 'email'],
+                'report_id' => ['required', 'exists:reports,id'],
+            ],
+            [
+                'email.required' => __('wizard_email_required'),
+                'email.email' => __('wizard_email_invalid'),
+            ],
+        );
 
         $report = Report::findOrFail($validated['report_id']);
 

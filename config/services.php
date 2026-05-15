@@ -39,4 +39,16 @@ return [
         'key' => env('OPENAI_API_KEY'),
     ],
 
+    'browsershot' => [
+        'chrome_path' => env('BROWSERSHOT_CHROME_PATH') ?: env('PUPPETEER_EXECUTABLE_PATH'),
+        'node_binary' => env('BROWSERSHOT_NODE_BINARY'),
+        'npm_binary' => env('BROWSERSHOT_NPM_BINARY'),
+        'no_sandbox' => env('BROWSERSHOT_NO_SANDBOX', true),
+        'disable_dev_shm_usage' => env('BROWSERSHOT_DISABLE_DEV_SHM_USAGE', true),
+        'disable_gpu' => env('BROWSERSHOT_DISABLE_GPU', true),
+        'disable_setuid_sandbox' => env('BROWSERSHOT_DISABLE_SETUID_SANDBOX', true),
+        'write_options_to_file' => env('BROWSERSHOT_WRITE_OPTIONS_TO_FILE', false),
+        'timeout' => env('BROWSERSHOT_TIMEOUT', 180),
+    ],
+
 ];

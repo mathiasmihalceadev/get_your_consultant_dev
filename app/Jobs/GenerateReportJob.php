@@ -7,6 +7,7 @@ use App\Exceptions\OpenAIRequestException;
 use App\Mail\ReportMail;
 use App\Models\Report;
 use App\Models\Settings;
+use App\Support\BrowsershotConfigurator;
 use App\Support\ReportPdfFooter;
 use App\Services\OpenAIService;
 use Illuminate\Bus\Queueable;
@@ -81,7 +82,8 @@ class GenerateReportJob implements ShouldQueue
             ])
                 ->format('a4')
                 ->withBrowsershot(function ($browsershot) use ($footerHtml) {
-                    $browsershot->waitUntilNetworkIdle()
+                    BrowsershotConfigurator::apply($browsershot)
+                        ->waitUntilNetworkIdle()
                         ->showBrowserHeaderAndFooter()
                         ->headerHtml('<div></div>')
                         ->footerHtml($footerHtml);

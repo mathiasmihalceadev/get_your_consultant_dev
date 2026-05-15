@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Settings;
+use App\Support\BrowsershotConfigurator;
 use App\Support\ReportPdfFooter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Spatie\LaravelPdf\Facades\Pdf;
 
@@ -89,20 +91,32 @@ class AdminSettingsController extends Controller
 
         $footerHtml = ReportPdfFooter::render(now());
 
-        $pdf = Pdf::view($template, [
-            'data' => $data,
-            'locale' => $config['locale'],
-            'trans' => $this->loadTranslations($config['locale']),
-        ])
-            ->format('a4')
-            ->withBrowsershot(function ($browsershot) use ($footerHtml) {
-                $browsershot->waitUntilNetworkIdle()
-                    ->showBrowserHeaderAndFooter()
-                    ->headerHtml('<div></div>')
-                    ->footerHtml($footerHtml);
-            });
+        try {
+            $pdf = Pdf::view($template, [
+                'data' => $data,
+                'locale' => $config['locale'],
+                'trans' => $this->loadTranslations($config['locale']),
+            ])
+                ->format('a4')
+                ->withBrowsershot(function ($browsershot) use ($footerHtml) {
+                    BrowsershotConfigurator::apply($browsershot)
+                        ->waitUntilNetworkIdle()
+                        ->showBrowserHeaderAndFooter()
+                        ->headerHtml('<div></div>')
+                        ->footerHtml($footerHtml);
+                });
 
-        $pdf->save($path);
+            $pdf->save($path);
+        } catch (\Throwable $e) {
+            Log::error('Admin test PDF generation failed', [
+                'type' => $type,
+                'template' => $template,
+                'json' => $config['json'],
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Test PDF generation failed. Check the server log and Browsershot/Chromium configuration.');
+        }
 
         return response()->download($path, $filename, [
             'Content-Type' => 'application/pdf',

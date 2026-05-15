@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Log;
 class OpenAIService
 {
     private string $apiKey;
-    private string $model = 'gpt-5.2';
+    private string $urlValidationModel = 'gpt-5.4-mini';
+    private string $reportGenerationModel = 'gpt-5.5';
 
     public function __construct()
     {
@@ -26,7 +27,7 @@ class OpenAIService
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type' => 'application/json',
             ])->timeout(30)->post('https://api.openai.com/v1/responses', [
-                'model' => $this->model,
+                'model' => $this->urlValidationModel,
                 'instructions' => $instructions,
                 'input' => $url,
                 'tools' => [
@@ -83,10 +84,13 @@ class OpenAIService
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type' => 'application/json',
-            ])->timeout(120)->post('https://api.openai.com/v1/responses', [
-                'model' => $this->model,
+            ])->timeout(600)->post('https://api.openai.com/v1/responses', [
+                'model' => $this->reportGenerationModel,
                 'instructions' => $prompt,
                 'input' => $url,
+                'reasoning' => [
+                    'effort' => 'high',
+                ],
                 'tools' => [
                     ['type' => 'web_search_preview'],
                 ],
