@@ -29,13 +29,10 @@ export default function PublicLayout({ children }: PropsWithChildren) {
             key: "landing_nav_example",
             href: localePath("/#report-example"),
         },
-        {
-            key: "landing_nav_why",
-            href: localePath("/#why-check"),
-        },
         { key: "how_it_works", href: localePath("/#how-it-works") },
         { key: "landing_nav_reviews", href: localePath("/#reviews") },
         { key: "pricing", href: localePath("/#pricing") },
+        { key: "contact", href: localePath("/contact") },
     ];
 
     const switchLocale = () => {
@@ -118,12 +115,12 @@ export default function PublicLayout({ children }: PropsWithChildren) {
             <footer className="bg-brand-primary">
                 <div className="h-0.75 bg-brand-secondary" />
                 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
-                    <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-8">
+                    <div className="mb-8 flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
                         <div>
                             <img
                                 src="/images/logo-footer.png"
                                 alt={t("site_name")}
-                                className="mb-4 h-14 w-auto object-contain md:h-16"
+                                className="mb-4 h-18 w-auto object-contain md:h-22"
                             />
                             <p className="max-w-md text-[14px] text-white/80 md:text-base">
                                 {t("landing_footer_desc")}
@@ -163,6 +160,11 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                     <LinkedinLogo size={18} weight="duotone" />
                                 </a>
                             </div>
+                            <div className="mt-4">
+                                <p className="whitespace-pre-line text-[14px] leading-[1.7] text-white/70 md:text-base">
+                                    {t("landing_footer_address")}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -191,6 +193,12 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                 className="text-white/70 transition-colors hover:text-white"
                             >
                                 {t("cookie_policy")}
+                            </a>
+                            <a
+                                href={localePath("/contact")}
+                                className="text-white/70 transition-colors hover:text-white"
+                            >
+                                {t("contact")}
                             </a>
                         </div>
 

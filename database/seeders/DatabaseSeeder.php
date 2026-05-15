@@ -19,26 +19,28 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        Settings::query()->whereIn('key', [
-            'rental_living_prompt',
-            'rental_living_prompt_ro',
-            'rental_business_prompt',
-            'rental_business_prompt_ro',
-            'buying_living_prompt',
-            'buying_living_prompt_ro',
-            'buying_business_prompt',
-            'buying_business_prompt_ro',
-            'rental_living_ro',
-            'rental_living_eng',
-            'buying_living_ro',
-            'buying_living_eng',
-        ])->delete();
+        User::firstOrCreate(
+            ['email' => 'admin@getyourconsultant.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('parola1234'),
+            ]
+        );
 
-        Settings::set('rental_living_ro', $this->rentalLivingPromptRo());
-        Settings::set('rental_living_eng', $this->rentalLivingPromptEng());
-        Settings::set('buying_living_ro', $this->buyingLivingPromptRo());
-        Settings::set('buying_living_eng', $this->buyingLivingPromptEng());
-        Settings::set('auto_send', false);
+        $this->seedSettingIfMissing('rental_living_ro', $this->rentalLivingPromptRo());
+        $this->seedSettingIfMissing('rental_living_eng', $this->rentalLivingPromptEng());
+        $this->seedSettingIfMissing('buying_living_ro', $this->buyingLivingPromptRo());
+        $this->seedSettingIfMissing('buying_living_eng', $this->buyingLivingPromptEng());
+        $this->seedSettingIfMissing('auto_send', false);
+    }
+
+    private function seedSettingIfMissing(string $key, mixed $value): void
+    {
+        if (Settings::query()->where('key', $key)->exists()) {
+            return;
+        }
+
+        Settings::set($key, $value);
     }
 
     private function rentalLivingPromptEng(): string

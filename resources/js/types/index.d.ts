@@ -41,6 +41,17 @@ export interface Report {
     updated_at: string;
 }
 
+export interface ContactInquiry {
+    id: number;
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+    locale: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Settings {
     rental_living_ro: string;
     rental_living_eng: string;

@@ -1,5 +1,11 @@
 import { Link, usePage, router } from "@inertiajs/react";
-import { ChartBar, Gear, SignOut, Icon } from "@phosphor-icons/react";
+import {
+    ChartBar,
+    EnvelopeSimple,
+    Gear,
+    SignOut,
+    Icon,
+} from "@phosphor-icons/react";
 import { PropsWithChildren } from "react";
 
 interface NavItem {
@@ -15,6 +21,12 @@ const navItems: NavItem[] = [
         href: "/admin/dashboard",
         icon: ChartBar,
         routeName: "admin.dashboard",
+    },
+    {
+        name: "Mesaje",
+        href: "/admin/inquiries",
+        icon: EnvelopeSimple,
+        routeName: "admin.inquiries",
     },
     {
         name: "Setări",
