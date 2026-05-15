@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Settings;
-use App\Support\BrowsershotConfigurator;
-use App\Support\ReportPdfFooter;
+use App\Services\RemotePdfRenderer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-use Spatie\LaravelPdf\Facades\Pdf;
 
 class AdminSettingsController extends Controller
 {
@@ -36,7 +34,7 @@ class AdminSettingsController extends Controller
         return back()->with('success', 'Settings saved successfully.');
     }
 
-    public function testPdf(Request $request)
+    public function testPdf(Request $request, RemotePdfRenderer $pdfRenderer)
     {
         $type = $request->query('type', 'rental_living_ro');
 
@@ -89,24 +87,12 @@ class AdminSettingsController extends Controller
             mkdir($dir, 0755, true);
         }
 
-        $footerHtml = ReportPdfFooter::render(now());
-
         try {
-            $pdf = Pdf::view($template, [
+            $pdfRenderer->saveView($template, [
                 'data' => $data,
                 'locale' => $config['locale'],
                 'trans' => $this->loadTranslations($config['locale']),
-            ])
-                ->format('a4')
-                ->withBrowsershot(function ($browsershot) use ($footerHtml) {
-                    BrowsershotConfigurator::apply($browsershot)
-                        ->waitUntilNetworkIdle()
-                        ->showBrowserHeaderAndFooter()
-                        ->headerHtml('<div></div>')
-                        ->footerHtml($footerHtml);
-                });
-
-            $pdf->save($path);
+            ], $path, $filename, now());
         } catch (\Throwable $e) {
             Log::error('Admin test PDF generation failed', [
                 'type' => $type,

@@ -7,9 +7,8 @@ use App\Exceptions\OpenAIRequestException;
 use App\Mail\ReportMail;
 use App\Models\Report;
 use App\Models\Settings;
-use App\Support\BrowsershotConfigurator;
-use App\Support\ReportPdfFooter;
 use App\Services\OpenAIService;
+use App\Services\RemotePdfRenderer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -17,8 +16,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
-use Spatie\LaravelPdf\Facades\Pdf;
 
 class GenerateReportJob implements ShouldQueue
 {
@@ -30,7 +27,7 @@ class GenerateReportJob implements ShouldQueue
         public int $reportId,
     ) {}
 
-    public function handle(OpenAIService $openAI): void
+    public function handle(OpenAIService $openAI, RemotePdfRenderer $pdfRenderer): void
     {
         $report = Report::find($this->reportId);
 
@@ -70,25 +67,14 @@ class GenerateReportJob implements ShouldQueue
             }
             $path = $dir . "/{$report->page_token}.pdf";
 
-            $footerHtml = ReportPdfFooter::render(now());
-
             $templateView = $this->resolveTemplateView($report);
 
-            Pdf::view($templateView, [
+            $pdfRenderer->saveView($templateView, [
                 'data' => $reportData,
                 'report' => $report,
                 'locale' => $locale,
                 'trans' => $this->loadTranslations($locale),
-            ])
-                ->format('a4')
-                ->withBrowsershot(function ($browsershot) use ($footerHtml) {
-                    BrowsershotConfigurator::apply($browsershot)
-                        ->waitUntilNetworkIdle()
-                        ->showBrowserHeaderAndFooter()
-                        ->headerHtml('<div></div>')
-                        ->footerHtml($footerHtml);
-                })
-                ->save($path);
+            ], $path, "{$report->page_token}.pdf", now());
 
             $report->report_url = "/storage/reports/{$report->page_token}.pdf";
         } catch (\Exception $e) {
