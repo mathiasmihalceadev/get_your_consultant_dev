@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminSettingsController;
-use App\Http\Controllers\InternalPdfRenderController;
 use App\Http\Controllers\PublicReportController;
 use App\Support\LocalizedUrl;
 use Illuminate\Http\Request;
@@ -50,14 +49,6 @@ Route::get('/sitemap.xml', function () {
 
 // API endpoint for polling (no locale needed)
 Route::get('/api/report-status/{page_token}', [PublicReportController::class, 'statusJson']);
-
-Route::post('/internal/render-pdf', InternalPdfRenderController::class)
-    ->middleware('throttle:20,1')
-    ->withoutMiddleware([
-        \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
-        \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
-    ])
-    ->name('internal.render-pdf');
 
 // Admin routes
 Route::middleware('auth')->prefix('admin')->group(function () {
