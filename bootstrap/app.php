@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__.'/../app/Support/browsershot_polyfill.php';
+
 use App\Exceptions\OpenAIJsonException;
 use App\Exceptions\OpenAIRequestException;
 use Illuminate\Foundation\Application;
