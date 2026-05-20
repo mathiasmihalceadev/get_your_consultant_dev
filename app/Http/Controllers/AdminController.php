@@ -65,7 +65,33 @@ class AdminController extends Controller
             return back()->with('error', 'Report cannot be sent — status is not "to_be_sent".');
         }
 
-        Mail::to($report->email)->send(new ReportMail($report));
+        if (!$report->email) {
+            return back()->with('error', 'Report cannot be sent because the email address is missing.');
+        }
+
+        try {
+            Mail::to($report->email)->sendNow(new ReportMail($report));
+        } catch (\Throwable $e) {
+            Log::channel('report')->error('Admin report email failed to send', [
+                'report_id' => $report->id,
+                'email' => $report->email,
+                'mailer' => config('mail.default'),
+                'mail_host' => config('mail.mailers.smtp.host'),
+                'mail_port' => config('mail.mailers.smtp.port'),
+                'mail_scheme' => config('mail.mailers.smtp.scheme'),
+                'from_address' => config('mail.from.address'),
+                'queue_connection' => config('queue.default'),
+                'pdf_path' => $report->pdfStoragePath(),
+                'pdf_exists' => file_exists($report->pdfStoragePath()),
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with(
+                'error',
+                'Report email could not be sent. Check the report log for the exact mail error.',
+            );
+        }
+
         $report->update(['status' => 'sent']);
 
         Log::channel('report')->info('Report manually sent by admin', [
