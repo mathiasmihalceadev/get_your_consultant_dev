@@ -39,6 +39,17 @@ return [
         'key' => env('OPENAI_API_KEY'),
     ],
 
+    'stripe' => [
+        'public_key' => env('STRIPE_PUBLIC_KEY'),
+        'secret_key' => env('STRIPE_SECRET_KEY'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'currency' => strtolower((string) env('STRIPE_CURRENCY', 'eur')),
+        'prices' => [
+            'rental_living' => env('STRIPE_PRICE_RENTAL_LIVING'),
+            'buying_living' => env('STRIPE_PRICE_BUYING_LIVING'),
+        ],
+    ],
+
     'browsershot' => [
         'chrome_path' => env('BROWSERSHOT_CHROME_PATH') ?: env('PUPPETEER_EXECUTABLE_PATH'),
         'node_binary' => env('BROWSERSHOT_NODE_BINARY'),

@@ -11,7 +11,7 @@ class RemotePdfRenderer
     public function saveView(string $view, array $viewData, string $path, string $filename, ?DateTimeInterface $generatedAt = null): void
     {
         $html = view($view, $viewData)->render();
-        $footerHtml = ReportPdfFooter::render($generatedAt);
+        $footerHtml = ReportPdfFooter::render($generatedAt, $this->resolveLocale($viewData));
         $pdfContent = $this->renderHtml($html, $footerHtml, $filename);
 
         $directory = dirname($path);
@@ -76,5 +76,16 @@ class RemotePdfRenderer
         }
 
         return $sharedSecret;
+    }
+
+    private function resolveLocale(array $viewData): string
+    {
+        $locale = $viewData['locale']
+            ?? ($viewData['report']->locale ?? null)
+            ?? ($viewData['data']['report_meta']['locale'] ?? null)
+            ?? ($viewData['data']['locale'] ?? null)
+            ?? 'ro';
+
+        return strtolower((string) $locale) === 'en' ? 'en' : 'ro';
     }
 }

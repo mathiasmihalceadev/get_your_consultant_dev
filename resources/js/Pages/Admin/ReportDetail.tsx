@@ -9,6 +9,10 @@ import { Report, ReportType, ReportStatus } from "@/types";
 
 const statusBadgeColors: Record<ReportStatus, string> = {
     not_accessible: "bg-yellow-100 text-yellow-800",
+    awaiting_payment: "bg-amber-100 text-amber-800",
+    payment_processing: "bg-sky-100 text-sky-800",
+    payment_cancelled: "bg-amber-100 text-amber-800",
+    payment_failed: "bg-red-100 text-red-800",
     pending: "bg-blue-100 text-blue-800",
     to_be_sent: "bg-orange-100 text-orange-800",
     sent: "bg-green-100 text-green-800",
@@ -24,6 +28,10 @@ const typeBadgeColors: Record<ReportType, string> = {
 
 const statusLabels: Record<ReportStatus, string> = {
     not_accessible: "Inaccesibil",
+    awaiting_payment: "Așteaptă plata",
+    payment_processing: "Plată în confirmare",
+    payment_cancelled: "Plată anulată",
+    payment_failed: "Plată eșuată",
     pending: "În așteptare",
     to_be_sent: "De trimis",
     sent: "Trimis",

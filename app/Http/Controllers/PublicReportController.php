@@ -3,13 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
-use App\Models\Settings;
-use App\Jobs\GenerateReportJob;
-use App\Mail\ReportMail;
 use App\Services\OpenAIService;
+use App\Services\StripeCheckoutService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class PublicReportController extends Controller
@@ -80,11 +77,13 @@ class PublicReportController extends Controller
         ]);
 
         try {
-            $result = $openAI->validateUrl($validated['url']);
+            $result = $openAI->validateUrl($validated['url'], $validated['report_type']);
         } catch (\Exception $e) {
+            $message = __('wizard_url_validation_failed');
+
             $report->update([
                 'status' => 'not_accessible',
-                'error_message' => $e->getMessage(),
+                'error_message' => $message,
             ]);
 
             Log::channel('report')->error('URL validation exception', [
@@ -93,23 +92,26 @@ class PublicReportController extends Controller
             ]);
 
             return back()->withErrors([
-                'url' => __('wizard_url_access_failed'),
+                'url' => $message,
             ]);
         }
 
         if (!$result['success']) {
+            $message = $this->resolveUrlValidationMessage($result['reason_code'] ?? null);
+
             $report->update([
                 'status' => 'not_accessible',
-                'error_message' => $result['message'],
+                'error_message' => $message,
             ]);
 
             Log::channel('report')->info('URL validation failed', [
                 'report_id' => $report->id,
+                'reason_code' => $result['reason_code'] ?? 'unknown',
                 'reason' => $result['message'],
             ]);
 
             return back()->withErrors([
-                'url' => __('wizard_url_access_failed'),
+                'url' => $message,
             ]);
         }
 
@@ -145,7 +147,7 @@ class PublicReportController extends Controller
         ]);
     }
 
-    public function submitEmail(Request $request)
+    public function submitEmail(Request $request, StripeCheckoutService $stripe)
     {
         $validated = $request->validate(
             [
@@ -161,6 +163,10 @@ class PublicReportController extends Controller
         $report = Report::findOrFail($validated['report_id']);
 
         if ($report->status !== 'pending') {
+            if ($report->page_token) {
+                return redirect()->route('report.status', ['pageToken' => $report->page_token]);
+            }
+
             return redirect()->route('home')->withErrors(['error' => 'This report is no longer pending.']);
         }
 
@@ -168,7 +174,7 @@ class PublicReportController extends Controller
 
         // If a report with this page_token already exists, redirect to it
         $existingByToken = Report::where('page_token', $pageToken)->first();
-        if ($existingByToken) {
+        if ($existingByToken && $existingByToken->id !== $report->id) {
             $report->delete();
             session()->forget('report_id');
 
@@ -182,41 +188,103 @@ class PublicReportController extends Controller
         $report->update([
             'email' => $validated['email'],
             'page_token' => $pageToken,
+            'error_message' => null,
         ]);
 
-        // Duplicate URL + type check (same URL+type but different email)
-        $existing = Report::where('url', $report->url)
-            ->where('report_type', $report->report_type)
-            ->where('id', '!=', $report->id)
-            ->whereNotNull('report_url')
-            ->whereIn('status', ['sent', 'to_be_sent'])
-            ->first();
-
-        if ($existing) {
-            Log::channel('report')->info('Duplicate detected — reusing existing PDF', [
+        try {
+            $checkoutUrl = $stripe->createCheckoutSession($report);
+        } catch (\Throwable $e) {
+            Log::channel('stripe')->error('Unable to start Stripe checkout for report', [
                 'report_id' => $report->id,
-                'existing_report_id' => $existing->id,
+                'error' => $e->getMessage(),
             ]);
 
-            $report->update(['report_url' => $existing->report_url]);
-
-            if (Settings::get('auto_send')) {
-                Mail::to($report->email)->send(new ReportMail($report));
-                $report->update(['status' => 'sent', 'processed_at' => now()]);
-            } else {
-                $report->update(['status' => 'to_be_sent', 'processed_at' => now()]);
-            }
-        } else {
-            $report->update(['status' => 'pending']);
-            GenerateReportJob::dispatch($report->id);
-            Log::channel('report')->info('GenerateReportJob dispatched', [
-                'report_id' => $report->id,
+            return back()->withErrors([
+                'email' => __('payment_unavailable'),
             ]);
         }
 
         session()->forget('report_id');
 
-        return redirect()->route('report.status', ['pageToken' => $pageToken]);
+        return Inertia::location($checkoutUrl);
+    }
+
+    public function retryCheckout(string $pageToken, StripeCheckoutService $stripe)
+    {
+        $report = Report::where('page_token', $pageToken)->firstOrFail();
+
+        if (!in_array($report->status, ['awaiting_payment', 'payment_cancelled', 'payment_failed'], true)) {
+            return redirect()->route('report.status', ['pageToken' => $pageToken])
+                ->with('error', __('payment_retry_unavailable'));
+        }
+
+        if (!$report->email) {
+            return redirect()->route('report.status', ['pageToken' => $pageToken])
+                ->with('error', __('payment_unavailable'));
+        }
+
+        try {
+            $checkoutUrl = $stripe->createCheckoutSession($report);
+        } catch (\Throwable $e) {
+            Log::channel('stripe')->error('Unable to retry Stripe checkout for report', [
+                'report_id' => $report->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('report.status', ['pageToken' => $pageToken])
+                ->with('error', __('payment_unavailable'));
+        }
+
+        return Inertia::location($checkoutUrl);
+    }
+
+    public function paymentSuccess(Request $request, string $pageToken, StripeCheckoutService $stripe)
+    {
+        $report = Report::where('page_token', $pageToken)->firstOrFail();
+        $purchaseId = $request->integer('purchase');
+
+        try {
+            $stripe->markCheckoutSuccessReturn(
+                $report,
+                $purchaseId > 0 ? $purchaseId : null,
+                $request->query('session_id'),
+            );
+        } catch (\Throwable $e) {
+            Log::channel('stripe')->error('Unable to sync Stripe success redirect', [
+                'report_id' => $report->id,
+                'purchase_id' => $purchaseId > 0 ? $purchaseId : null,
+                'session_id' => $request->query('session_id'),
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('report.status', ['pageToken' => $pageToken])
+                ->with('error', __('payment_status_sync_error'));
+        }
+
+        return redirect()->route('report.status', ['pageToken' => $pageToken])
+            ->with('success', __('payment_return_success'));
+    }
+
+    public function paymentCancel(Request $request, string $pageToken, StripeCheckoutService $stripe)
+    {
+        $report = Report::where('page_token', $pageToken)->firstOrFail();
+        $purchaseId = $request->integer('purchase');
+
+        try {
+            $stripe->markCheckoutCanceled($report, $purchaseId > 0 ? $purchaseId : null);
+        } catch (\Throwable $e) {
+            Log::channel('stripe')->error('Unable to sync Stripe cancel redirect', [
+                'report_id' => $report->id,
+                'purchase_id' => $purchaseId > 0 ? $purchaseId : null,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('report.status', ['pageToken' => $pageToken])
+                ->with('error', __('payment_status_sync_error'));
+        }
+
+        return redirect()->route('report.status', ['pageToken' => $pageToken])
+            ->with('error', __('payment_return_cancelled'));
     }
 
     public function status(string $pageToken)
@@ -224,13 +292,7 @@ class PublicReportController extends Controller
         $report = Report::where('page_token', $pageToken)->firstOrFail();
 
         return Inertia::render('Public/ReportStatus', [
-            'report' => [
-                'url' => $report->url,
-                'report_type' => $report->report_type,
-                'status' => $report->status,
-                'report_url' => $report->report_url,
-                'error_message' => $report->error_message,
-            ],
+            'report' => $this->reportStatusPayload($report),
             'pageToken' => $pageToken,
         ]);
     }
@@ -243,10 +305,18 @@ class PublicReportController extends Controller
             return response()->json(['error' => 'Report not found'], 404);
         }
 
-        return response()->json([
+        return response()->json($this->reportStatusPayload($report));
+    }
+
+    private function reportStatusPayload(Report $report): array
+    {
+        return [
+            'url' => $report->url,
+            'report_type' => $report->report_type,
             'status' => $report->status,
             'report_url' => $report->report_url,
-        ]);
+            'error_message' => $report->error_message,
+        ];
     }
 
     private function renderLegalDocument(string $documentKey)
@@ -311,5 +381,16 @@ class PublicReportController extends Controller
             'description' => $document['description'][$locale],
             'markdown' => $markdown,
         ]);
+    }
+
+    private function resolveUrlValidationMessage(?string $reasonCode): string
+    {
+        return match ($reasonCode) {
+            'not_property' => __('wizard_url_not_property'),
+            'not_buying_property' => __('wizard_url_not_buying_property'),
+            'not_renting_property' => __('wizard_url_not_renting_property'),
+            'source_blocked', 'accessible_property', null => __('wizard_url_access_failed'),
+            default => __('wizard_url_access_failed'),
+        };
     }
 }

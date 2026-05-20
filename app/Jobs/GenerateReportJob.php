@@ -9,6 +9,7 @@ use App\Models\Report;
 use App\Models\Settings;
 use App\Services\OpenAIService;
 use App\Services\RemotePdfRenderer;
+use App\Support\ReportDataNormalizer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -46,6 +47,7 @@ class GenerateReportJob implements ShouldQueue
 
         try {
             $reportData = $openAI->generateReportData($report->url, $prompt);
+            $reportData = ReportDataNormalizer::normalize($reportData, $locale);
         } catch (OpenAIJsonException|OpenAIRequestException $e) {
             Log::channel('report')->error('OpenAI request failed', [
                 'report_id' => $report->id,
@@ -65,7 +67,8 @@ class GenerateReportJob implements ShouldQueue
             if (!is_dir($dir)) {
                 mkdir($dir, 0755, true);
             }
-            $path = $dir . "/{$report->page_token}.pdf";
+            $filename = $report->pdfStorageFilename();
+            $path = $dir . '/' . $filename;
 
             $templateView = $this->resolveTemplateView($report);
 
@@ -74,9 +77,9 @@ class GenerateReportJob implements ShouldQueue
                 'report' => $report,
                 'locale' => $locale,
                 'trans' => $this->loadTranslations($locale),
-            ], $path, "{$report->page_token}.pdf", now());
+            ], $path, $filename, now());
 
-            $report->report_url = "/storage/reports/{$report->page_token}.pdf";
+            $report->report_url = $report->pdfPublicUrl();
         } catch (\Exception $e) {
             Log::channel('report')->error('PDF generation failed', [
                 'report_id' => $report->id,
@@ -129,7 +132,7 @@ class GenerateReportJob implements ShouldQueue
             $value = Settings::get($key);
 
             if (is_string($value) && trim($value) !== '') {
-                return $value;
+                return $this->appendRenderingConstraints($value, $locale);
             }
         }
 
@@ -158,6 +161,20 @@ class GenerateReportJob implements ShouldQueue
             'buying_living', 'buying_business' => 'reports.template-buying',
             default => 'reports.template-rental',
         };
+    }
+
+    private function appendRenderingConstraints(string $prompt, string $locale): string
+    {
+        $oneWordExamples = $locale === 'en'
+            ? 'Price, Notary, Registry, Agency, Bank, Renovation, Reserve'
+            : 'Preț, Notar, Carte, Comision, Bancă, Renovare, Rezervă';
+
+        return rtrim($prompt) . "\n\nAdditional hard output constraints:\n"
+            . "- page_one.badges must fit visually within 2 rows on the first page. Keep only the most decision-relevant badges and never exceed 8 badges.\n"
+            . "- page_one.verdict.ideal_for must contain at most 3 short items.\n"
+            . "- page_one.verdict.not_ideal_for must contain at most 3 short items.\n"
+            . "- page_one.verdict.one_liner must stay concise and scannable.\n"
+            . "- If the chart id is total_acquisition_cost, every data.segments[].label must be a single word. Use labels like: {$oneWordExamples}.\n";
     }
 }
 

@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminInquiryController;
 use App\Http\Controllers\AdminSettingsController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PublicReportController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Support\LocalizedUrl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,8 @@ Route::get('/get-report', [PublicReportController::class, 'index'])->name('get-r
 Route::get('/submit-url', [PublicReportController::class, 'showUrlForm'])->name('submit-url');
 Route::get('/submit-email', [PublicReportController::class, 'showEmailForm'])->name('submit-email');
 Route::get('/report/{pageToken}', [PublicReportController::class, 'status'])->name('report.status');
+Route::get('/checkout/success/{pageToken}', [PublicReportController::class, 'paymentSuccess'])->name('checkout.success');
+Route::get('/checkout/cancel/{pageToken}', [PublicReportController::class, 'paymentCancel'])->name('checkout.cancel');
 Route::get('/privacy-policy', [PublicReportController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/terms-and-conditions', [PublicReportController::class, 'termsAndConditions'])->name('terms-and-conditions');
 Route::get('/cookie-policy', [PublicReportController::class, 'cookiePolicy'])->name('cookie-policy');
@@ -25,7 +28,11 @@ Route::get('/politica-de-cookie-uri', [PublicReportController::class, 'cookiePol
 Route::middleware('throttle:10,1')->group(function () {
     Route::post('/validate-url', [PublicReportController::class, 'validateUrl'])->name('validate-url');
     Route::post('/submit-email', [PublicReportController::class, 'submitEmail'])->name('submit-email.store');
+    Route::post('/report/{pageToken}/checkout', [PublicReportController::class, 'retryCheckout'])->name('report.checkout');
 });
+
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
+    ->name('stripe.webhook');
 
 Route::post('/contact', [ContactController::class, 'store'])
     ->middleware('throttle:5,1')

@@ -54,7 +54,7 @@ class ReportMail extends Mailable implements ShouldQueue
 
     public function attachments(): array
     {
-        $path = storage_path("app/public/reports/{$this->report->page_token}.pdf");
+        $path = $this->report->pdfStoragePath();
 
         if (!file_exists($path)) {
             return [];
@@ -62,7 +62,7 @@ class ReportMail extends Mailable implements ShouldQueue
 
         return [
             Attachment::fromPath($path)
-                ->as('property-report.pdf')
+                ->as('raport.pdf')
                 ->withMime('application/pdf'),
         ];
     }

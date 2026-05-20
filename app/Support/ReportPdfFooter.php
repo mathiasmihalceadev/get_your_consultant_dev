@@ -7,12 +7,13 @@ use DateTimeInterface;
 
 class ReportPdfFooter
 {
-    public static function render(?DateTimeInterface $generatedAt = null): string
+    public static function render(?DateTimeInterface $generatedAt = null, string $locale = 'ro'): string
     {
         $timestamp = $generatedAt
             ? Carbon::instance(\DateTime::createFromInterface($generatedAt))
             : now();
 
+        $locale = strtolower($locale) === 'en' ? 'en' : 'ro';
         $generatedDate = $timestamp->format('d.m.Y');
         $logo = self::logoDataUri();
         $checkIcon = self::iconSvg(
@@ -20,16 +21,36 @@ class ReportPdfFooter
             '#16a34a',
             20
         );
+        $copy = $locale === 'en'
+            ? [
+                'title' => 'Verified property report',
+                'line_one' => 'This report is generated using available public market data',
+                'line_two' => 'and comparative statistical analysis.',
+                'generated' => 'Generated on:',
+                'validity' => 'Analysis validity:',
+                'validity_value' => '30 days',
+                'rights' => 'GetYourConsultant - All rights reserved.',
+            ]
+            : [
+                'title' => 'Raport de proprietate verificat',
+                'line_one' => 'Acest raport este generat pe baza datelor publice disponibile',
+                'line_two' => 'din piață și a analizelor comparative statistice.',
+                'generated' => 'Generat la:',
+                'validity' => 'Valabilitate analiză:',
+                'validity_value' => '30 zile',
+                'rights' => 'GetYourConsultant - Toate drepturile rezervate.',
+            ];
+
         return <<<HTML
 <div style="width:100%;padding:0 16px;font-family:Inter,sans-serif;box-sizing:border-box;">
     <div style="display:flex;align-items:center;gap:14px;background:#ffffff;border:1px solid #dfe3f3;border-radius:8px;padding:6px 10px;">
         <div style="flex:1 1 0;min-width:0;display:flex;align-items:flex-start;gap:8px;">
             <div style="width:30px;flex:0 0 30px;font-size:0;line-height:1;">{$checkIcon}</div>
             <div style="min-width:0;">
-                <div style="font-size:10px;line-height:1.22;font-weight:700;color:#1f2a44;margin-bottom:1px;white-space:nowrap;">Raport de proprietate verificat</div>
+                <div style="font-size:10px;line-height:1.22;font-weight:700;color:#1f2a44;margin-bottom:1px;white-space:nowrap;">{$copy['title']}</div>
                 <div style="font-size:8.5px;line-height:1.45;color:#334155;">
-                    <span style="display:block;white-space:nowrap;">Acest raport este generat pe baza datelor publice disponibile</span>
-                    <span style="display:block;white-space:nowrap;">din piață și a analizelor comparative statistice.</span>
+                    <span style="display:block;white-space:nowrap;">{$copy['line_one']}</span>
+                    <span style="display:block;white-space:nowrap;">{$copy['line_two']}</span>
                 </div>
             </div>
         </div>
@@ -38,12 +59,12 @@ class ReportPdfFooter
         </div>
         <div style="flex:1 1 0;min-width:0;display:flex;justify-content:flex-end;">
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;white-space:nowrap;">
-                <div style="font-size:10px;line-height:1.25;font-weight:500;color:#334155;">Generat la: <span style="font-weight:700;color:#1f2a44;">{$generatedDate}</span></div>
-                <div style="font-size:10px;line-height:1.25;font-weight:500;color:#334155;">Valabilitate analiză: <span style="font-weight:700;color:#1f2a44;">30 zile</span></div>
+                <div style="font-size:10px;line-height:1.25;font-weight:500;color:#334155;">{$copy['generated']} <span style="font-weight:700;color:#1f2a44;">{$generatedDate}</span></div>
+                <div style="font-size:10px;line-height:1.25;font-weight:500;color:#334155;">{$copy['validity']} <span style="font-weight:700;color:#1f2a44;">{$copy['validity_value']}</span></div>
             </div>
         </div>
     </div>
-    <div style="margin-top:10px;text-align:center;font-size:8px;line-height:1.2;font-weight:500;color:#aeb7c5;">GetYourConsultant - Toate drepturile rezervate.</div>
+    <div style="margin-top:10px;text-align:center;font-size:8px;line-height:1.2;font-weight:500;color:#aeb7c5;">{$copy['rights']}</div>
 </div>
 HTML;
     }

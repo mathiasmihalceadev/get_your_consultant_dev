@@ -22,6 +22,10 @@ export type ReportType =
     | "buying_business";
 export type ReportStatus =
     | "not_accessible"
+    | "awaiting_payment"
+    | "payment_processing"
+    | "payment_cancelled"
+    | "payment_failed"
     | "pending"
     | "to_be_sent"
     | "sent"

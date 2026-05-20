@@ -5,6 +5,7 @@ import { Badge } from "@/Components/ui/badge";
 import { Button } from "@/Components/ui/button";
 import { Report, ReportType, ReportStatus, PaginatedData } from "@/types";
 import {
+    CreditCard,
     PaperPlaneTilt,
     FilePdf,
     Eye,
@@ -29,6 +30,26 @@ const statusConfig: Record<
         label: "În așteptare",
         bg: "bg-brand-tertiary/10",
         text: "text-brand-tertiary",
+    },
+    awaiting_payment: {
+        label: "Așteaptă plata",
+        bg: "bg-amber-50",
+        text: "text-amber-700",
+    },
+    payment_processing: {
+        label: "Plată în confirmare",
+        bg: "bg-sky-50",
+        text: "text-sky-700",
+    },
+    payment_cancelled: {
+        label: "Plată anulată",
+        bg: "bg-amber-50",
+        text: "text-amber-700",
+    },
+    payment_failed: {
+        label: "Plată eșuată",
+        bg: "bg-red-50",
+        text: "text-red-600",
     },
     to_be_sent: {
         label: "De trimis",
@@ -81,6 +102,10 @@ function truncate(str: string | null, len = 40): string {
 interface DashboardCounts {
     total: number;
     pending: number;
+    awaiting_payment: number;
+    payment_processing: number;
+    payment_cancelled: number;
+    payment_failed: number;
     to_be_sent: number;
     sent: number;
     error: number;
@@ -122,7 +147,7 @@ export default function Dashboard({
             </h1>
 
             {/* Summary cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+            <div className="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4 xl:grid-cols-5">
                 {[
                     {
                         label: "Total",
@@ -135,6 +160,30 @@ export default function Dashboard({
                         count: counts.pending,
                         color: "text-brand-tertiary",
                         icon: ClockCountdown,
+                    },
+                    {
+                        label: "Așteaptă plata",
+                        count: counts.awaiting_payment,
+                        color: "text-amber-600",
+                        icon: CreditCard,
+                    },
+                    {
+                        label: "Plată în confirmare",
+                        count: counts.payment_processing,
+                        color: "text-sky-600",
+                        icon: ClockCountdown,
+                    },
+                    {
+                        label: "Plată anulată",
+                        count: counts.payment_cancelled,
+                        color: "text-amber-600",
+                        icon: XCircle,
+                    },
+                    {
+                        label: "Plată eșuată",
+                        count: counts.payment_failed,
+                        color: "text-red-500",
+                        icon: Warning,
                     },
                     {
                         label: "De trimis",

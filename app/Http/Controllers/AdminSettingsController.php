@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Settings;
 use App\Services\RemotePdfRenderer;
+use App\Support\ReportDataNormalizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -76,6 +77,8 @@ class AdminSettingsController extends Controller
         if (json_last_error() !== JSON_ERROR_NONE) {
             return back()->with('error', 'Invalid JSON in mock file: ' . json_last_error_msg());
         }
+
+        $data = ReportDataNormalizer::normalize($data, $config['locale']);
 
         $template = $config['template'];
         $label = $config['label'];

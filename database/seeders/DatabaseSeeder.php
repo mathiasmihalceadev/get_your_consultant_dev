@@ -93,6 +93,10 @@ Rules:
 - Keep the same top-level keys, nested keys, object nesting, chart ids, chart types, section ids, and array/object shapes.
 - Replace the example values with values inferred from the listing.
 - If information is missing, estimate a realistic value and keep the expected data type.
+- page_one.badges must fit within 2 rows on the first page, so keep only the most decision-relevant badges and never exceed 8 badges.
+- page_one.verdict.ideal_for must contain at most 3 short items.
+- page_one.verdict.not_ideal_for must contain at most 3 short items.
+- If the chart id is total_acquisition_cost, every data.segments.label must be a single word.
 - Do not add markdown, explanations, comments, or extra text.
 
 Schema example to follow exactly:
@@ -116,6 +120,10 @@ Reguli:
 - Menține aceleași chei de top, chei imbricate, nivele de obiecte, id-uri de grafice, tipuri de grafice, id-uri de secțiuni și forme de array/object.
 - Înlocuiește valorile de exemplu cu valori deduse din anunț.
 - Dacă lipsesc informații, estimează o valoare realistă și păstrează tipul de date așteptat.
+- page_one.badges trebuie să încapă în 2 rânduri pe prima pagină, deci păstrează doar badge-urile cele mai relevante și nu depăși 8 badge-uri.
+- page_one.verdict.ideal_for trebuie să conțină maximum 3 elemente scurte.
+- page_one.verdict.not_ideal_for trebuie să conțină maximum 3 elemente scurte.
+- Dacă graficul are id-ul total_acquisition_cost, fiecare data.segments.label trebuie să fie dintr-un singur cuvânt.
 - Nu adăuga markdown, explicații, comentarii sau text suplimentar.
 
 Exemplu de schemă de urmat întocmai:

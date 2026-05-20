@@ -1177,7 +1177,7 @@
                 <div class="verdict-score-circle" style="background: {{ $verdictScoreColor }};">{{ $verdict['overall_score'] ?? '' }}<small>/10</small></div>
                 <div>
                     <div class="verdict-rec-label">{{ $t('final_recommendation') }}</div>
-                    <div class="verdict-rec {{ $recClass }}">{{ $verdict['recommendation'] ?? '' }}</div>
+                    <div class="verdict-rec {{ $recClass }}" style="color: {{ $verdictScoreColor }};">{{ $verdict['recommendation'] ?? '' }}</div>
                 </div>
             </div>
             <div class="verdict-oneliner">{{ $verdict['one_liner'] ?? '' }}</div>

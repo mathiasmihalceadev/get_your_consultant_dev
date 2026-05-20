@@ -200,14 +200,14 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                             >
                                 {processing
                                     ? t("submitting")
-                                    : t("get_my_report")}
+                                    : t("continue_to_payment")}
                                 {!processing && <ArrowRight size={16} />}
                             </button>
                         </div>
                     </form>
 
                     <p className="mt-6 text-[14px] leading-[1.68] text-brand-primary/78">
-                        {t("report_delivery_note")}
+                        {t("payment_checkout_note")}
                     </p>
                 </div>
             </WizardLayout>

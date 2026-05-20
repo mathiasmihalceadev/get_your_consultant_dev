@@ -28,6 +28,10 @@ class AdminController extends Controller
         $counts = [
             'total' => Report::count(),
             'pending' => Report::where('status', 'pending')->count(),
+            'awaiting_payment' => Report::where('status', 'awaiting_payment')->count(),
+            'payment_processing' => Report::where('status', 'payment_processing')->count(),
+            'payment_cancelled' => Report::where('status', 'payment_cancelled')->count(),
+            'payment_failed' => Report::where('status', 'payment_failed')->count(),
             'to_be_sent' => Report::where('status', 'to_be_sent')->count(),
             'sent' => Report::where('status', 'sent')->count(),
             'error' => Report::where('status', 'error')->count(),

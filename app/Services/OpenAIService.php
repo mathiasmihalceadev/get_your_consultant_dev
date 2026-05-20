@@ -4,36 +4,69 @@ namespace App\Services;
 
 use App\Exceptions\OpenAIJsonException;
 use App\Exceptions\OpenAIRequestException;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class OpenAIService
 {
+    private const RESPONSES_ENDPOINT = 'https://api.openai.com/v1/responses';
     private string $apiKey;
     private string $urlValidationModel = 'gpt-5.4-mini';
     private string $reportGenerationModel = 'gpt-5.5';
+    private const URL_VALIDATION_REASON_CODES = [
+        'accessible_property',
+        'source_blocked',
+        'not_property',
+        'not_buying_property',
+        'not_renting_property',
+    ];
 
     public function __construct()
     {
         $this->apiKey = config('services.openai.key');
     }
 
-    public function validateUrl(string $url): array
+    public function validateUrl(string $url, string $reportType): array
     {
-        $instructions = 'You are a URL accessibility checker. Use the web search tool to visit the given URL. Respond ONLY with a JSON object: {"accessible": true} if the URL is publicly reachable and contains a property listing, or {"accessible": false, "reason": "..."} if not.';
+        $expectedTransaction = str_starts_with($reportType, 'buying_') ? 'buying' : 'renting';
+        $instructions = <<<PROMPT
+You are a validator for a residential real-estate report flow.
+
+Use the web search tool to inspect the provided URL and classify it into exactly one of these reason codes:
+- accessible_property: the URL is publicly reachable and is a residential property listing that matches the expected transaction type.
+- source_blocked: the source cannot be analyzed reliably because it blocks automated access, requires authentication, rate-limits heavily, is unavailable, or the content cannot be opened.
+- not_property: the URL is reachable but it is not a single public residential property listing page.
+- not_buying_property: the URL is a property listing, but it is not a buying / for-sale listing while the expected transaction type is buying.
+- not_renting_property: the URL is a property listing, but it is not a renting / for-rent listing while the expected transaction type is renting.
+
+Expected transaction type: {$expectedTransaction}
+
+Important rules:
+- Treat search pages, category pages, homepages, news articles, blog posts, portals without a concrete listing, agent profile pages, and non-residential listings as not_property.
+- Only use not_buying_property when the page is clearly a property listing but the listing is for rent while the expected transaction is buying.
+- Only use not_renting_property when the page is clearly a property listing but the listing is for sale while the expected transaction is renting.
+- If the page content cannot be inspected well enough because of login walls, bot protection, automation limits, broken pages, or unavailable content, use source_blocked.
+
+Respond ONLY with strict JSON in one of these shapes:
+{"accessible": true, "reason_code": "accessible_property"}
+{"accessible": false, "reason_code": "source_blocked", "reason": "short explanation"}
+{"accessible": false, "reason_code": "not_property", "reason": "short explanation"}
+{"accessible": false, "reason_code": "not_buying_property", "reason": "short explanation"}
+{"accessible": false, "reason_code": "not_renting_property", "reason": "short explanation"}
+PROMPT;
 
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type' => 'application/json',
-            ])->timeout(30)->post('https://api.openai.com/v1/responses', [
+            $payload = [
                 'model' => $this->urlValidationModel,
                 'instructions' => $instructions,
                 'input' => $url,
                 'tools' => [
                     ['type' => 'web_search_preview'],
                 ],
-            ]);
+            ];
+
+            $response = $this->sendResponsesRequest('url_validation', $payload, 30);
 
             if ($response->failed()) {
                 Log::channel('report')->error('OpenAI URL validation request failed', [
@@ -57,13 +90,37 @@ class OpenAIService
             }
 
             if (!empty($data['accessible'])) {
-                Log::channel('report')->info('URL validation passed', ['url' => $url]);
-                return ['success' => true];
+                Log::channel('report')->info('URL validation passed', [
+                    'url' => $url,
+                    'report_type' => $reportType,
+                    'reason_code' => $data['reason_code'] ?? 'accessible_property',
+                ]);
+
+                return [
+                    'success' => true,
+                    'reason_code' => 'accessible_property',
+                ];
             }
 
-            $reason = $data['reason'] ?? 'URL is not accessible or does not contain a property listing.';
-            Log::channel('report')->info('URL validation failed', ['url' => $url, 'reason' => $reason]);
-            return ['success' => false, 'message' => $reason];
+            $reasonCode = $data['reason_code'] ?? 'source_blocked';
+
+            if (!in_array($reasonCode, self::URL_VALIDATION_REASON_CODES, true)) {
+                $reasonCode = 'source_blocked';
+            }
+
+            $reason = $data['reason'] ?? 'URL validation failed.';
+            Log::channel('report')->info('URL validation failed', [
+                'url' => $url,
+                'report_type' => $reportType,
+                'reason_code' => $reasonCode,
+                'reason' => $reason,
+            ]);
+
+            return [
+                'success' => false,
+                'reason_code' => $reasonCode,
+                'message' => $reason,
+            ];
 
         } catch (OpenAIRequestException|OpenAIJsonException $e) {
             throw $e;
@@ -79,12 +136,7 @@ class OpenAIService
     public function generateReportData(string $url, string $prompt): array
     {
         try {
-            Log::channel('report')->info($prompt);
-
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type' => 'application/json',
-            ])->timeout(600)->post('https://api.openai.com/v1/responses', [
+            $payload = [
                 'model' => $this->reportGenerationModel,
                 'instructions' => $prompt,
                 'input' => $url,
@@ -94,9 +146,9 @@ class OpenAIService
                 'tools' => [
                     ['type' => 'web_search_preview'],
                 ],
-            ]);
+            ];
 
-            Log::channel('report')->info('Sending report generation request to OpenAI', ['response' => $response]);
+            $response = $this->sendResponsesRequest('report_generation', $payload, 600);
 
             if ($response->failed()) {
                 Log::channel('report')->error('OpenAI report generation request failed', [
@@ -131,6 +183,52 @@ class OpenAIService
             ]);
             throw new OpenAIRequestException('OpenAI request failed: ' . $e->getMessage(), 0, $e);
         }
+    }
+
+    private function sendResponsesRequest(string $operation, array $payload, int $timeoutSeconds): Response
+    {
+        $this->logOpenAIRequest($operation, $payload, $timeoutSeconds);
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Content-Type' => 'application/json',
+        ])->timeout($timeoutSeconds)->post(self::RESPONSES_ENDPOINT, $payload);
+
+        $this->logOpenAIResponse($operation, $response);
+
+        return $response;
+    }
+
+    private function logOpenAIRequest(string $operation, array $payload, int $timeoutSeconds): void
+    {
+        Log::channel('report')->info('OpenAI request', [
+            'operation' => $operation,
+            'endpoint' => self::RESPONSES_ENDPOINT,
+            'timeout_seconds' => $timeoutSeconds,
+            'payload' => $payload,
+        ]);
+    }
+
+    private function logOpenAIResponse(string $operation, Response $response): void
+    {
+        Log::channel('report')->info('OpenAI response', [
+            'operation' => $operation,
+            'endpoint' => self::RESPONSES_ENDPOINT,
+            'status' => $response->status(),
+            'successful' => $response->successful(),
+            'body' => $this->decodeResponseBody($response->body()),
+        ]);
+    }
+
+    private function decodeResponseBody(string $body): mixed
+    {
+        $decoded = json_decode($body, true);
+
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return $decoded;
+        }
+
+        return $body;
     }
 
     private function extractOutputText(array $responseData): ?string
