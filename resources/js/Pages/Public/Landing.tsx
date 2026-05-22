@@ -174,7 +174,7 @@ const itemVariants: Variants = {
 };
 
 export default function Landing() {
-    const { t, localePath } = useTranslation();
+    const { t, locale, localePath } = useTranslation();
     const [url, setUrl] = useState("");
     const shouldReduceMotion = useReducedMotion();
 
@@ -190,7 +190,10 @@ export default function Landing() {
               viewport: { once: true, amount: 0.08 },
           };
 
-    const sampleReportHref = "/images/report-example.pdf";
+    const sampleReportHref =
+        locale === "ro"
+            ? "/images/report-example-ro.pdf"
+            : "/images/report-example-en.pdf";
     const heroImageSrc = landingAssets.heroImageSrc;
     const reportImageSrc = landingAssets.reportImageSrc;
     const ctaImageSrc = landingAssets.ctaImageSrc;

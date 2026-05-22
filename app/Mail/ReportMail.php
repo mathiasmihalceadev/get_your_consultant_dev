@@ -5,7 +5,6 @@ namespace App\Mail;
 use App\Models\Report;
 use App\Support\LocalizedUrl;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -38,13 +37,26 @@ class ReportMail extends Mailable
 
         $typeKey = "type_{$this->report->report_type}";
         $typeLabel = $translations[$typeKey] ?? $this->report->report_type;
+        $statusUrl = LocalizedUrl::urlForLocale($locale, "/report/{$this->report->page_token}");
+        $downloadPath = $this->report->report_url ?: $this->report->pdfPublicUrl();
 
         return new Content(
             view: 'emails.report',
             with: [
                 'report' => $this->report,
                 'typeLabel' => $typeLabel,
-                'statusUrl' => LocalizedUrl::urlForLocale($locale, "/report/{$this->report->page_token}"),
+                'downloadUrl' => LocalizedUrl::urlForLocale($locale, $downloadPath),
+                'statusUrl' => $statusUrl,
+                'contactUrl' => LocalizedUrl::urlForLocale($locale, '/contact'),
+                'logoUrl' => LocalizedUrl::urlForLocale($locale, '/images/logo-white.jpg'),
+                'contactEmail' => $locale === 'ro'
+                    ? 'contact@getyourconsultant.ro'
+                    : 'contact@getyourconsultant.com',
+                'websiteUrl' => LocalizedUrl::urlForLocale($locale, '/'),
+                'websiteLabel' => $locale === 'ro'
+                    ? 'getyourconsultant.ro'
+                    : 'getyourconsultant.com',
+                'currentYear' => now()->year,
                 'trans' => $translations,
             ],
         );
@@ -52,17 +64,7 @@ class ReportMail extends Mailable
 
     public function attachments(): array
     {
-        $path = $this->report->pdfStoragePath();
-
-        if (!file_exists($path)) {
-            return [];
-        }
-
-        return [
-            Attachment::fromPath($path)
-                ->as('raport.pdf')
-                ->withMime('application/pdf'),
-        ];
+        return [];
     }
 
     private function loadTranslations(string $locale): array

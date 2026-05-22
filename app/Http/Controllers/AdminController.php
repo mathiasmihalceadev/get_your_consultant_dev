@@ -61,13 +61,20 @@ class AdminController extends Controller
     {
         $report = Report::findOrFail($id);
 
-        if ($report->status !== 'to_be_sent') {
-            return back()->with('error', 'Report cannot be sent — status is not "to_be_sent".');
-        }
-
         if (!$report->email) {
             return back()->with('error', 'Report cannot be sent because the email address is missing.');
         }
+
+        $hasGeneratedReport = filled($report->report_url) || file_exists($report->pdfStoragePath());
+
+        if (!$hasGeneratedReport) {
+            return back()->with(
+                'error',
+                'Report email could not be sent because the generated report file is missing.',
+            );
+        }
+
+        $isResend = $report->status === 'sent';
 
         try {
             Mail::to($report->email)->sendNow(new ReportMail($report));
@@ -96,8 +103,14 @@ class AdminController extends Controller
 
         Log::channel('report')->info('Report manually sent by admin', [
             'report_id' => $report->id,
+            'action' => $isResend ? 'resent' : 'sent',
         ]);
 
-        return back()->with('success', "Report has been sent to {$report->email}.");
+        return back()->with(
+            'success',
+            $isResend
+                ? "Report has been resent to {$report->email}."
+                : "Report has been sent to {$report->email}.",
+        );
     }
 }
