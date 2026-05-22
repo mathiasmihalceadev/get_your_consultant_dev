@@ -217,7 +217,7 @@
     "progress_generating": "Generating PDF report",
     "payment_retry_note": "If the Stripe page was closed, cancelled, or expired, you can start a new checkout from here.",
 
-    "landing_meta_title": "Check a property before you buy",
+    "landing_meta_title": "Check a property before you buy/rent",
     "landing_badge": "Property check",
     "landing_hero_title_1": "Check a property before you buy.",
     "landing_hero_title_2": "Every detail, scored.",
@@ -376,7 +376,7 @@
     "contact_form_name_placeholder": "Your name",
     "contact_form_email_placeholder": "you@example.com",
     "contact_form_subject_placeholder": "What would you like to discuss?",
-    "contact_form_message_placeholder": "Tell us what you need, what property flow you are interested in, or how we can help.",
+    "contact_form_message_placeholder": "Tell us what you need, what property flow (information) you are interested in, or how we can help.",
     "contact_form_submit": "Send message",
     "contact_form_success": "Your message was sent successfully. We will get back to you soon.",
     "contact_form_required_note": "We usually reply within 1-2 business days.",

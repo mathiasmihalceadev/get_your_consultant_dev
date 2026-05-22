@@ -3,7 +3,7 @@ import {
     Globe,
     FacebookLogo,
     InstagramLogo,
-    LinkedinLogo,
+    TiktokLogoIcon,
 } from "@phosphor-icons/react";
 import { PropsWithChildren } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -151,13 +151,16 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                     <InstagramLogo size={18} weight="duotone" />
                                 </a>
                                 <a
-                                    href="https://www.linkedin.com"
+                                    href="https://www.tiktok.com"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    aria-label="LinkedIn"
+                                    aria-label="TikTok"
                                     className="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white"
                                 >
-                                    <LinkedinLogo size={18} weight="duotone" />
+                                    <TiktokLogoIcon
+                                        size={18}
+                                        weight="duotone"
+                                    />
                                 </a>
                             </div>
                             <div className="mt-4">
