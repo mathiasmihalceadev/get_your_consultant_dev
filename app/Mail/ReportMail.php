@@ -48,7 +48,7 @@ class ReportMail extends Mailable
                 'downloadUrl' => LocalizedUrl::urlForLocale($locale, $downloadPath),
                 'statusUrl' => $statusUrl,
                 'contactUrl' => LocalizedUrl::urlForLocale($locale, '/contact'),
-                'logoUrl' => LocalizedUrl::urlForLocale($locale, '/images/logo-white.jpg'),
+                'logoUrl' => LocalizedUrl::urlForLocale($locale, '/images/main-logo-transparent.png'),
                 'contactEmail' => $locale === 'ro'
                     ? 'contact@getyourconsultant.ro'
                     : 'contact@getyourconsultant.com',
