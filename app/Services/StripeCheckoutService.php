@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Report;
 use App\Models\ReportPurchase;
+use App\Support\LocalizedUrl;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -18,6 +19,7 @@ class StripeCheckoutService
 
     public function __construct(
         private readonly PaidReportFulfillmentService $paidReportFulfillment,
+        private readonly ReportPricingService $reportPricing,
     ) {
     }
 
@@ -27,7 +29,21 @@ class StripeCheckoutService
             throw new RuntimeException('Report email and page token are required before creating a checkout session.');
         }
 
-        $priceId = $this->resolvePriceId($report->report_type);
+        $pricing = $this->reportPricing->pricingForCheckout($report, request());
+
+        $metadata = array_filter([
+            'report_id' => (string) $report->id,
+            'page_token' => $report->page_token,
+            'report_type' => $report->report_type,
+            'locale' => $report->locale,
+            'checkout_locale' => $pricing['checkout_locale'],
+            'checkout_currency' => $pricing['checkout_currency'],
+            'base_currency' => $pricing['base_currency'],
+            'base_amount_minor' => (string) $pricing['base_amount_minor'],
+            'checkout_amount_minor' => (string) $pricing['checkout_amount_minor'],
+            'exchange_rate' => $pricing['exchange_rate'] !== null ? (string) $pricing['exchange_rate'] : null,
+            'stripe_product_id' => $pricing['stripe_product_id'],
+        ], static fn (mixed $value): bool => $value !== null && $value !== '');
 
         $purchase = ReportPurchase::create([
             'report_id' => $report->id,
@@ -35,15 +51,13 @@ class StripeCheckoutService
             'locale' => $report->locale,
             'email' => $report->email,
             'status' => 'checkout_created',
-            'currency' => $this->currency(),
-            'stripe_price_id' => $priceId,
-            'metadata' => [
-                'report_id' => $report->id,
-                'page_token' => $report->page_token,
-                'report_type' => $report->report_type,
-                'locale' => $report->locale,
-                'price_id' => $priceId,
-            ],
+            'currency' => $pricing['checkout_currency'],
+            'base_currency' => $pricing['base_currency'],
+            'base_amount_minor' => $pricing['base_amount_minor'],
+            'checkout_amount_minor' => $pricing['checkout_amount_minor'],
+            'exchange_rate' => $pricing['exchange_rate'],
+            'stripe_product_id' => $pricing['stripe_product_id'],
+            'metadata' => $metadata,
             'checkout_started_at' => now(),
         ]);
 
@@ -51,7 +65,11 @@ class StripeCheckoutService
             'mode' => 'payment',
             'line_items' => [
                 [
-                    'price' => $priceId,
+                    'price_data' => [
+                        'currency' => $pricing['checkout_currency'],
+                        'product' => $pricing['stripe_product_id'],
+                        'unit_amount' => $pricing['checkout_amount_minor'],
+                    ],
                     'quantity' => 1,
                 ],
             ],
@@ -64,10 +82,7 @@ class StripeCheckoutService
             'metadata' => [
                 'report_id' => (string) $report->id,
                 'purchase_id' => (string) $purchase->id,
-                'page_token' => $report->page_token,
-                'report_type' => $report->report_type,
-                'locale' => $report->locale,
-                'price_id' => $priceId,
+                ...$metadata,
             ],
             'success_url' => $this->successUrl($report, $purchase),
             'cancel_url' => $this->cancelUrl($report, $purchase),
@@ -99,6 +114,8 @@ class StripeCheckoutService
         $purchase->update([
             'status' => 'checkout_open',
             'stripe_checkout_session_id' => $session->id,
+            'amount_subtotal' => $session->amount_subtotal,
+            'amount_total' => $session->amount_total,
             'checkout_session_payload' => $session->toArray(),
             'customer_email' => $session->customer_email ?: $report->email,
         ]);
@@ -138,7 +155,7 @@ class StripeCheckoutService
                         'stripe_checkout_session_id' => $session->id,
                         'amount_subtotal' => $session->amount_subtotal,
                         'amount_total' => $session->amount_total,
-                        'currency' => strtolower((string) ($session->currency ?: $purchase->currency ?: $this->currency())),
+                        'paid_currency' => strtolower((string) ($session->currency ?: $purchase->paid_currency ?: $purchase->currency)),
                         'customer_email' => $customerDetails['email'] ?? $session->customer_email ?? $purchase->email,
                         'customer_name' => $customerDetails['name'] ?? $purchase->customer_name,
                         'customer_phone' => $customerDetails['phone'] ?? $purchase->customer_phone,
@@ -271,6 +288,16 @@ class StripeCheckoutService
             $eventPayload,
         );
 
+        if ($purchase?->status === 'failed') {
+            return [
+                'handled' => true,
+                'event_id' => $eventId,
+                'type' => $eventType,
+                'purchase_id' => $purchase->id,
+                'report_id' => $purchase->report_id,
+            ];
+        }
+
         $report = $purchase?->report;
 
         if ($report && !in_array($report->status, ['pending', 'to_be_sent', 'sent'], true)) {
@@ -316,6 +343,16 @@ class StripeCheckoutService
 
         if (!$purchase || !$purchase->report) {
             throw new RuntimeException('Unable to resolve a report purchase for the paid Stripe checkout session.');
+        }
+
+        if ($purchase->status === 'failed') {
+            return [
+                'handled' => true,
+                'event_id' => $eventId,
+                'type' => $eventType,
+                'purchase_id' => $purchase->id,
+                'report_id' => $purchase->report_id,
+            ];
         }
 
         $purchase->report->update([
@@ -426,6 +463,10 @@ class StripeCheckoutService
             return null;
         }
 
+        if ($failedPurchase = $this->markPricingMismatchIfNeeded($purchase, $session, $eventId, $eventType, $eventPayload)) {
+            return $failedPurchase;
+        }
+
         $metadata = $this->normalizeStripeValue($session->metadata) ?? $purchase->metadata ?? [];
         $customerDetails = $this->normalizeStripeValue($session->customer_details);
         $paymentIntentPayload = is_object($session->payment_intent)
@@ -437,7 +478,7 @@ class StripeCheckoutService
             'status' => $status,
             'amount_subtotal' => $session->amount_subtotal,
             'amount_total' => $session->amount_total,
-            'currency' => strtolower((string) ($session->currency ?: $purchase->currency ?: $this->currency())),
+            'paid_currency' => strtolower((string) ($session->currency ?: $purchase->paid_currency ?: $purchase->currency)),
             'stripe_checkout_session_id' => $session->id,
             'stripe_payment_intent_id' => is_string($session->payment_intent)
                 ? $session->payment_intent
@@ -446,6 +487,7 @@ class StripeCheckoutService
                 ? $session->customer
                 : $session->customer?->id,
             'stripe_price_id' => (string) ($metadata['price_id'] ?? $purchase->stripe_price_id ?? ''),
+            'stripe_product_id' => (string) ($metadata['stripe_product_id'] ?? $purchase->stripe_product_id ?? ''),
             'customer_email' => $customerDetails['email'] ?? $session->customer_email ?? $purchase->email,
             'customer_name' => $customerDetails['name'] ?? null,
             'customer_phone' => $customerDetails['phone'] ?? null,
@@ -501,12 +543,98 @@ class StripeCheckoutService
             'locale' => $report->locale,
             'email' => $report->email,
             'status' => 'checkout_open',
-            'currency' => strtolower((string) ($session->currency ?: $this->currency())),
+            'currency' => strtolower((string) (($metadata['checkout_currency'] ?? $metadata['currency'] ?? $session->currency) ?: $this->currency())),
+            'paid_currency' => $session->currency ? strtolower((string) $session->currency) : null,
+            'base_currency' => strtolower((string) ($metadata['base_currency'] ?? 'eur')),
+            'base_amount_minor' => isset($metadata['base_amount_minor']) ? (int) $metadata['base_amount_minor'] : null,
+            'checkout_amount_minor' => isset($metadata['checkout_amount_minor'])
+                ? (int) $metadata['checkout_amount_minor']
+                : $session->amount_total,
+            'exchange_rate' => isset($metadata['exchange_rate']) && $metadata['exchange_rate'] !== ''
+                ? (string) $metadata['exchange_rate']
+                : null,
             'stripe_checkout_session_id' => $session->id,
             'stripe_price_id' => $metadata['price_id'] ?? null,
+            'stripe_product_id' => $metadata['stripe_product_id'] ?? null,
             'metadata' => $metadata,
             'checkout_started_at' => $this->stripeTimestamp($session->created) ?: now(),
         ])->fresh('report');
+    }
+
+    private function markPricingMismatchIfNeeded(
+        ReportPurchase $purchase,
+        Session $session,
+        string $eventId,
+        string $eventType,
+        array $eventPayload,
+    ): ?ReportPurchase {
+        $expectedCurrency = strtolower((string) $purchase->currency);
+        $actualCurrency = strtolower((string) ($session->currency ?: ''));
+        $expectedAmount = $purchase->checkout_amount_minor;
+        $actualAmount = $session->amount_total;
+        $mismatch = [];
+
+        if ($expectedCurrency !== '' && $actualCurrency !== '' && $expectedCurrency !== $actualCurrency) {
+            $mismatch['currency'] = [
+                'expected' => $expectedCurrency,
+                'actual' => $actualCurrency,
+            ];
+        }
+
+        if ($expectedAmount !== null && $actualAmount !== null && (int) $expectedAmount !== (int) $actualAmount) {
+            $mismatch['amount_total'] = [
+                'expected' => (int) $expectedAmount,
+                'actual' => (int) $actualAmount,
+            ];
+        }
+
+        if ($mismatch === []) {
+            return null;
+        }
+
+        $metadata = $purchase->metadata ?? [];
+        $metadata['pricing_mismatch'] = $mismatch;
+
+        $purchase->fill([
+            'status' => 'failed',
+            'amount_subtotal' => $session->amount_subtotal,
+            'amount_total' => $session->amount_total,
+            'paid_currency' => $actualCurrency !== '' ? $actualCurrency : $purchase->paid_currency,
+            'stripe_checkout_session_id' => $session->id,
+            'stripe_payment_intent_id' => is_string($session->payment_intent)
+                ? $session->payment_intent
+                : $session->payment_intent?->id,
+            'stripe_customer_id' => is_string($session->customer)
+                ? $session->customer
+                : $session->customer?->id,
+            'checkout_session_payload' => $session->toArray(),
+            'payment_intent_payload' => is_object($session->payment_intent)
+                ? $this->normalizeStripeValue($session->payment_intent)
+                : null,
+            'latest_webhook_event_id' => $eventId,
+            'latest_webhook_event_type' => $eventType,
+            'latest_webhook_payload' => $eventPayload,
+            'metadata' => $metadata,
+            'failed_at' => $purchase->failed_at ?: now(),
+        ]);
+
+        $purchase->save();
+
+        if ($purchase->report && !in_array($purchase->report->status, ['pending', 'to_be_sent', 'sent'], true)) {
+            $purchase->report->update([
+                'status' => 'payment_failed',
+                'error_message' => null,
+            ]);
+        }
+
+        $this->logError('Stripe payment did not match the expected checkout pricing', [
+            'purchase_id' => $purchase->id,
+            'report_id' => $purchase->report_id,
+            'checkout_session_id' => $session->id,
+            'mismatch' => $mismatch,
+        ]);
+
+        return $purchase->fresh('report');
     }
 
     private function resolveReportFromSession(Session $session): ?Report
@@ -590,6 +718,44 @@ class StripeCheckoutService
             (string) config("locales.domain_urls.{$report->locale}", config('app.url')),
             '/',
         );
+    }
+
+    private function checkoutLocale(Report $report): string
+    {
+        $request = request();
+
+        if ($request) {
+            $host = LocalizedUrl::requestHost($request);
+
+            if (str_ends_with($host, '.ro')) {
+                return 'ro';
+            }
+
+            if (str_ends_with($host, '.com')) {
+                return 'en';
+            }
+
+            return LocalizedUrl::localeForHost($host);
+        }
+
+        $locale = strtolower((string) ($report->locale ?: LocalizedUrl::defaultLocale()));
+
+        return in_array($locale, LocalizedUrl::supportedLocales(), true)
+            ? $locale
+            : LocalizedUrl::defaultLocale();
+    }
+
+    private function currencyForLocale(string $locale): string
+    {
+        $currency = strtolower((string) config("services.stripe.currencies.{$locale}", ''));
+
+        if ($currency !== '') {
+            return $currency;
+        }
+
+        return $locale === 'ro'
+            ? 'ron'
+            : $this->currency();
     }
 
     private function resolvePriceId(string $reportType): string

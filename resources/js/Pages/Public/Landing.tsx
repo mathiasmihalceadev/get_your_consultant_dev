@@ -33,6 +33,15 @@ type PricingOption = {
     featureKeys: string[];
 };
 
+type PricingCatalogEntry = {
+    checkout_currency: string;
+    checkout_amount_minor: number;
+};
+
+interface LandingProps {
+    pricingCatalog: Partial<Record<ReportType, PricingCatalogEntry>>;
+}
+
 const heroBenefitKeys = [
     "landing_hero_benefit_1",
     "landing_hero_benefit_2",
@@ -173,7 +182,7 @@ const itemVariants: Variants = {
     },
 };
 
-export default function Landing() {
+export default function Landing({ pricingCatalog }: LandingProps) {
     const { t, locale, localePath } = useTranslation();
     const [url, setUrl] = useState("");
     const shouldReduceMotion = useReducedMotion();
@@ -201,6 +210,21 @@ export default function Landing() {
 
     const selectTypeFromPage = (type: ReportType) => {
         router.visit(localePath(`/get-report?type=${type}`));
+    };
+
+    const formatCatalogPrice = (type: ReportType, fallbackKey: string) => {
+        const pricing = pricingCatalog?.[type];
+
+        if (!pricing) {
+            return t(fallbackKey);
+        }
+
+        return new Intl.NumberFormat(locale === "ro" ? "ro-RO" : "en-IE", {
+            style: "currency",
+            currency: pricing.checkout_currency.toUpperCase(),
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(pricing.checkout_amount_minor / 100);
     };
 
     const handleHeroRedirect = (event: FormEvent<HTMLFormElement>) => {
@@ -627,7 +651,10 @@ export default function Landing() {
                                             </h3>
                                             <div className="text-right">
                                                 <p className="text-3xl font-bold tracking-[-0.05em] text-brand-primary">
-                                                    {t(priceKey)}
+                                                    {formatCatalogPrice(
+                                                        type,
+                                                        priceKey,
+                                                    )}
                                                 </p>
                                                 <p className="mt-1 text-xs font-semibold text-brand-primary/54">
                                                     {t(

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use App\Services\OpenAIService;
+use App\Services\ReportPricingService;
 use App\Services\StripeCheckoutService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -11,9 +12,11 @@ use Inertia\Inertia;
 
 class PublicReportController extends Controller
 {
-    public function landing()
+    public function landing(Request $request, ReportPricingService $pricing)
     {
-        return Inertia::render('Public/Landing');
+        return Inertia::render('Public/Landing', [
+            'pricingCatalog' => $pricing->catalogForRequest(app()->getLocale(), $request),
+        ]);
     }
 
     public function index()

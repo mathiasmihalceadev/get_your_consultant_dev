@@ -71,6 +71,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/reports/{id}', [AdminController::class, 'show'])->name('admin.reports.show');
     Route::post('/reports/{id}/send', [AdminController::class, 'send'])->name('admin.reports.send');
     Route::get('/settings', [AdminSettingsController::class, 'show'])->name('admin.settings');
+    Route::get('/settings/exchange-rate', [AdminSettingsController::class, 'exchangeRate'])->name('admin.settings.exchange-rate');
     Route::post('/settings', [AdminSettingsController::class, 'update'])->name('admin.settings.update');
     Route::get('/test-pdf', [AdminSettingsController::class, 'testPdf'])->name('admin.test-pdf');
 });

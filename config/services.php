@@ -44,10 +44,26 @@ return [
         'secret_key' => env('STRIPE_SECRET_KEY'),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
         'currency' => strtolower((string) env('STRIPE_CURRENCY', 'eur')),
+        'currencies' => [
+            'en' => strtolower((string) env('STRIPE_CURRENCY_EN', env('STRIPE_CURRENCY', 'eur'))),
+            'ro' => strtolower((string) env('STRIPE_CURRENCY_RO', 'ron')),
+        ],
+        'products' => [
+            'rental_living' => env('STRIPE_PRODUCT_RENTAL_LIVING'),
+            'buying_living' => env('STRIPE_PRODUCT_BUYING_LIVING'),
+        ],
         'prices' => [
             'rental_living' => env('STRIPE_PRICE_RENTAL_LIVING'),
             'buying_living' => env('STRIPE_PRICE_BUYING_LIVING'),
         ],
+    ],
+
+    'exchange_rates' => [
+        'eur_ron_url' => env(
+            'EXCHANGE_RATE_EUR_RON_URL',
+            'https://api.frankfurter.app/latest?from=EUR&to=RON',
+        ),
+        'timeout' => (int) env('EXCHANGE_RATE_TIMEOUT', 10),
     ],
 
     'browsershot' => [

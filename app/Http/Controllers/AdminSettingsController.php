@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Settings;
+use App\Services\ExchangeRateService;
 use App\Services\RemotePdfRenderer;
 use App\Support\ReportDataNormalizer;
 use Illuminate\Http\Request;
@@ -26,13 +27,61 @@ class AdminSettingsController extends Controller
             'buying_living_ro' => ['required', 'string'],
             'buying_living_eng' => ['required', 'string'],
             'auto_send' => ['boolean'],
+            'pricing_rental_living_eur' => ['required', 'numeric', 'gt:0'],
+            'pricing_buying_living_eur' => ['required', 'numeric', 'gt:0'],
+            'pricing_exchange_rate_eur_ron' => ['required', 'numeric', 'gt:0'],
+            'stripe_product_rental_living' => ['nullable', 'string', 'max:255'],
+            'stripe_product_buying_living' => ['nullable', 'string', 'max:255'],
         ]);
+
+        $validated['pricing_rental_living_eur'] = number_format(
+            (float) $validated['pricing_rental_living_eur'],
+            2,
+            '.',
+            '',
+        );
+        $validated['pricing_buying_living_eur'] = number_format(
+            (float) $validated['pricing_buying_living_eur'],
+            2,
+            '.',
+            '',
+        );
+        $validated['pricing_exchange_rate_eur_ron'] = number_format(
+            (float) $validated['pricing_exchange_rate_eur_ron'],
+            6,
+            '.',
+            '',
+        );
+        $validated['stripe_product_rental_living'] = trim((string) ($validated['stripe_product_rental_living'] ?? ''));
+        $validated['stripe_product_buying_living'] = trim((string) ($validated['stripe_product_buying_living'] ?? ''));
 
         foreach ($validated as $key => $value) {
             Settings::set($key, $value);
         }
 
         return back()->with('success', 'Settings saved successfully.');
+    }
+
+    public function exchangeRate(ExchangeRateService $exchangeRates)
+    {
+        try {
+            $rate = $exchangeRates->fetchEurToRonRate();
+        } catch (\Throwable $e) {
+            Log::warning('Unable to fetch EUR to RON exchange rate', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Nu am putut prelua cursul EUR → RON acum. Încearcă din nou în câteva momente.',
+            ], 422);
+        }
+
+        return response()->json([
+            'message' => 'Cursul a fost preluat cu succes.',
+            'rate' => $rate['rate'],
+            'date' => $rate['date'],
+            'provider' => $rate['provider'],
+        ]);
     }
 
     public function testPdf(Request $request, RemotePdfRenderer $pdfRenderer)

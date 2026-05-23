@@ -62,6 +62,11 @@ export interface Settings {
     buying_living_ro: string;
     buying_living_eng: string;
     auto_send: boolean;
+    pricing_rental_living_eur: string;
+    pricing_buying_living_eur: string;
+    pricing_exchange_rate_eur_ron: string;
+    stripe_product_rental_living: string;
+    stripe_product_buying_living: string;
     [key: string]: string | boolean;
 }
 
