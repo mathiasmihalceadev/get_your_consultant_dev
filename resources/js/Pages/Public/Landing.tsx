@@ -34,6 +34,8 @@ type PricingOption = {
 };
 
 type PricingCatalogEntry = {
+    base_currency: string;
+    base_amount_minor: number;
     checkout_currency: string;
     checkout_amount_minor: number;
 };
@@ -221,10 +223,10 @@ export default function Landing({ pricingCatalog }: LandingProps) {
 
         return new Intl.NumberFormat(locale === "ro" ? "ro-RO" : "en-IE", {
             style: "currency",
-            currency: pricing.checkout_currency.toUpperCase(),
+            currency: pricing.base_currency.toUpperCase(),
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
-        }).format(pricing.checkout_amount_minor / 100);
+        }).format(pricing.base_amount_minor / 100);
     };
 
     const handleHeroRedirect = (event: FormEvent<HTMLFormElement>) => {
