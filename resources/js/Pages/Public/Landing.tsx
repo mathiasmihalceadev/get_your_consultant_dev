@@ -201,10 +201,14 @@ export default function Landing({ pricingCatalog }: LandingProps) {
               viewport: { once: true, amount: 0.08 },
           };
 
-    const sampleReportHref =
+    const buyingSampleReportHref =
         locale === "ro"
             ? "/images/report-example-ro.pdf"
             : "/images/report-example-en.pdf";
+    const rentalSampleReportHref =
+        locale === "ro"
+            ? "/images/report-example-rental-ro.pdf"
+            : "/images/report-example-rental-en.pdf";
     const heroImageSrc = landingAssets.heroImageSrc;
     const reportImageSrc = landingAssets.reportImageSrc;
     const ctaImageSrc = landingAssets.ctaImageSrc;
@@ -449,15 +453,28 @@ export default function Landing({ pricingCatalog }: LandingProps) {
                                 ),
                             )}
                         </div>
-                        <a
-                            href={sampleReportHref}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="mt-8 inline-flex items-center gap-2 bg-brand-primary px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_34px_rgba(52,48,106,0.18)] transition-colors hover:bg-brand-primary/92"
-                        >
-                            {t("landing_example_cta")}
-                            <ArrowRight size={16} />
-                        </a>
+                        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                            <a
+                                href={buyingSampleReportHref}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center justify-center gap-2 bg-brand-primary px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_34px_rgba(52,48,106,0.18)] transition-colors hover:bg-brand-primary/92"
+                            >
+                                <FilePdf size={16} />
+                                {t("landing_example_buying_cta")}
+                                <ArrowRight size={16} />
+                            </a>
+                            <a
+                                href={rentalSampleReportHref}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center justify-center gap-2 border border-brand-primary/12 bg-[linear-gradient(180deg,#eef2ff_0%,#dde7ff_100%)] px-6 py-3 text-sm font-semibold text-brand-primary shadow-[0_18px_34px_rgba(52,48,106,0.1)] transition-colors hover:border-brand-primary/20 hover:bg-[linear-gradient(180deg,#e7eeff_0%,#d3e0ff_100%)]"
+                            >
+                                <FilePdf size={16} />
+                                {t("landing_example_rental_cta")}
+                                <ArrowRight size={16} />
+                            </a>
+                        </div>
                     </motion.div>
                 </motion.div>
             </motion.section>

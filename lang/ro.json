@@ -219,7 +219,7 @@
 
     "landing_meta_title": "Verifică o proprietate înainte să cumperi/închiriezi",
     "landing_badge": "Verificare proprietate",
-    "landing_hero_title_1": "Verifică o proprietate înainte să cumperi.",
+    "landing_hero_title_1": "Verifică o proprietate înainte să cumperi/închiriezi.",
     "landing_hero_title_2": "Fiecare detaliu, evaluat.",
     "landing_hero_desc": "Află dacă prețul este corect, ce riscuri ascunde și dacă merită investiția.",
     "landing_cta_primary": "Începe un raport",
@@ -426,6 +426,8 @@
     "landing_example_visual_title": "Spațiu pentru imaginea primei pagini",
     "landing_example_visual_desc": "Înlocuiește această zonă cu captura sau mockup-ul final al primei pagini din raportul PDF.",
     "landing_example_cta": "Vezi PDF-ul demo",
+    "landing_example_buying_cta": "Vezi demo PDF cumpărare",
+    "landing_example_rental_cta": "Vezi demo PDF închiriere",
     "landing_how_desc": "Trei pași simpli, vizuali și rapizi de la link-ul proprietății până la verdictul final.",
     "landing_process_item_1_title": "Copiază link-ul",
     "landing_process_item_1_desc": "Adaugă link-ul anunțului din platforma pe care ai găsit proprietatea și începe verificarea.",

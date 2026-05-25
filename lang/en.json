@@ -219,7 +219,7 @@
 
     "landing_meta_title": "Check a property before you buy/rent",
     "landing_badge": "Property check",
-    "landing_hero_title_1": "Check a property before you buy.",
+    "landing_hero_title_1": "Check a property before you buy/rent.",
     "landing_hero_title_2": "Every detail, scored.",
     "landing_hero_desc": "Find out whether the price is fair, what risks it hides, and whether it is worth the investment.",
     "landing_cta_primary": "Start a report",
@@ -426,6 +426,8 @@
     "landing_example_visual_title": "Space for the first page visual",
     "landing_example_visual_desc": "Replace this placeholder with the final screenshot or polished mockup of the report's first PDF page.",
     "landing_example_cta": "Open the demo PDF",
+    "landing_example_buying_cta": "See buying demo PDF",
+    "landing_example_rental_cta": "See rental demo PDF",
     "landing_how_desc": "Three simple visual steps from property URL to a confident final verdict.",
     "landing_process_item_1_title": "Copy the link",
     "landing_process_item_1_desc": "Paste the listing URL from the platform where you found the property and start the verification flow.",
