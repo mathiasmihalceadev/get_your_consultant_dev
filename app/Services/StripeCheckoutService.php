@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Jobs\SyncSmartBillInvoiceJob;
 use App\Models\Report;
 use App\Models\ReportPurchase;
 use App\Support\LocalizedUrl;
@@ -484,7 +483,7 @@ class StripeCheckoutService
             'error_message' => null,
         ]);
 
-        SyncSmartBillInvoiceJob::dispatch($purchase->id);
+        $this->smartBillPurchaseSyncService()->syncPaidPurchase($purchase);
 
         if ($purchase->report->is_test) {
             $this->logInfo('Stripe payment confirmed for admin billing test', [
@@ -1009,6 +1008,17 @@ class StripeCheckoutService
         $this->client = new StripeClient($secretKey);
 
         return $this->client;
+    }
+
+    private function smartBillPurchaseSyncService(): SmartBillPurchaseSyncService
+    {
+        $service = app(SmartBillPurchaseSyncService::class);
+
+        if (!$service instanceof SmartBillPurchaseSyncService) {
+            throw new RuntimeException('Unable to resolve SmartBillPurchaseSyncService from the container.');
+        }
+
+        return $service;
     }
 
     private function normalizeStripeValue(mixed $value): ?array

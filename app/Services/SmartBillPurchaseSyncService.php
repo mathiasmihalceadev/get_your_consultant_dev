@@ -1,52 +1,24 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Services;
 
 use App\Exceptions\SmartBillException;
 use App\Mail\BillingTestInvoiceMail;
 use App\Models\ReportPurchase;
 use App\Models\SmartBillInvoice;
-use App\Services\SmartBillService;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
-class SyncSmartBillInvoiceJob implements ShouldBeUnique, ShouldQueue
+class SmartBillPurchaseSyncService
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    public $tries = 3;
-
-    public $backoff = [60, 300, 900];
-
-    public $uniqueFor = 3600;
-
     public function __construct(
-        public int $purchaseId,
+        private readonly SmartBillService $smartBill,
     ) {
     }
 
-    public function uniqueId(): string
+    public function syncPaidPurchase(ReportPurchase $purchase): void
     {
-        return (string) $this->purchaseId;
-    }
-
-    public function handle(SmartBillService $smartBill): void
-    {
-        $purchase = ReportPurchase::with(['report', 'smartBillInvoice'])->find($this->purchaseId);
-
-        if (!$purchase) {
-            Log::channel('smartbill')->warning('SmartBill sync skipped because purchase was not found', [
-                'purchase_id' => $this->purchaseId,
-            ]);
-
-            return;
-        }
+        $purchase->loadMissing(['report', 'smartBillInvoice']);
 
         if ($purchase->paid_at === null && $purchase->status !== 'paid') {
             Log::channel('smartbill')->info('SmartBill sync skipped because purchase is not marked as paid', [
@@ -73,59 +45,20 @@ class SyncSmartBillInvoiceJob implements ShouldBeUnique, ShouldQueue
         }
 
         try {
-            $invoice = $smartBill->syncPurchase($purchase);
+            $invoice = $this->smartBill->syncPurchase($purchase);
 
             $this->markTestReportAsCompleted($purchase);
-            $this->sendTestInvoiceEmailIfRequested($purchase->fresh(['report']), $invoice);
+            $this->sendTestInvoiceEmailIfRequested($this->refreshPurchaseForEmail($purchase), $invoice);
         } catch (SmartBillException $exception) {
-            $this->markTestReportAsFailed($purchase, $exception->getMessage());
-
-            if ($exception->retryable) {
-                throw $exception;
-            }
-
-            return;
-        }
-    }
-
-    public function failed(?\Throwable $exception): void
-    {
-        if (!$exception) {
-            return;
-        }
-
-        $purchase = ReportPurchase::find($this->purchaseId);
-
-        if (!$purchase) {
-            return;
-        }
-
-        $invoice = SmartBillInvoice::firstOrCreate(
-            ['report_purchase_id' => $purchase->id],
-            [
+            Log::channel('smartbill')->warning('Synchronous SmartBill sync failed', [
+                'purchase_id' => $purchase->id,
                 'report_id' => $purchase->report_id,
-                'status' => 'pending',
-                'payment_status' => 'pending',
-            ],
-        );
+                'retryable' => $exception->retryable,
+                'error' => $exception->getMessage(),
+            ]);
 
-        $invoice->forceFill([
-            'status' => $invoice->invoice_number ? 'issued' : 'failed',
-            'payment_status' => $invoice->invoice_number && $invoice->payment_status !== 'registered'
-                ? 'failed'
-                : $invoice->payment_status,
-            'last_attempt_at' => now(),
-            'error_message' => $exception->getMessage(),
-        ])->save();
-
-        Log::channel('smartbill')->error('SmartBill sync failed permanently', [
-            'purchase_id' => $purchase->id,
-            'report_id' => $purchase->report_id,
-            'smart_bill_invoice_id' => $invoice->id,
-            'error' => $exception->getMessage(),
-        ]);
-
-        $this->markTestReportAsFailed($purchase, $exception->getMessage());
+            $this->markTestReportAsFailed($purchase, $exception->getMessage());
+        }
     }
 
     private function markTestReportAsCompleted(ReportPurchase $purchase): void
@@ -210,5 +143,14 @@ class SyncSmartBillInvoiceJob implements ShouldBeUnique, ShouldQueue
                 'error' => $exception->getMessage(),
             ]);
         }
+    }
+
+    private function refreshPurchaseForEmail(ReportPurchase $purchase): ReportPurchase
+    {
+        if (!$purchase->exists) {
+            return $purchase;
+        }
+
+        return $purchase->fresh(['report']) ?? $purchase;
     }
 }
