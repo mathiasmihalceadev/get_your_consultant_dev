@@ -68,6 +68,9 @@ Route::get('/api/report-status/{page_token}', [PublicReportController::class, 's
 Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/inquiries', [AdminInquiryController::class, 'index'])->name('admin.inquiries');
+    Route::post('/billing-tests/checkout', [AdminController::class, 'createBillingTestCheckout'])->name('admin.billing-tests.create');
+    Route::get('/billing-tests/{id}/checkout/success', [AdminController::class, 'billingTestSuccess'])->name('admin.billing-tests.success');
+    Route::get('/billing-tests/{id}/checkout/cancel', [AdminController::class, 'billingTestCancel'])->name('admin.billing-tests.cancel');
     Route::get('/reports/{id}', [AdminController::class, 'show'])->name('admin.reports.show');
     Route::post('/reports/{id}/send', [AdminController::class, 'send'])->name('admin.reports.send');
     Route::get('/settings', [AdminSettingsController::class, 'show'])->name('admin.settings');

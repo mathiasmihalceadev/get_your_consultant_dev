@@ -25,6 +25,9 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'appFlags' => fn () => [
+                'publicWizardMaintenance' => (bool) config('app.public_wizard_maintenance', false),
+            ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

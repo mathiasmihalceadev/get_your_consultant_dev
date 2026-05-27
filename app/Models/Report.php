@@ -13,6 +13,7 @@ class Report extends Model
         'url',
         'email',
         'locale',
+        'is_test',
         'status',
         'report_url',
         'page_token',
@@ -23,6 +24,7 @@ class Report extends Model
     protected function casts(): array
     {
         return [
+            'is_test' => 'boolean',
             'processed_at' => 'datetime',
         ];
     }
@@ -35,6 +37,11 @@ class Report extends Model
     public function latestPurchase(): HasOne
     {
         return $this->hasOne(ReportPurchase::class)->latestOfMany();
+    }
+
+    public function smartBillInvoices(): HasMany
+    {
+        return $this->hasMany(SmartBillInvoice::class);
     }
 
     public function pdfStorageFilename(): string

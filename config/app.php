@@ -123,4 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'public_wizard_maintenance' => env('APP_PUBLIC_WIZARD_MAINTENANCE', false),
+
 ];

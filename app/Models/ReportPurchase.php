@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ReportPurchase extends Model
 {
@@ -63,5 +64,10 @@ class ReportPurchase extends Model
     public function report(): BelongsTo
     {
         return $this->belongsTo(Report::class);
+    }
+
+    public function smartBillInvoice(): HasOne
+    {
+        return $this->hasOne(SmartBillInvoice::class);
     }
 }

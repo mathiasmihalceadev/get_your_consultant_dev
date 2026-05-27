@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Head, router } from "@inertiajs/react";
-import { ArrowRight, CheckCircle, ShieldCheck } from "@phosphor-icons/react";
+import { Head, router, usePage } from "@inertiajs/react";
+import { ArrowRight, Clock, ShieldCheck } from "@phosphor-icons/react";
+import Modal from "@/Components/Modal";
 import PublicLayout from "@/Layouts/PublicLayout";
 import WizardLayout from "@/Components/WizardLayout";
 import { useTranslation } from "@/hooks/useTranslation";
 import { landingAssets } from "@/lib/landingAssets";
-import { ReportType } from "@/types";
+import { PageProps, ReportType } from "@/types";
 
 const typeOptions: {
     type: ReportType;
@@ -28,6 +29,7 @@ const typeOptions: {
 ];
 
 export default function Index() {
+    const { appFlags } = usePage<PageProps>().props;
     const [selectedType, setSelectedType] = useState<ReportType | null>(() => {
         if (typeof window === "undefined") {
             return null;
@@ -39,10 +41,17 @@ export default function Index() {
             ? type
             : null;
     });
+    const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
     const { t, localePath } = useTranslation();
 
     const handleContinue = () => {
         if (!selectedType) return;
+
+        if (appFlags.publicWizardMaintenance) {
+            setShowMaintenanceModal(true);
+            return;
+        }
+
         router.visit(localePath(`/submit-url?type=${selectedType}`));
     };
 
@@ -95,6 +104,42 @@ export default function Index() {
     return (
         <PublicLayout>
             <Head title={t("home_title")} />
+            <Modal
+                show={showMaintenanceModal}
+                onClose={() => setShowMaintenanceModal(false)}
+                maxWidth="2xl"
+                centered
+                panelClassName="rounded-none"
+            >
+                <div className="overflow-hidden border border-brand-primary/10 bg-[linear-gradient(180deg,#fffaf4_0%,#ffffff_42%,#eef1ff_100%)]">
+                    <div className="h-1 bg-brand-secondary" />
+                    <div className="flex flex-col items-center px-6 py-8 text-center sm:px-10 sm:py-10">
+                        <div className="flex h-12 w-12 items-center justify-center bg-brand-primary text-white shadow-[0_12px_30px_rgba(18,35,74,0.16)]">
+                            <Clock size={22} weight="fill" />
+                        </div>
+
+                        <div className="mt-5 max-w-xl">
+                            <h3 className="text-[1.9rem] font-bold leading-[0.98] tracking-[-0.04em] text-brand-primary sm:text-[2.3rem]">
+                                {t("wizard_maintenance_title")}
+                            </h3>
+                            <p className="mt-3 text-[14px] leading-[1.75] text-brand-primary/78 sm:text-base">
+                                {t("wizard_maintenance_body")}
+                            </p>
+                        </div>
+
+                        <div className="mt-7 flex justify-center">
+                            <button
+                                type="button"
+                                onClick={() => setShowMaintenanceModal(false)}
+                                className="inline-flex items-center gap-2 bg-brand-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-primary/92"
+                            >
+                                {t("wizard_maintenance_close")}
+                                <ArrowRight size={16} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </Modal>
             <WizardLayout
                 currentStep={1}
                 sidebar={sidebar}

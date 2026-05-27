@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Head, router, usePage } from "@inertiajs/react";
+import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
 import Modal from "@/Components/Modal";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
@@ -8,7 +8,13 @@ import { Input } from "@/Components/ui/input";
 import { Textarea } from "@/Components/ui/textarea";
 import { Checkbox } from "@/Components/ui/checkbox";
 import { Label } from "@/Components/ui/label";
-import { Settings as SettingsType } from "@/types";
+import {
+    Report,
+    ReportStatus,
+    ReportType,
+    Settings as SettingsType,
+} from "@/types";
+import { CaretDown } from "@phosphor-icons/react";
 
 interface SettingsForm {
     rental_living_ro: string;
@@ -54,8 +60,98 @@ interface ExchangeRateResponse {
     message?: string;
 }
 
-export default function Settings({ settings }: { settings: SettingsType }) {
+const billingStatusConfig: Record<
+    ReportStatus,
+    { label: string; bg: string; text: string }
+> = {
+    not_accessible: {
+        label: "Inaccesibil",
+        bg: "bg-brand-secondary/10",
+        text: "text-brand-secondary",
+    },
+    pending: {
+        label: "În așteptare",
+        bg: "bg-brand-tertiary/10",
+        text: "text-brand-tertiary",
+    },
+    awaiting_payment: {
+        label: "Așteaptă plata",
+        bg: "bg-amber-50",
+        text: "text-amber-700",
+    },
+    payment_processing: {
+        label: "Plată în confirmare",
+        bg: "bg-sky-50",
+        text: "text-sky-700",
+    },
+    payment_cancelled: {
+        label: "Plată anulată",
+        bg: "bg-amber-50",
+        text: "text-amber-700",
+    },
+    payment_failed: {
+        label: "Plată eșuată",
+        bg: "bg-red-50",
+        text: "text-red-600",
+    },
+    test_completed: {
+        label: "Test finalizat",
+        bg: "bg-emerald-50",
+        text: "text-emerald-700",
+    },
+    to_be_sent: {
+        label: "De trimis",
+        bg: "bg-brand-secondary/15",
+        text: "text-brand-secondary",
+    },
+    sent: {
+        label: "Trimis",
+        bg: "bg-emerald-50",
+        text: "text-emerald-700",
+    },
+    error: {
+        label: "Eroare",
+        bg: "bg-red-50",
+        text: "text-red-600",
+    },
+};
+
+const billingTypeLabels: Record<ReportType, string> = {
+    rental_living: "Închiriere – Rezidențial",
+    rental_business: "Închiriere – Business",
+    buying_living: "Cumpărare – Rezidențial",
+    buying_business: "Cumpărare – Business",
+};
+
+function formatDateTime(value: string | null): string {
+    if (!value) {
+        return "—";
+    }
+
+    return new Date(value).toLocaleString("ro-RO", {
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+}
+
+export default function Settings({
+    settings,
+    billingTests,
+    billingTestCompletedCount,
+}: {
+    settings: SettingsType;
+    billingTests: Report[];
+    billingTestCompletedCount: number;
+}) {
     const { errors } = usePage().props;
+    const billingTestForm = useForm({
+        email: "",
+        locale: "ro",
+        report_type: "buying_living" as ReportType,
+        send_test_email: false,
+    });
     const [form, setForm] = useState<SettingsForm>({
         rental_living_ro: settings?.rental_living_ro || "",
         rental_living_eng: settings?.rental_living_eng || "",
@@ -96,6 +192,8 @@ export default function Settings({ settings }: { settings: SettingsType }) {
     );
     const activePromptValue = String(form[selectedPromptKey] || "");
     const promptPreview = activePromptValue.replace(/\s+/g, " ").trim();
+    const currentBillingTestAmount =
+        billingTestForm.data.locale === "ro" ? "5.00 RON" : "1.00 EUR";
 
     const formatMoneyPreview = (amount: number, currency: string) => {
         return new Intl.NumberFormat(currency === "RON" ? "ro-RO" : "en-IE", {
@@ -123,6 +221,10 @@ export default function Settings({ settings }: { settings: SettingsType }) {
         router.post("/admin/settings", form, {
             onFinish: () => setProcessing(false),
         });
+    };
+
+    const handleBillingTestCheckout = () => {
+        billingTestForm.post("/admin/billing-tests/checkout");
     };
 
     const closePromptEditor = () => {
@@ -480,6 +582,236 @@ export default function Settings({ settings }: { settings: SettingsType }) {
                                 ) : null}
                             </div>
                         </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="mb-6 border border-brand-primary/10 bg-white shadow-[0_18px_40px_rgba(52,48,106,0.08)]">
+                    <CardContent className="p-5">
+                        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                            <div className="max-w-2xl">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-secondary">
+                                    Stripe + SmartBill
+                                </p>
+                                <h2 className="mt-1 text-lg font-semibold text-brand-primary md:text-[1.35rem]">
+                                    Flux rapid de test facturare
+                                </h2>
+                                <p className="mt-2 text-sm leading-6 text-brand-primary/72">
+                                    Creează un checkout Stripe de test din
+                                    admin, apoi urmărește în același raport dacă
+                                    plata și sincronizarea SmartBill s-au închis
+                                    corect. Nu se generează PDF-ul final al
+                                    raportului, dar poți trimite opțional un
+                                    email de test doar cu factura SmartBill
+                                    atașată.
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl bg-brand-primary/5 px-4 py-3 text-sm font-semibold text-brand-primary">
+                                Suma fixă: {currentBillingTestAmount}
+                            </div>
+                        </div>
+
+                        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
+                            SmartBill nu are sandbox în acest flux. Dacă ai
+                            credențiale live, va înregistra o factură și o plată
+                            reale, dar marcate ca test.
+                        </div>
+
+                        <div className="mt-5 grid gap-4 md:grid-cols-2">
+                            <label className="block md:col-span-2">
+                                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-neutral">
+                                    Email pentru checkout
+                                </span>
+                                <input
+                                    type="email"
+                                    value={billingTestForm.data.email}
+                                    onChange={(event) =>
+                                        billingTestForm.setData(
+                                            "email",
+                                            event.target.value,
+                                        )
+                                    }
+                                    className="h-11 w-full rounded-2xl border border-brand-primary/12 bg-white px-4 text-sm text-brand-primary outline-none transition-colors focus:border-brand-primary/28"
+                                    placeholder="billing-test@example.com"
+                                    required
+                                />
+                                {billingTestForm.errors.email && (
+                                    <p className="mt-2 text-sm text-red-600">
+                                        {billingTestForm.errors.email}
+                                    </p>
+                                )}
+                            </label>
+
+                            <label className="block">
+                                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-neutral">
+                                    Limbă și monedă
+                                </span>
+                                <div className="relative">
+                                    <select
+                                        value={billingTestForm.data.locale}
+                                        onChange={(event) =>
+                                            billingTestForm.setData(
+                                                "locale",
+                                                event.target.value,
+                                            )
+                                        }
+                                        className="h-11 w-full appearance-none rounded-2xl border border-brand-primary/12 bg-white px-4 pr-10 text-sm text-brand-primary outline-none transition-colors focus:border-brand-primary/28"
+                                    >
+                                        <option value="ro">
+                                            Română / RON / 5.00
+                                        </option>
+                                        <option value="en">
+                                            English / EUR / 1.00
+                                        </option>
+                                    </select>
+                                    <CaretDown
+                                        size={16}
+                                        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-brand-primary/48"
+                                    />
+                                </div>
+                            </label>
+
+                            <label className="block">
+                                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-neutral">
+                                    Tip flux
+                                </span>
+                                <div className="relative">
+                                    <select
+                                        value={billingTestForm.data.report_type}
+                                        onChange={(event) =>
+                                            billingTestForm.setData(
+                                                "report_type",
+                                                event.target
+                                                    .value as ReportType,
+                                            )
+                                        }
+                                        className="h-11 w-full appearance-none rounded-2xl border border-brand-primary/12 bg-white px-4 pr-10 text-sm text-brand-primary outline-none transition-colors focus:border-brand-primary/28"
+                                    >
+                                        <option value="buying_living">
+                                            Cumpărare rezidențial
+                                        </option>
+                                        <option value="rental_living">
+                                            Închiriere rezidențială
+                                        </option>
+                                    </select>
+                                    <CaretDown
+                                        size={16}
+                                        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-brand-primary/48"
+                                    />
+                                </div>
+                            </label>
+
+                            <div className="md:col-span-2 flex items-start gap-3 rounded-2xl border border-brand-primary/10 bg-brand-primary/3 px-4 py-3">
+                                <Checkbox
+                                    id="send_test_email"
+                                    checked={
+                                        billingTestForm.data.send_test_email
+                                    }
+                                    onCheckedChange={(checked) =>
+                                        billingTestForm.setData(
+                                            "send_test_email",
+                                            !!checked,
+                                        )
+                                    }
+                                />
+                                <div className="space-y-1">
+                                    <Label
+                                        htmlFor="send_test_email"
+                                        className="cursor-pointer text-sm font-medium text-brand-primary"
+                                    >
+                                        Trimite email de test cu factura
+                                        SmartBill
+                                    </Label>
+                                    <p className="text-sm leading-6 text-brand-primary/66">
+                                        Dacă fluxul se închide corect și factura
+                                        este emisă, se va trimite un email de
+                                        test la adresa din checkout, fără PDF-ul
+                                        raportului.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="md:col-span-2 flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:justify-between">
+                                <p className="text-sm text-brand-primary/66">
+                                    După checkout, revenirea se face direct
+                                    într-o pagină de detaliu din admin, unde
+                                    poți urmări Stripe și SmartBill.
+                                </p>
+                                <Button
+                                    type="button"
+                                    onClick={handleBillingTestCheckout}
+                                    disabled={billingTestForm.processing}
+                                    className="h-11 bg-brand-primary text-white hover:bg-brand-primary/92"
+                                >
+                                    {billingTestForm.processing
+                                        ? "Se pregătește..."
+                                        : "Pornește checkout-ul de test"}
+                                </Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="mb-6 border border-brand-primary/10 bg-white shadow-[0_18px_40px_rgba(52,48,106,0.08)]">
+                    <CardContent className="p-5">
+                        <div className="flex items-center justify-between gap-3">
+                            <div>
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-primary/56">
+                                    Ultimele rulari
+                                </p>
+                                <h2 className="mt-1 text-lg font-semibold text-brand-primary">
+                                    Teste facturare
+                                </h2>
+                            </div>
+
+                            <span className="rounded-full bg-brand-primary/6 px-3 py-1 text-xs font-semibold text-brand-primary/78">
+                                {billingTestCompletedCount} finalizate
+                            </span>
+                        </div>
+
+                        {billingTests.length === 0 ? (
+                            <p className="mt-4 text-sm leading-6 text-brand-primary/66">
+                                Nu există încă fluxuri de test pornite din
+                                admin.
+                            </p>
+                        ) : (
+                            <div className="mt-4 space-y-3">
+                                {billingTests.map((report) => (
+                                    <Link
+                                        key={report.id}
+                                        href={`/admin/reports/${report.id}`}
+                                        className="block rounded-2xl border border-brand-primary/8 bg-brand-primary/2 px-4 py-3 transition-colors hover:border-brand-primary/18 hover:bg-brand-primary/4"
+                                    >
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-semibold text-brand-primary">
+                                                    Test #{report.id}
+                                                </p>
+                                                <p className="mt-1 text-sm text-brand-primary/76">
+                                                    {billingTypeLabels[
+                                                        report.report_type
+                                                    ] ?? report.report_type}
+                                                </p>
+                                            </div>
+                                            <span
+                                                className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${billingStatusConfig[report.status].bg} ${billingStatusConfig[report.status].text}`}
+                                            >
+                                                {
+                                                    billingStatusConfig[
+                                                        report.status
+                                                    ].label
+                                                }
+                                            </span>
+                                        </div>
+
+                                        <p className="mt-2 text-xs text-brand-primary/62">
+                                            {report.email || "Fără email"} •{" "}
+                                            {formatDateTime(report.created_at)}
+                                        </p>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 

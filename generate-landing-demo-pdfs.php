@@ -34,15 +34,17 @@ $renderer = $app->make(RemotePdfRenderer::class);
 $variants = [
     'buying_en' => [
         'locale' => 'en',
-        'mode' => 'existing',
-        'source' => public_path('images/report-example-en.pdf'),
+        'mode' => 'rendered',
+        'json' => storage_path('app/landing_example_buying_en.json'),
+        'template' => 'reports.template-buying',
         'output' => public_path('images/report-example-en.pdf'),
         'report_type' => 'buying_living',
     ],
     'buying_ro' => [
         'locale' => 'ro',
-        'mode' => 'existing',
-        'source' => public_path('images/report-example-ro.pdf'),
+        'mode' => 'rendered',
+        'json' => storage_path('app/landing_example_buying_ro.json'),
+        'template' => 'reports.template-buying',
         'output' => public_path('images/report-example-ro.pdf'),
         'report_type' => 'buying_living',
     ],

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Report;
 use App\Models\Settings;
 use App\Services\ExchangeRateService;
 use App\Services\RemotePdfRenderer;
@@ -16,6 +17,12 @@ class AdminSettingsController extends Controller
     {
         return Inertia::render('Admin/Settings', [
             'settings' => Settings::getAllSettings(),
+            'billingTests' => Report::query()
+                ->where('is_test', true)
+                ->orderByDesc('created_at')
+                ->limit(5)
+                ->get(),
+            'billingTestCompletedCount' => Report::where('status', 'test_completed')->count(),
         ]);
     }
 

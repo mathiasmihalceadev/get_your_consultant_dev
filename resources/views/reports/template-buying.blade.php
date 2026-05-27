@@ -90,15 +90,26 @@
         .header-bar {
             background: linear-gradient(135deg, var(--primary) 0%, #28255a 100%);
             padding: 10px 28px;
-            display: flex;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 16px;
             align-items: center;
-            justify-content: space-between;
         }
         .header-logo { height: 50px; }
         .header-left { display: flex; align-items: center; }
+        .header-report-kind {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.92);
+            line-height: 1.3;
+        }
         .header-badge-gen {
             font-size: var(--font-small); color: rgba(255,255,255,0.68);
             font-weight: 500; line-height: var(--line-body);
+            justify-self: end;
         }
 
         /* â”€â”€ HERO â”€â”€ */
@@ -656,6 +667,7 @@
 
     $viewTranslations = [
         'ro' => [
+            'report_kind_header' => 'Analiză cumpărare',
             'asking_price' => 'Preț cerut',
             'fair_value_estimate' => 'Valoare corectă estimată',
             'vs_market' => 'față de piață',
@@ -743,6 +755,7 @@
             'total_cost_chart' => 'cost total',
         ],
         'en' => [
+            'report_kind_header' => 'Buying analysis',
             'asking_price' => 'Asking price',
             'fair_value_estimate' => 'Estimated fair value',
             'vs_market' => 'vs market',
@@ -981,6 +994,7 @@
                 <img src="{{ $logoBase64 }}" alt="Logo" class="header-logo">
             @endif
         </div>
+        <div class="header-report-kind">{{ $t('report_kind_header') }}</div>
         <div class="header-badge-gen">{{ date('d.m.Y', strtotime($meta['generated_at'] ?? 'now')) }}</div>
     </div>
 

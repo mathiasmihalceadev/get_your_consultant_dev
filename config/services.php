@@ -58,6 +58,22 @@ return [
         ],
     ],
 
+    'smartbill' => [
+        'username' => env('SMARTBILL_USERNAME'),
+        'token' => env('SMARTBILL_TOKEN'),
+        'company_vat_code' => env('SMARTBILL_COMPANY_VAT_CODE'),
+        'base_url' => rtrim((string) env('SMARTBILL_BASE_URL', 'https://ws.smartbill.ro/SBORO/api'), '/'),
+        'timeout' => (int) env('SMARTBILL_TIMEOUT', 20),
+        'invoice' => [
+            'series' => env('SMARTBILL_INVOICE_SERIES'),
+            'payment_type' => env('SMARTBILL_PAYMENT_TYPE', 'Card online'),
+            'test_draft' => env('SMARTBILL_TEST_FLOW_DRAFT', true),
+            'tax_name' => env('SMARTBILL_TAX_NAME'),
+            'tax_percentage' => env('SMARTBILL_TAX_PERCENTAGE'),
+            'tax_included' => env('SMARTBILL_TAX_INCLUDED'),
+        ],
+    ],
+
     'exchange_rates' => [
         'eur_ron_url' => env(
             'EXCHANGE_RATE_EUR_RON_URL',

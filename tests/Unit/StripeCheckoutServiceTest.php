@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Report;
+use App\Models\ReportPurchase;
 use App\Services\PaidReportFulfillmentService;
 use App\Services\ReportPricingService;
 use App\Services\StripeCheckoutService;
@@ -46,4 +47,58 @@ class StripeCheckoutServiceTest extends TestCase
 
         app()->forgetInstance('request');
     }
+
+    public function test_it_uses_admin_return_urls_for_billing_test_reports(): void
+    {
+        $service = new StripeCheckoutService(
+            app(PaidReportFulfillmentService::class),
+            app(ReportPricingService::class),
+        );
+
+        $report = (new Report([
+            'report_type' => 'buying_living',
+            'locale' => 'ro',
+            'email' => 'billing-test@example.com',
+            'page_token' => 'billing-test-token',
+            'is_test' => true,
+        ]))->forceFill([
+            'id' => 45,
+        ]);
+        $purchase = (new ReportPurchase())->forceFill([
+            'id' => 67,
+        ]);
+
+        app()->instance('request', Request::create('https://admin.example.ro/admin/dashboard', 'GET'));
+
+        $successUrl = new \ReflectionMethod($service, 'successUrl');
+        $cancelUrl = new \ReflectionMethod($service, 'cancelUrl');
+
+        $this->assertSame(
+            'https://admin.example.ro/admin/billing-tests/45/checkout/success?session_id={CHECKOUT_SESSION_ID}&purchase=67',
+            $successUrl->invoke($service, $report, $purchase),
+        );
+        $this->assertSame(
+            'https://admin.example.ro/admin/billing-tests/45/checkout/cancel?purchase=67',
+            $cancelUrl->invoke($service, $report, $purchase),
+        );
+
+        app()->forgetInstance('request');
+    }
+
+    public function test_it_uses_only_supported_billing_fields_for_checkout_sessions(): void
+    {
+        $service = new StripeCheckoutService(
+            app(PaidReportFulfillmentService::class),
+            app(ReportPricingService::class),
+        );
+        $method = new \ReflectionMethod($service, 'checkoutBillingCollectionPayload');
+
+        $this->assertSame([
+            'billing_address_collection' => 'required',
+            'phone_number_collection' => [
+                'enabled' => true,
+            ],
+        ], $method->invoke($service));
+    }
+
 }

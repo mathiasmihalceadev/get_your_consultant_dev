@@ -2,11 +2,13 @@
 
 namespace App\Services;
 
+use App\Jobs\SyncSmartBillInvoiceJob;
 use App\Models\Report;
 use App\Models\ReportPurchase;
 use App\Support\LocalizedUrl;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use RuntimeException;
 use Stripe\Checkout\Session;
 use Stripe\Exception\ApiErrorException;
@@ -75,10 +77,7 @@ class StripeCheckoutService
             ],
             'customer_email' => $report->email,
             'customer_creation' => 'always',
-            'billing_address_collection' => 'required',
-            'phone_number_collection' => [
-                'enabled' => true,
-            ],
+            ...$this->checkoutBillingCollectionPayload(),
             'metadata' => [
                 'report_id' => (string) $report->id,
                 'purchase_id' => (string) $purchase->id,
@@ -135,6 +134,125 @@ class StripeCheckoutService
         return (string) $session->url;
     }
 
+    public function createBillingTestCheckoutSession(Report $report, bool $sendTestInvoiceEmail = false): string
+    {
+        if (!$report->email || !$report->page_token) {
+            throw new RuntimeException('Billing test report email and page token are required before creating a checkout session.');
+        }
+
+        if (!$report->is_test) {
+            throw new RuntimeException('Billing test checkout can only be created for reports marked as tests.');
+        }
+
+        $currency = $this->billingTestCurrency($report->locale);
+        $amountMinor = $this->billingTestAmountMinor($currency);
+        $metadata = array_filter([
+            'report_id' => (string) $report->id,
+            'page_token' => $report->page_token,
+            'report_type' => $report->report_type,
+            'locale' => $report->locale,
+            'checkout_locale' => $report->locale === 'ro' ? 'ro' : 'en',
+            'checkout_currency' => $currency,
+            'base_currency' => $currency,
+            'base_amount_minor' => (string) $amountMinor,
+            'checkout_amount_minor' => (string) $amountMinor,
+            'billing_test' => '1',
+            'send_test_invoice_email' => $sendTestInvoiceEmail ? '1' : '0',
+        ], static fn (mixed $value): bool => $value !== null && $value !== '');
+
+        $purchase = ReportPurchase::create([
+            'report_id' => $report->id,
+            'report_type' => $report->report_type,
+            'locale' => $report->locale,
+            'email' => $report->email,
+            'status' => 'checkout_created',
+            'currency' => $currency,
+            'base_currency' => $currency,
+            'base_amount_minor' => $amountMinor,
+            'checkout_amount_minor' => $amountMinor,
+            'metadata' => $metadata,
+            'checkout_started_at' => now(),
+        ]);
+
+        $payload = [
+            'mode' => 'payment',
+            'line_items' => [
+                [
+                    'price_data' => [
+                        'currency' => $currency,
+                        'product_data' => [
+                            'name' => $this->billingTestProductName($report),
+                            'description' => $this->billingTestProductDescription($report),
+                        ],
+                        'unit_amount' => $amountMinor,
+                    ],
+                    'quantity' => 1,
+                ],
+            ],
+            'customer_email' => $report->email,
+            'customer_creation' => 'always',
+            ...$this->checkoutBillingCollectionPayload(),
+            'metadata' => [
+                'report_id' => (string) $report->id,
+                'purchase_id' => (string) $purchase->id,
+                ...$metadata,
+            ],
+            'success_url' => $this->successUrl($report, $purchase),
+            'cancel_url' => $this->cancelUrl($report, $purchase),
+        ];
+
+        $this->logInfo('Creating Stripe billing test checkout session', [
+            'report_id' => $report->id,
+            'purchase_id' => $purchase->id,
+            'payload' => $payload,
+        ]);
+
+        try {
+            $session = $this->client()->checkout->sessions->create($payload);
+        } catch (ApiErrorException $e) {
+            $purchase->update([
+                'status' => 'failed',
+                'failed_at' => now(),
+            ]);
+
+            $report->update([
+                'status' => 'error',
+                'error_message' => 'Unable to create the Stripe billing test checkout session.',
+            ]);
+
+            $this->logError('Stripe billing test checkout session creation failed', [
+                'report_id' => $report->id,
+                'purchase_id' => $purchase->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw new RuntimeException('Unable to create Stripe billing test checkout session.', previous: $e);
+        }
+
+        $purchase->update([
+            'status' => 'checkout_open',
+            'stripe_checkout_session_id' => $session->id,
+            'amount_subtotal' => $session->amount_subtotal,
+            'amount_total' => $session->amount_total,
+            'checkout_session_payload' => $session->toArray(),
+            'customer_email' => $session->customer_email ?: $report->email,
+        ]);
+
+        $report->update([
+            'status' => 'awaiting_payment',
+            'error_message' => null,
+        ]);
+
+        $this->logInfo('Stripe billing test checkout session created', [
+            'report_id' => $report->id,
+            'purchase_id' => $purchase->id,
+            'checkout_session_id' => $session->id,
+            'checkout_url' => $session->url,
+        ]);
+
+        return (string) $session->url;
+    }
+
     public function markCheckoutSuccessReturn(Report $report, ?int $purchaseId, ?string $sessionId): void
     {
         $purchase = $this->findPurchase($report, $purchaseId, $sessionId);
@@ -146,7 +264,13 @@ class StripeCheckoutService
                 $sessionPaymentStatus = $session->payment_status;
 
                 if ($purchase) {
-                    $customerDetails = $this->normalizeStripeValue($session->customer_details);
+                    $customerPayload = is_object($session->customer)
+                        ? $this->normalizeStripeValue($session->customer)
+                        : null;
+                    $customerDetails = $this->mergeStripeCustomerDetails(
+                        $this->normalizeStripeValue($session->customer_details),
+                        $customerPayload,
+                    );
 
                     $purchase->update([
                         'status' => $session->payment_status === 'paid'
@@ -157,7 +281,7 @@ class StripeCheckoutService
                         'amount_total' => $session->amount_total,
                         'paid_currency' => strtolower((string) ($session->currency ?: $purchase->paid_currency ?: $purchase->currency)),
                         'customer_email' => $customerDetails['email'] ?? $session->customer_email ?? $purchase->email,
-                        'customer_name' => $customerDetails['name'] ?? $purchase->customer_name,
+                        'customer_name' => $this->resolveStripeCustomerName($customerDetails) ?? $purchase->customer_name,
                         'customer_phone' => $customerDetails['phone'] ?? $purchase->customer_phone,
                         'customer_address' => is_array($customerDetails['address'] ?? null)
                             ? $customerDetails['address']
@@ -356,8 +480,29 @@ class StripeCheckoutService
         }
 
         $purchase->report->update([
+            'status' => 'payment_processing',
             'error_message' => null,
         ]);
+
+        SyncSmartBillInvoiceJob::dispatch($purchase->id);
+
+        if ($purchase->report->is_test) {
+            $this->logInfo('Stripe payment confirmed for admin billing test', [
+                'event_id' => $eventId,
+                'event_type' => $eventType,
+                'checkout_session_id' => $sessionId,
+                'purchase_id' => $purchase->id,
+                'report_id' => $purchase->report_id,
+            ]);
+
+            return [
+                'handled' => true,
+                'event_id' => $eventId,
+                'type' => $eventType,
+                'purchase_id' => $purchase->id,
+                'report_id' => $purchase->report_id,
+            ];
+        }
 
         $this->paidReportFulfillment->fulfill($purchase->report->fresh());
 
@@ -439,7 +584,7 @@ class StripeCheckoutService
     private function retrieveCheckoutSession(string $sessionId): Session
     {
         return $this->client()->checkout->sessions->retrieve($sessionId, [
-            'expand' => ['payment_intent', 'customer'],
+            'expand' => ['payment_intent', 'customer', 'customer.tax_ids'],
         ]);
     }
 
@@ -467,8 +612,17 @@ class StripeCheckoutService
             return $failedPurchase;
         }
 
-        $metadata = $this->normalizeStripeValue($session->metadata) ?? $purchase->metadata ?? [];
-        $customerDetails = $this->normalizeStripeValue($session->customer_details);
+        $metadata = [
+            ...(is_array($purchase->metadata) ? $purchase->metadata : []),
+            ...($this->normalizeStripeValue($session->metadata) ?? []),
+        ];
+        $customerPayload = is_object($session->customer)
+            ? $this->normalizeStripeValue($session->customer)
+            : null;
+        $customerDetails = $this->mergeStripeCustomerDetails(
+            $this->normalizeStripeValue($session->customer_details),
+            $customerPayload,
+        );
         $paymentIntentPayload = is_object($session->payment_intent)
             ? $this->normalizeStripeValue($session->payment_intent)
             : null;
@@ -489,7 +643,7 @@ class StripeCheckoutService
             'stripe_price_id' => (string) ($metadata['price_id'] ?? $purchase->stripe_price_id ?? ''),
             'stripe_product_id' => (string) ($metadata['stripe_product_id'] ?? $purchase->stripe_product_id ?? ''),
             'customer_email' => $customerDetails['email'] ?? $session->customer_email ?? $purchase->email,
-            'customer_name' => $customerDetails['name'] ?? null,
+            'customer_name' => $this->resolveStripeCustomerName($customerDetails),
             'customer_phone' => $customerDetails['phone'] ?? null,
             'customer_address' => is_array($customerDetails['address'] ?? null) ? $customerDetails['address'] : null,
             'customer_details' => $customerDetails,
@@ -684,6 +838,15 @@ class StripeCheckoutService
 
     private function successUrl(Report $report, ReportPurchase $purchase): string
     {
+        if ($report->is_test) {
+            $path = route('admin.billing-tests.success', ['id' => $report->id], false);
+
+            return $this->checkoutBaseUrl($report)
+                . $path
+                . '?session_id={CHECKOUT_SESSION_ID}&purchase='
+                . $purchase->id;
+        }
+
         $path = route('checkout.success', ['pageToken' => $report->page_token], false);
 
         return $this->checkoutBaseUrl($report)
@@ -694,6 +857,15 @@ class StripeCheckoutService
 
     private function cancelUrl(Report $report, ReportPurchase $purchase): string
     {
+        if ($report->is_test) {
+            $path = route('admin.billing-tests.cancel', ['id' => $report->id], false);
+
+            return $this->checkoutBaseUrl($report)
+                . $path
+                . '?purchase='
+                . $purchase->id;
+        }
+
         $path = route('checkout.cancel', ['pageToken' => $report->page_token], false);
 
         return $this->checkoutBaseUrl($report)
@@ -774,6 +946,43 @@ class StripeCheckoutService
         return strtolower((string) config('services.stripe.currency', 'eur'));
     }
 
+    private function checkoutBillingCollectionPayload(): array
+    {
+        return [
+            'billing_address_collection' => 'required',
+            'phone_number_collection' => [
+                'enabled' => true,
+            ],
+        ];
+    }
+
+    private function billingTestCurrency(?string $locale): string
+    {
+        return strtolower($locale) === 'ro' ? 'ron' : 'eur';
+    }
+
+    private function billingTestAmountMinor(string $currency): int
+    {
+        return $currency === 'ron' ? 500 : 100;
+    }
+
+    private function billingTestProductName(Report $report): string
+    {
+        return match ($report->locale) {
+            'ro' => 'Test Stripe + SmartBill',
+            default => 'Stripe + SmartBill test',
+        };
+    }
+
+    private function billingTestProductDescription(Report $report): string
+    {
+        $reportType = Str::replace('_', ' ', $report->report_type);
+
+        return $report->locale === 'ro'
+            ? 'Flux de test pentru plata si facturare. Nu se genereaza raportul final. Tip: ' . $reportType
+            : 'Billing test flow for payment and invoicing. No final report will be generated. Type: ' . $reportType;
+    }
+
     private function webhookSecret(): string
     {
         $secret = (string) config('services.stripe.webhook_secret');
@@ -819,6 +1028,95 @@ class StripeCheckoutService
         $decoded = json_decode(json_encode($value), true);
 
         return is_array($decoded) ? $decoded : null;
+    }
+
+    private function mergeStripeCustomerDetails(?array $customerDetails, ?array $customerPayload): ?array
+    {
+        if ($customerDetails === null && $customerPayload === null) {
+            return null;
+        }
+
+        $address = is_array($customerDetails['address'] ?? null)
+            ? $customerDetails['address']
+            : (is_array($customerPayload['address'] ?? null) ? $customerPayload['address'] : null);
+        $taxIds = $this->extractStripeTaxIds($customerDetails, $customerPayload);
+
+        $merged = array_filter([
+            ...($customerDetails ?? []),
+            'name' => $customerDetails['name']
+                ?? $customerPayload['business_name']
+                ?? $customerPayload['name']
+                ?? $customerPayload['individual_name']
+                ?? null,
+            'email' => $customerDetails['email'] ?? $customerPayload['email'] ?? null,
+            'phone' => $customerDetails['phone'] ?? $customerPayload['phone'] ?? null,
+            'address' => $address,
+            'business_name' => $customerPayload['business_name'] ?? $customerDetails['business_name'] ?? null,
+            'individual_name' => $customerPayload['individual_name'] ?? $customerDetails['individual_name'] ?? null,
+            'tax_exempt' => $customerPayload['tax_exempt'] ?? $customerDetails['tax_exempt'] ?? null,
+            'tax_ids' => $taxIds,
+        ], fn (mixed $value): bool => $this->hasStripeValue($value));
+
+        return $merged === [] ? null : $merged;
+    }
+
+    private function extractStripeTaxIds(?array $customerDetails, ?array $customerPayload): array
+    {
+        $sources = [
+            $customerDetails['tax_ids'] ?? [],
+            $customerPayload['tax_ids']['data'] ?? [],
+            $customerPayload['tax_ids'] ?? [],
+        ];
+
+        $taxIds = [];
+
+        foreach ($sources as $source) {
+            if (!is_array($source)) {
+                continue;
+            }
+
+            foreach ($source as $taxId) {
+                if (!is_array($taxId)) {
+                    continue;
+                }
+
+                $value = trim((string) ($taxId['value'] ?? ''));
+
+                if ($value === '') {
+                    continue;
+                }
+
+                $signature = strtolower((string) ($taxId['type'] ?? '')) . '|' . strtolower($value);
+
+                $taxIds[$signature] = array_filter([
+                    'type' => $taxId['type'] ?? null,
+                    'value' => $value,
+                ], fn (mixed $item): bool => $item !== null && $item !== '');
+            }
+        }
+
+        return array_values($taxIds);
+    }
+
+    private function resolveStripeCustomerName(?array $customerDetails): ?string
+    {
+        $name = trim((string) (
+            $customerDetails['business_name']
+            ?? $customerDetails['name']
+            ?? $customerDetails['individual_name']
+            ?? ''
+        ));
+
+        return $name !== '' ? $name : null;
+    }
+
+    private function hasStripeValue(mixed $value): bool
+    {
+        if (is_array($value)) {
+            return $value !== [];
+        }
+
+        return $value !== null && $value !== '';
     }
 
     private function stripeTimestamp(?int $timestamp): ?Carbon

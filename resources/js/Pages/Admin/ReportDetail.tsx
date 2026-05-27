@@ -21,6 +21,7 @@ const statusBadgeColors: Record<ReportStatus, string> = {
     payment_processing: "bg-sky-100 text-sky-800",
     payment_cancelled: "bg-amber-100 text-amber-800",
     payment_failed: "bg-red-100 text-red-800",
+    test_completed: "bg-emerald-100 text-emerald-800",
     pending: "bg-blue-100 text-blue-800",
     to_be_sent: "bg-orange-100 text-orange-800",
     sent: "bg-green-100 text-green-800",
@@ -40,6 +41,7 @@ const statusLabels: Record<ReportStatus, string> = {
     payment_processing: "Plată în confirmare",
     payment_cancelled: "Plată anulată",
     payment_failed: "Plată eșuată",
+    test_completed: "Test finalizat",
     pending: "În așteptare",
     to_be_sent: "De trimis",
     sent: "Trimis",
@@ -91,6 +93,12 @@ export default function ReportDetail({ report }: { report: Report }) {
                             <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
                                 Raport #{report.id}
                             </h1>
+                            {report.is_test && (
+                                <p className="mt-2 text-sm font-medium text-white/78">
+                                    Flux intern de test pentru Stripe +
+                                    SmartBill
+                                </p>
+                            )}
                         </div>
 
                         <div className="mt-5 grid grid-cols-2 gap-3">
@@ -169,20 +177,143 @@ export default function ReportDetail({ report }: { report: Report }) {
                             </div>
                         )}
 
+                        {report.latest_purchase && (
+                            <div className="rounded-2xl border border-brand-primary/8 bg-white p-4">
+                                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-neutral">
+                                    <ClockCountdown size={14} />
+                                    Stripe + SmartBill
+                                </div>
+
+                                <div className="mt-3 grid gap-3 text-sm text-brand-primary/82">
+                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                        <div>
+                                            <span className="text-brand-primary/56">
+                                                Purchase status:
+                                            </span>
+                                            <p className="mt-1 font-medium">
+                                                {report.latest_purchase.status}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <span className="text-brand-primary/56">
+                                                Payment intent:
+                                            </span>
+                                            <p className="mt-1 break-all font-medium">
+                                                {report.latest_purchase
+                                                    .stripe_payment_intent_id ||
+                                                    "—"}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                        <div>
+                                            <span className="text-brand-primary/56">
+                                                Checkout session:
+                                            </span>
+                                            <p className="mt-1 break-all font-medium">
+                                                {report.latest_purchase
+                                                    .stripe_checkout_session_id ||
+                                                    "—"}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <span className="text-brand-primary/56">
+                                                Paid at:
+                                            </span>
+                                            <p className="mt-1 font-medium">
+                                                {formatDateTime(
+                                                    report.latest_purchase
+                                                        .paid_at,
+                                                )}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {report.latest_purchase
+                                        .smart_bill_invoice && (
+                                        <div className="rounded-2xl border border-brand-primary/8 bg-brand-primary/2 p-4">
+                                            <div className="grid gap-3 sm:grid-cols-2">
+                                                <div>
+                                                    <span className="text-brand-primary/56">
+                                                        SmartBill invoice:
+                                                    </span>
+                                                    <p className="mt-1 font-medium">
+                                                        {report.latest_purchase
+                                                            .smart_bill_invoice
+                                                            .invoice_series &&
+                                                        report.latest_purchase
+                                                            .smart_bill_invoice
+                                                            .invoice_number
+                                                            ? `${report.latest_purchase.smart_bill_invoice.invoice_series}${report.latest_purchase.smart_bill_invoice.invoice_number}`
+                                                            : "În curs / indisponibil"}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <span className="text-brand-primary/56">
+                                                        SmartBill status:
+                                                    </span>
+                                                    <p className="mt-1 font-medium">
+                                                        {
+                                                            report
+                                                                .latest_purchase
+                                                                .smart_bill_invoice
+                                                                .status
+                                                        }{" "}
+                                                        /{" "}
+                                                        {
+                                                            report
+                                                                .latest_purchase
+                                                                .smart_bill_invoice
+                                                                .payment_status
+                                                        }
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {report.latest_purchase
+                                                .smart_bill_invoice
+                                                .file_url && (
+                                                <a
+                                                    href={
+                                                        report.latest_purchase
+                                                            .smart_bill_invoice
+                                                            .file_url
+                                                    }
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className={cn(
+                                                        buttonVariants({
+                                                            variant: "outline",
+                                                            size: "sm",
+                                                        }),
+                                                        "mt-3 h-9 border-brand-primary/15 text-brand-primary",
+                                                    )}
+                                                >
+                                                    Vezi documentul SmartBill
+                                                </a>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex flex-col gap-2 pt-1">
-                            {report.status === "to_be_sent" && (
-                                <Button
-                                    onClick={() =>
-                                        router.post(
-                                            `/admin/reports/${report.id}/send`,
-                                        )
-                                    }
-                                    className="h-11 w-full gap-2 bg-brand-primary text-white hover:bg-brand-primary/90"
-                                >
-                                    <PaperPlaneTilt size={18} />
-                                    Trimite Raport
-                                </Button>
-                            )}
+                            {!report.is_test &&
+                                report.status === "to_be_sent" && (
+                                    <Button
+                                        onClick={() =>
+                                            router.post(
+                                                `/admin/reports/${report.id}/send`,
+                                            )
+                                        }
+                                        className="h-11 w-full gap-2 bg-brand-primary text-white hover:bg-brand-primary/90"
+                                    >
+                                        <PaperPlaneTilt size={18} />
+                                        Trimite Raport
+                                    </Button>
+                                )}
 
                             {report.report_url && (
                                 <a
@@ -309,20 +440,41 @@ export default function ReportDetail({ report }: { report: Report }) {
                                     </Button>
                                 </a>
                             )}
-                            {report.status === "to_be_sent" && (
-                                <Button
-                                    onClick={() =>
-                                        router.post(
-                                            `/admin/reports/${report.id}/send`,
-                                        )
-                                    }
-                                    className="gap-2 bg-brand-primary hover:bg-brand-primary/90 text-white cursor-pointer"
-                                >
-                                    <PaperPlaneTilt size={18} />
-                                    Trimite Raport
-                                </Button>
-                            )}
+                            {!report.is_test &&
+                                report.status === "to_be_sent" && (
+                                    <Button
+                                        onClick={() =>
+                                            router.post(
+                                                `/admin/reports/${report.id}/send`,
+                                            )
+                                        }
+                                        className="gap-2 bg-brand-primary hover:bg-brand-primary/90 text-white cursor-pointer"
+                                    >
+                                        <PaperPlaneTilt size={18} />
+                                        Trimite Raport
+                                    </Button>
+                                )}
                         </div>
+
+                        {report.is_test &&
+                            report.latest_purchase?.smart_bill_invoice
+                                ?.file_url && (
+                                <a
+                                    href={
+                                        report.latest_purchase
+                                            .smart_bill_invoice.file_url
+                                    }
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <Button
+                                        variant="outline"
+                                        className="gap-2 cursor-pointer"
+                                    >
+                                        Vezi documentul SmartBill
+                                    </Button>
+                                </a>
+                            )}
                     </CardContent>
                 </Card>
             </div>

@@ -143,6 +143,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'smartbill' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/smartbill.log'),
+            'level' => 'debug',
+            'days' => 60,
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];

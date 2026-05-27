@@ -40,6 +40,11 @@ const statusConfig: Record<
         bg: "bg-red-50",
         text: "text-red-600",
     },
+    test_completed: {
+        label: "Test finalizat",
+        bg: "bg-emerald-50",
+        text: "text-emerald-700",
+    },
     to_be_sent: {
         label: "De trimis",
         bg: "bg-brand-secondary/15",
@@ -90,6 +95,7 @@ interface DashboardCounts {
     payment_processing: number;
     payment_cancelled: number;
     payment_failed: number;
+    test_completed?: number;
     to_be_sent: number;
     sent: number;
     error: number;
@@ -110,6 +116,7 @@ interface DashboardProps {
 
 function canEmailReport(report: Report): boolean {
     return (
+        !report.is_test &&
         Boolean(report.email) &&
         (report.status === "to_be_sent" ||
             report.status === "sent" ||
@@ -167,6 +174,11 @@ function ActionableReportCard({ report }: { report: Report }) {
                 <p className="mt-3 text-xs leading-5 text-brand-primary/70">
                     #{report.id} • {formatDateTime(report.created_at)}
                 </p>
+                {report.is_test && (
+                    <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-secondary">
+                        Flux de test facturare
+                    </p>
+                )}
                 <p className="mt-2 break-all text-sm leading-6 text-brand-primary/80">
                     {truncate(report.url, 88)}
                 </p>
@@ -223,6 +235,11 @@ function MobileReportRow({ report }: { report: Report }) {
             <p className="mt-2 text-xs text-brand-primary/62">
                 {formatDateTime(report.created_at)}
             </p>
+            {report.is_test && (
+                <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-secondary">
+                    Flux de test facturare
+                </p>
+            )}
             <p className="mt-2 break-all text-sm leading-6 text-brand-primary/78">
                 {truncate(report.url, 120)}
             </p>
@@ -468,6 +485,11 @@ export default function Dashboard({
                                         <p className="text-xs font-semibold text-brand-primary">
                                             #{report.id}
                                         </p>
+                                        {report.is_test && (
+                                            <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-secondary">
+                                                Test billing
+                                            </p>
+                                        )}
                                         <p className="mt-1 text-sm text-brand-primary/78">
                                             {typeConfig[report.report_type]
                                                 ?.label ?? report.report_type}

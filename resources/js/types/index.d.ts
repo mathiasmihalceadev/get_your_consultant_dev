@@ -26,16 +26,47 @@ export type ReportStatus =
     | "payment_processing"
     | "payment_cancelled"
     | "payment_failed"
+    | "test_completed"
     | "pending"
     | "to_be_sent"
     | "sent"
     | "error";
+
+export interface SmartBillInvoice {
+    id: number;
+    status: string;
+    payment_status: string;
+    invoice_series: string | null;
+    invoice_number: string | null;
+    file_url: string | null;
+    download_url: string | null;
+    document_url: string | null;
+    document_view_url: string | null;
+    error_message: string | null;
+    issued_at: string | null;
+    payment_registered_at: string | null;
+}
+
+export interface ReportPurchase {
+    id: number;
+    status: string;
+    amount_total: number | null;
+    currency: string;
+    paid_currency: string | null;
+    customer_email: string | null;
+    customer_name: string | null;
+    stripe_checkout_session_id: string | null;
+    stripe_payment_intent_id: string | null;
+    paid_at: string | null;
+    smart_bill_invoice?: SmartBillInvoice | null;
+}
 
 export interface Report {
     id: number;
     report_type: ReportType;
     url: string;
     email: string | null;
+    is_test: boolean;
     status: ReportStatus;
     report_url: string | null;
     page_token: string | null;
@@ -43,6 +74,7 @@ export interface Report {
     processed_at: string | null;
     created_at: string;
     updated_at: string;
+    latest_purchase?: ReportPurchase | null;
 }
 
 export interface ContactInquiry {
@@ -90,10 +122,15 @@ export interface FlashMessages {
     error?: string;
 }
 
+export interface AppFlags {
+    publicWizardMaintenance: boolean;
+}
+
 export interface PageProps {
     auth: {
         user: User | null;
     };
+    appFlags: AppFlags;
     flash: FlashMessages;
     locale: string;
     supportedLocales: string[];

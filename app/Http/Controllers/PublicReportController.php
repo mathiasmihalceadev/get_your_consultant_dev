@@ -41,6 +41,10 @@ class PublicReportController extends Controller
 
     public function showUrlForm(Request $request)
     {
+        if ($this->publicWizardMaintenanceEnabled()) {
+            return redirect()->route('get-report');
+        }
+
         $type = $request->query('type');
 
         if (!in_array($type, ['rental_living', 'buying_living'])) {
@@ -54,6 +58,10 @@ class PublicReportController extends Controller
 
     public function validateUrl(Request $request, OpenAIService $openAI)
     {
+        if ($this->publicWizardMaintenanceEnabled()) {
+            return redirect()->route('get-report');
+        }
+
         $locale = app()->getLocale();
         $validated = $request->validate(
             [
@@ -320,6 +328,11 @@ class PublicReportController extends Controller
             'report_url' => $report->report_url,
             'error_message' => $report->error_message,
         ];
+    }
+
+    private function publicWizardMaintenanceEnabled(): bool
+    {
+        return (bool) config('app.public_wizard_maintenance', false);
     }
 
     private function renderLegalDocument(string $documentKey)
