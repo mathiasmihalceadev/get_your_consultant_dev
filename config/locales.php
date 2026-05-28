@@ -1,5 +1,30 @@
 <?php
 
+$parseLocaleList = static function (?string $value, array $fallback): array {
+    $source = $value;
+
+    if (!is_string($source) || trim($source) === '') {
+        return array_values(array_unique($fallback));
+    }
+
+    $locales = array_filter(array_map(
+        static fn (string $locale): string => strtolower(trim($locale)),
+        explode(',', $source),
+    ));
+
+    return array_values(array_unique($locales));
+};
+
+$supportedLocales = $parseLocaleList(env('APP_SUPPORTED_LOCALES'), ['en', 'ro']);
+$publicLocales = array_values(array_filter(
+    $parseLocaleList(env('APP_PUBLIC_LOCALES'), $supportedLocales),
+    static fn (string $locale): bool => in_array($locale, $supportedLocales, true),
+));
+
+if ($publicLocales === []) {
+    $publicLocales = $supportedLocales;
+}
+
 $domainUrls = [
     'en' => env('APP_DOMAIN_EN', 'http://myapp-com.test:8000'),
     'ro' => env('APP_DOMAIN_RO', 'http://myapp-ro.test:8000'),
@@ -24,9 +49,10 @@ foreach ($defaultHosts as $locale => $hosts) {
 }
 
 return [
-    'supported' => ['en', 'ro'],
+    'supported' => $supportedLocales,
+    'public' => $publicLocales,
     'default' => env('APP_LOCALE', 'en'),
-    'x_default_locale' => 'en',
+    'x_default_locale' => env('APP_X_DEFAULT_LOCALE', env('APP_LOCALE', 'en')),
     'domain_urls' => $domainUrls,
     'host_locale_map' => $hostLocaleMap,
     'translated_paths' => [

@@ -5,9 +5,11 @@ export function useTranslation() {
     const {
         locale,
         translations,
+        appFlags,
         domainUrls,
         localizedUrls,
         supportedLocales,
+        publicLocales,
         seoIndexing,
     } = usePage<PageProps>().props;
 
@@ -30,6 +32,8 @@ export function useTranslation() {
         domainUrls,
         localizedUrls,
         supportedLocales,
+        publicLocales,
+        showLocaleSwitcher: appFlags.publicLocaleSwitcher,
         seoIndexing,
     };
 }

@@ -36,7 +36,7 @@ class DomainLocaleTest extends TestCase
             ->assertJson([
                 'host' => 'myapp-ro.test',
                 'locale' => 'ro',
-                'message' => 'Obține Raport',
+                'message' => 'Obține raport',
             ]);
     }
 
@@ -91,6 +91,22 @@ class DomainLocaleTest extends TestCase
             ->assertHeader('Content-Type', 'application/xml')
             ->assertSee('http://myapp-com.test:8000', false)
             ->assertSee('http://myapp-ro.test:8000', false);
+    }
+
+    public function test_sitemap_uses_only_public_locales_when_configured(): void
+    {
+        config()->set('seo.indexing', true);
+        config()->set('locales.public', ['ro']);
+
+        $response = $this->withServerVariables([
+            'HTTP_HOST' => 'myapp-ro.test',
+        ])->get('/sitemap.xml');
+
+        $response
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/xml')
+            ->assertSee('http://myapp-ro.test:8000', false)
+            ->assertDontSee('http://myapp-com.test:8000', false);
     }
 
     public function test_old_locale_prefix_url_is_not_required(): void

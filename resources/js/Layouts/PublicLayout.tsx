@@ -9,8 +9,17 @@ import { PropsWithChildren } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 
 export default function PublicLayout({ children }: PropsWithChildren) {
-    const { t, locale, localePath, localizedUrls } = useTranslation();
-    const otherLocale = locale === "en" ? "ro" : "en";
+    const {
+        t,
+        locale,
+        localePath,
+        localizedUrls,
+        publicLocales,
+        showLocaleSwitcher,
+    } = useTranslation();
+    const otherLocale =
+        publicLocales.find((candidateLocale) => candidateLocale !== locale) ??
+        null;
     const currentYear = new Date().getFullYear();
     const legalPaths =
         locale === "ro"
@@ -36,6 +45,10 @@ export default function PublicLayout({ children }: PropsWithChildren) {
     ];
 
     const switchLocale = () => {
+        if (!otherLocale) {
+            return;
+        }
+
         const targetUrl = localizedUrls?.[otherLocale];
 
         if (!targetUrl) {
@@ -84,13 +97,15 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                 {t("get_report")}
                             </Link>
 
-                            <button
-                                onClick={switchLocale}
-                                className="flex items-center gap-1.5 border border-gray-200 px-3 py-2 text-[14px] font-semibold text-brand-primary/76 transition-colors cursor-pointer hover:text-brand-primary md:text-base"
-                            >
-                                <Globe size={16} />
-                                {otherLocale.toUpperCase()}
-                            </button>
+                            {showLocaleSwitcher && otherLocale ? (
+                                <button
+                                    onClick={switchLocale}
+                                    className="flex items-center gap-1.5 border border-gray-200 px-3 py-2 text-[14px] font-semibold text-brand-primary/76 transition-colors cursor-pointer hover:text-brand-primary md:text-base"
+                                >
+                                    <Globe size={16} />
+                                    {otherLocale.toUpperCase()}
+                                </button>
+                            ) : null}
                         </div>
                     </div>
 

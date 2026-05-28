@@ -72,7 +72,7 @@ class ReportMailTest extends TestCase
         $this->assertTrue(
             $attachments[0]->isEquivalent(
                 Attachment::fromPath($report->pdfStoragePath())
-                    ->as('report-mail-test.pdf')
+                    ->as('raport.pdf')
                     ->withMime('application/pdf')
             )
         );
@@ -106,12 +106,49 @@ class ReportMailTest extends TestCase
         $this->assertTrue(
             $attachments[0]->isEquivalent(
                 Attachment::fromPath($report->pdfStoragePath())
-                    ->as('report-mail-fallback.pdf')
+                    ->as('raport.pdf')
                     ->withMime('application/pdf')
             )
         );
 
         Http::assertSentCount(1);
+    }
+
+    public function test_it_uses_report_pdf_as_the_attachment_name_for_english_reports(): void
+    {
+        $reportPdf = "%PDF-report\n";
+        $report = $this->makeReportWithInvoice('report-mail-english.pdf', $this->makeInvoice('FCT', '0025'));
+        $report->forceFill(['locale' => 'en']);
+
+        $this->writeReportPdf($report, $reportPdf);
+
+        Http::fake([
+            'https://smartbill.test/SBORO/api/invoice/pdf?*' => Http::response([
+                'errorText' => 'Factura nu a fost gasita!',
+            ], 404),
+        ]);
+
+        $attachments = (new ReportMail($report))->attachments();
+
+        $this->assertCount(1, $attachments);
+        $this->assertTrue(
+            $attachments[0]->isEquivalent(
+                Attachment::fromPath($report->pdfStoragePath())
+                    ->as('report.pdf')
+                    ->withMime('application/pdf')
+            )
+        );
+    }
+
+    public function test_it_offsets_the_internal_pdf_storage_number_from_2000(): void
+    {
+        $report = (new Report())->forceFill([
+            'id' => 1,
+        ]);
+
+        $this->assertSame(2000, $report->pdfStorageNumber());
+        $this->assertSame('gyc_02000.pdf', $report->pdfStorageFilename());
+        $this->assertSame('/storage/reports/gyc_02000.pdf', $report->pdfPublicUrl());
     }
 
     private function makeReportWithInvoice(string $filename, SmartBillInvoice $invoice): Report

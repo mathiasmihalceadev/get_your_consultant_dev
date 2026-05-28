@@ -38,11 +38,12 @@ class ReportMail extends Mailable
     public function content(): Content
     {
         $locale = $this->report->locale ?? 'en';
+        $publicLocale = LocalizedUrl::publicLocale($locale);
         $translations = $this->loadTranslations($locale);
 
         $typeKey = "type_{$this->report->report_type}";
         $typeLabel = $translations[$typeKey] ?? $this->report->report_type;
-        $statusUrl = LocalizedUrl::urlForLocale($locale, "/report/{$this->report->page_token}");
+        $statusUrl = LocalizedUrl::publicUrlForLocale($locale, "/report/{$this->report->page_token}");
         $downloadPath = $this->report->report_url ?: $this->report->pdfPublicUrl();
 
         return new Content(
@@ -50,15 +51,15 @@ class ReportMail extends Mailable
             with: [
                 'report' => $this->report,
                 'typeLabel' => $typeLabel,
-                'downloadUrl' => LocalizedUrl::urlForLocale($locale, $downloadPath),
+                'downloadUrl' => LocalizedUrl::publicUrlForLocale($locale, $downloadPath),
                 'statusUrl' => $statusUrl,
-                'contactUrl' => LocalizedUrl::urlForLocale($locale, '/contact'),
-                'logoUrl' => LocalizedUrl::urlForLocale($locale, '/images/main-logo-transparent.png'),
-                'contactEmail' => $locale === 'ro'
+                'contactUrl' => LocalizedUrl::publicUrlForLocale($locale, '/contact'),
+                'logoUrl' => LocalizedUrl::publicUrlForLocale($locale, '/images/main-logo-transparent.png'),
+                'contactEmail' => $publicLocale === 'ro'
                     ? 'contact@getyourconsultant.ro'
                     : 'contact@getyourconsultant.com',
-                'websiteUrl' => LocalizedUrl::urlForLocale($locale, '/'),
-                'websiteLabel' => $locale === 'ro'
+                'websiteUrl' => LocalizedUrl::publicUrlForLocale($locale, '/'),
+                'websiteLabel' => $publicLocale === 'ro'
                     ? 'getyourconsultant.ro'
                     : 'getyourconsultant.com',
                 'currentYear' => now()->year,
@@ -84,7 +85,7 @@ class ReportMail extends Mailable
         }
 
         return Attachment::fromPath($path)
-            ->as($this->report->resolvedPdfStorageFilename())
+            ->as($this->reportAttachmentFilename())
             ->withMime('application/pdf');
     }
 
@@ -145,6 +146,13 @@ class ReportMail extends Mailable
         return $this->report->exists
             ? $this->report->smartBillInvoices()->latest('id')->first()
             : null;
+    }
+
+    private function reportAttachmentFilename(): string
+    {
+        $locale = strtolower((string) ($this->report->locale ?? 'en'));
+
+        return $locale === 'ro' ? 'raport.pdf' : 'report.pdf';
     }
 
     private function invoiceAttachmentFilename(SmartBillInvoice $invoice): string

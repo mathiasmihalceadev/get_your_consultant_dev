@@ -17,8 +17,18 @@ class HandleInertiaRequests extends Middleware
 
     public function share(Request $request): array
     {
-        $localizedUrls = LocalizedUrl::localizedUrlsForRequest($request);
+        $localizedUrls = LocalizedUrl::publicLocalizedUrlsForRequest($request);
         $activeLocale = app()->getLocale();
+        $publicLocale = LocalizedUrl::publicLocale($activeLocale);
+        $seoAlternates = [];
+
+        if (isset($localizedUrls['en'])) {
+            $seoAlternates['en'] = $localizedUrls['en'];
+        }
+
+        if (isset($localizedUrls['ro'])) {
+            $seoAlternates['ro-RO'] = $localizedUrls['ro'];
+        }
 
         return [
             ...parent::share($request),
@@ -27,6 +37,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'appFlags' => fn () => [
                 'publicWizardMaintenance' => (bool) config('app.public_wizard_maintenance', false),
+                'publicLocaleSwitcher' => (bool) config('app.public_locale_switcher', false),
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
@@ -34,16 +45,14 @@ class HandleInertiaRequests extends Middleware
             ],
             'locale' => fn () => $activeLocale,
             'supportedLocales' => fn () => LocalizedUrl::supportedLocales(),
-            'domainUrls' => fn () => LocalizedUrl::domainUrls(),
+            'publicLocales' => fn () => LocalizedUrl::publicLocales(),
+            'domainUrls' => fn () => LocalizedUrl::publicDomainUrls(),
             'localizedUrls' => fn () => $localizedUrls,
             'seoIndexing' => fn () => config('seo.indexing'),
             'seo' => fn () => [
-                'canonical' => $localizedUrls[$activeLocale] ?? $request->url(),
-                'alternates' => [
-                    'en' => $localizedUrls['en'] ?? null,
-                    'ro-RO' => $localizedUrls['ro'] ?? null,
-                ],
-                'xDefault' => $localizedUrls[config('locales.x_default_locale', 'en')] ?? null,
+                'canonical' => $localizedUrls[$publicLocale] ?? $request->url(),
+                'alternates' => $seoAlternates,
+                'xDefault' => $localizedUrls[LocalizedUrl::publicXDefaultLocale()] ?? null,
             ],
             'translations' => function () {
                 $locale = app()->getLocale();

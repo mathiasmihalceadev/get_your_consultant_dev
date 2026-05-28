@@ -52,7 +52,7 @@ Route::get('/sitemap.xml', function () {
     abort_unless(config('seo.indexing'), 404);
 
     $paths = ['/', '/contact', '/get-report', '/privacy-policy', '/terms-and-conditions', '/cookie-policy'];
-    $urls = collect(config('locales.supported', []))
+    $urls = collect(LocalizedUrl::publicLocales())
         ->flatMap(fn (string $locale) => collect($paths)->map(fn (string $path) => LocalizedUrl::urlForLocale($locale, $path)))
         ->all();
 

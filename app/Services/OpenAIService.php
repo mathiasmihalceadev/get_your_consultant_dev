@@ -29,32 +29,7 @@ class OpenAIService
 
     public function validateUrl(string $url, string $reportType): array
     {
-        $expectedTransaction = str_starts_with($reportType, 'buying_') ? 'buying' : 'renting';
-        $instructions = <<<PROMPT
-You are a validator for a residential real-estate report flow.
-
-Use the web search tool to inspect the provided URL and classify it into exactly one of these reason codes:
-- accessible_property: the URL is publicly reachable and is a residential property listing that matches the expected transaction type.
-- source_blocked: the source cannot be analyzed reliably because it blocks automated access, requires authentication, rate-limits heavily, is unavailable, or the content cannot be opened.
-- not_property: the URL is reachable but it is not a single public residential property listing page.
-- not_buying_property: the URL is a property listing, but it is not a buying / for-sale listing while the expected transaction type is buying.
-- not_renting_property: the URL is a property listing, but it is not a renting / for-rent listing while the expected transaction type is renting.
-
-Expected transaction type: {$expectedTransaction}
-
-Important rules:
-- Treat search pages, category pages, homepages, news articles, blog posts, portals without a concrete listing, agent profile pages, and non-residential listings as not_property.
-- Only use not_buying_property when the page is clearly a property listing but the listing is for rent while the expected transaction is buying.
-- Only use not_renting_property when the page is clearly a property listing but the listing is for sale while the expected transaction is renting.
-- If the page content cannot be inspected well enough because of login walls, bot protection, automation limits, broken pages, or unavailable content, use source_blocked.
-
-Respond ONLY with strict JSON in one of these shapes:
-{"accessible": true, "reason_code": "accessible_property"}
-{"accessible": false, "reason_code": "source_blocked", "reason": "short explanation"}
-{"accessible": false, "reason_code": "not_property", "reason": "short explanation"}
-{"accessible": false, "reason_code": "not_buying_property", "reason": "short explanation"}
-{"accessible": false, "reason_code": "not_renting_property", "reason": "short explanation"}
-PROMPT;
+        $instructions = $this->urlValidationInstructions($reportType);
 
         try {
             $payload = [
@@ -131,6 +106,40 @@ PROMPT;
             ]);
             throw new OpenAIRequestException('OpenAI request failed: ' . $e->getMessage(), 0, $e);
         }
+    }
+
+    private function urlValidationInstructions(string $reportType): string
+    {
+        $expectedTransaction = str_starts_with($reportType, 'buying_') ? 'buying' : 'renting';
+
+        return <<<PROMPT
+You are a validator for a residential real-estate report flow.
+
+Use the web search tool to inspect the provided URL and classify it into exactly one of these reason codes:
+- accessible_property: the URL is publicly reachable and is a residential property listing that matches the expected transaction type.
+- source_blocked: the source cannot be analyzed reliably because it blocks automated access, requires authentication, rate-limits heavily, is unavailable, or the content cannot be opened.
+- not_property: the URL is reachable but it is not a single public residential property listing page.
+- not_buying_property: the URL is a property listing, but it is not a buying / for-sale listing while the expected transaction type is buying.
+- not_renting_property: the URL is a property listing, but it is not a renting / for-rent listing while the expected transaction type is renting.
+
+Expected transaction type: {$expectedTransaction}
+
+Important rules:
+- A page only qualifies as accessible_property when it clearly represents one specific residential listing, such as an apartment, studio, house, villa, duplex, or other home meant for people to live in.
+- Treat search pages, category pages, homepages, news articles, blog posts, portals without a concrete listing, agent profile pages, and non-residential listings as not_property.
+- Treat vehicle listings and non-real-estate classifieds as not_property. This includes cars, motorcycles, trucks, vans, buses, boats, campers, tractors, auto parts, and generic marketplaces where the main offer is not a residential property.
+- If the page is ambiguous, mixed, or lacks clear evidence that the main offer is a single residential property listing, use not_property.
+- Only use not_buying_property when the page is clearly a residential property listing but the listing is for rent while the expected transaction is buying.
+- Only use not_renting_property when the page is clearly a residential property listing but the listing is for sale while the expected transaction is renting.
+- If the page content cannot be inspected well enough because of login walls, bot protection, automation limits, broken pages, or unavailable content, use source_blocked.
+
+Respond ONLY with strict JSON in one of these shapes:
+{"accessible": true, "reason_code": "accessible_property"}
+{"accessible": false, "reason_code": "source_blocked", "reason": "short explanation"}
+{"accessible": false, "reason_code": "not_property", "reason": "short explanation"}
+{"accessible": false, "reason_code": "not_buying_property", "reason": "short explanation"}
+{"accessible": false, "reason_code": "not_renting_property", "reason": "short explanation"}
+PROMPT;
     }
 
     public function generateReportData(string $url, string $prompt): array

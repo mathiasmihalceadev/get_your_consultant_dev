@@ -124,6 +124,7 @@ export interface FlashMessages {
 
 export interface AppFlags {
     publicWizardMaintenance: boolean;
+    publicLocaleSwitcher: boolean;
 }
 
 export interface PageProps {
@@ -134,6 +135,7 @@ export interface PageProps {
     flash: FlashMessages;
     locale: string;
     supportedLocales: string[];
+    publicLocales: string[];
     domainUrls: Record<string, string>;
     localizedUrls: Record<string, string>;
     seoIndexing: boolean;

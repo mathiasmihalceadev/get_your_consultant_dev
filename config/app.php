@@ -125,4 +125,6 @@ return [
 
     'public_wizard_maintenance' => env('APP_PUBLIC_WIZARD_MAINTENANCE', false),
 
+    'public_locale_switcher' => env('APP_PUBLIC_LOCALE_SWITCHER', false),
+
 ];

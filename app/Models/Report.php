@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Report extends Model
 {
+    private const PDF_STORAGE_NUMBER_OFFSET = 1999;
+
     protected $fillable = [
         'report_type',
         'url',
@@ -46,7 +48,7 @@ class Report extends Model
 
     public function pdfStorageFilename(): string
     {
-        return sprintf('gyc_%05d.pdf', $this->id);
+        return sprintf('gyc_%05d.pdf', $this->pdfStorageNumber());
     }
 
     public function resolvedPdfStorageFilename(): string
@@ -73,5 +75,10 @@ class Report extends Model
     public function pdfPublicUrl(): string
     {
         return '/storage/reports/' . $this->pdfStorageFilename();
+    }
+
+    public function pdfStorageNumber(): int
+    {
+        return (int) $this->id + self::PDF_STORAGE_NUMBER_OFFSET;
     }
 }
