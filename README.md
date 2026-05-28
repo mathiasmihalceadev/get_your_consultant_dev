@@ -23,6 +23,18 @@ DB_PASSWORD=your_password
 
 OPENAI_API_KEY=sk-...
 
+SMARTBILL_USERNAME=billing@example.com
+SMARTBILL_TOKEN=your-smartbill-token
+SMARTBILL_COMPANY_VAT_CODE=RO12345678
+SMARTBILL_INVOICE_SERIES=FCT
+SMARTBILL_PAYMENT_TYPE=Card online
+SMARTBILL_TEST_FLOW_DRAFT=true
+SMARTBILL_TAX_NAME=Normala
+SMARTBILL_TAX_PERCENTAGE=19
+SMARTBILL_TAX_INCLUDED=true
+
+APP_PUBLIC_WIZARD_MAINTENANCE=false
+
 QUEUE_CONNECTION=database
 
 MAIL_MAILER=smtp
@@ -32,6 +44,10 @@ MAIL_USERNAME=your-username
 MAIL_PASSWORD=your-password
 MAIL_FROM_ADDRESS=noreply@example.com
 ```
+
+`SMARTBILL_TAX_*` should match a tax configuration that already exists in SmartBill Cloud. If your company is not a VAT payer, leave those values empty.
+
+`SMARTBILL_TEST_FLOW_DRAFT=true` keeps SmartBill invoices created by the admin billing-test flow in draft mode. `APP_PUBLIC_WIZARD_MAINTENANCE=true` blocks the public wizard at step one and shows a branded maintenance modal instead of continuing into report generation.
 
 ### 2. Install Dependencies
 
@@ -61,7 +77,7 @@ npm run build  # production build
 
 ### 5. Queue Worker
 
-Reports are generated asynchronously. You **must** run the queue worker:
+Reports, paid-report follow-up work, and SmartBill invoice sync run asynchronously. You **must** run the queue worker:
 
 ```bash
 php artisan queue:work
@@ -94,6 +110,12 @@ Report generation activity is logged to a dedicated channel:
 
 ```
 storage/logs/report.log
+```
+
+SmartBill request and response activity is logged separately:
+
+```
+storage/logs/smartbill.log
 ```
 
 ## Key Files

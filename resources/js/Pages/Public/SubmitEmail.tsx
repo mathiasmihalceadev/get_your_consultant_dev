@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Head, router } from "@inertiajs/react";
-import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 import {
@@ -9,7 +8,7 @@ import {
     ShieldCheck,
     FilePdf,
 } from "@phosphor-icons/react";
-import { Report, ReportType } from "@/types";
+import { Report } from "@/types";
 import PublicLayout from "@/Layouts/PublicLayout";
 import WizardLayout from "@/Components/WizardLayout";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -18,7 +17,7 @@ function BlurredReportPreview() {
     return (
         <div className="relative select-none pointer-events-none">
             <div
-                className="bg-white border border-gray-200 shadow-sm p-5 space-y-4"
+                className="border solid-border solid-border-warm bg-white p-5 space-y-4"
                 style={{ filter: "blur(4px)" }}
             >
                 {/* Header */}
@@ -55,7 +54,7 @@ function BlurredReportPreview() {
                 </div>
 
                 {/* Final score */}
-                <div className="border-2 border-brand-primary/30 rounded p-3 text-center">
+                <div className="border-[1.5px] border-brand-primary/35 rounded p-3 text-center">
                     <div className="w-12 h-8 bg-brand-primary/40 rounded mx-auto mb-1" />
                     <div className="w-20 h-3 bg-gray-200 rounded mx-auto" />
                     <div className="w-16 h-5 bg-green-300 rounded mx-auto mt-2" />
@@ -64,7 +63,7 @@ function BlurredReportPreview() {
 
             {/* Overlay icon */}
             <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-white/90 backdrop-blur-sm shadow-lg px-5 py-3 flex items-center gap-2 border border-gray-200">
+                <div className="flex items-center gap-2 border solid-border solid-border-warm-strong bg-white px-5 py-3">
                     <FilePdf
                         size={24}
                         weight="fill"
@@ -89,13 +88,6 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
     const [email, setEmail] = useState("");
     const [processing, setProcessing] = useState(false);
 
-    const typeLabels: Record<ReportType, string> = {
-        rental_living: t("type_rental_living"),
-        rental_business: t("type_rental_business"),
-        buying_living: t("type_buying_living"),
-        buying_business: t("type_buying_business"),
-    };
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
@@ -107,10 +99,10 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
     };
 
     const sidebar = (
-        <div className="space-y-6">
-            <div className="bg-gray-50 border border-gray-200 p-6">
+        <>
+            <div className="border solid-border solid-border-warm bg-white p-6">
                 <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-brand-tertiary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)]">
                         <Envelope
                             size={22}
                             weight="fill"
@@ -118,19 +110,19 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                         />
                     </div>
                     <div>
-                        <h4 className="text-sm font-bold text-brand-primary mb-1">
+                        <h4 className="mb-1 text-[0.95rem] font-semibold leading-[1.3] text-brand-primary">
                             {t("sidebar_fast_title")}
                         </h4>
-                        <p className="text-xs text-brand-neutral leading-relaxed">
+                        <p className="text-[14px] leading-[1.65] text-brand-primary/78">
                             {t("sidebar_fast_desc")}
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div className="border border-gray-200 p-6">
+            <div className="border solid-border solid-border-warm bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)] p-6">
                 <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-brand-secondary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-white">
                         <ShieldCheck
                             size={22}
                             weight="fill"
@@ -138,33 +130,32 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                         />
                     </div>
                     <div>
-                        <h4 className="text-sm font-bold text-brand-primary mb-1">
+                        <h4 className="mb-1 text-[0.95rem] font-semibold leading-[1.3] text-brand-primary">
                             {t("sidebar_secure_title")}
                         </h4>
-                        <p className="text-xs text-brand-neutral leading-relaxed">
+                        <p className="text-[14px] leading-[1.65] text-brand-primary/78">
                             {t("sidebar_secure_desc")}
                         </p>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 
     return (
         <PublicLayout>
             <Head title={t("your_email")} />
-            <WizardLayout currentStep={3} sidebar={sidebar}>
+            <WizardLayout
+                currentStep={3}
+                sidebar={sidebar}
+                reportType={report.report_type}
+            >
                 <div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-brand-primary mb-2 tracking-tight">
+                    <h2 className="mb-2 text-[2.1rem] font-bold leading-[0.98] tracking-[-0.04em] text-brand-primary md:text-[2.7rem]">
                         {t("almost_there")}
                     </h2>
 
-                    <div className="flex flex-wrap gap-2 mb-1">
-                        <span className="inline-flex items-center px-2.5 py-0.5 bg-brand-primary/10 text-brand-primary text-xs font-semibold">
-                            {typeLabels[report.report_type]}
-                        </span>
-                    </div>
-                    <p className="text-sm text-brand-neutral mb-6 break-all">
+                    <p className="mb-6 break-all text-[14px] leading-[1.68] text-brand-primary/78">
                         {report.url}
                     </p>
 
@@ -188,9 +179,11 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className={
-                                    errors?.email ? "border-red-500" : ""
-                                }
+                                className={`solid-border text-brand-primary placeholder:text-brand-primary/55 ${
+                                    errors?.email
+                                        ? "border-red-500"
+                                        : "border-brand-primary/30"
+                                }`}
                             />
                             {errors?.email && (
                                 <p className="text-sm text-red-600 mt-1.5">
@@ -200,23 +193,21 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                         </div>
 
                         <div className="flex justify-end">
-                            <Button
+                            <button
                                 type="submit"
                                 disabled={processing || !email}
-                                className="bg-brand-secondary hover:bg-brand-secondary/90 text-white px-6 cursor-pointer"
+                                className="inline-flex cursor-pointer items-center gap-2 bg-brand-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-primary/92 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {processing
                                     ? t("submitting")
-                                    : t("get_my_report")}
-                                {!processing && (
-                                    <ArrowRight size={16} className="ml-2" />
-                                )}
-                            </Button>
+                                    : t("continue_to_payment")}
+                                {!processing && <ArrowRight size={16} />}
+                            </button>
                         </div>
                     </form>
 
-                    <p className="text-xs text-brand-neutral mt-6">
-                        {t("report_delivery_note")}
+                    <p className="mt-6 text-[14px] leading-[1.68] text-brand-primary/78">
+                        {t("payment_checkout_note")}
                     </p>
                 </div>
             </WizardLayout>

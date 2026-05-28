@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { Head, router } from "@inertiajs/react";
-import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 import {
@@ -37,9 +36,9 @@ export default function SubmitUrl({ reportType, errors }: SubmitUrlProps) {
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const typeLabels: Record<ReportType, string> = {
-        rental_living: t("type_rental_living"),
+        rental_living: t("rental"),
         rental_business: t("type_rental_business"),
-        buying_living: t("type_buying_living"),
+        buying_living: t("buying"),
         buying_business: t("type_buying_business"),
     };
 
@@ -77,9 +76,9 @@ export default function SubmitUrl({ reportType, errors }: SubmitUrlProps) {
     };
 
     const sidebar = (
-        <div className="space-y-6">
-            <div className="bg-gray-50 border border-gray-200 p-6">
-                <h3 className="text-xs font-bold text-brand-primary uppercase tracking-widest mb-5">
+        <>
+            <div className="border solid-border solid-border-warm bg-white p-6">
+                <h3 className="mb-5 text-[0.85rem] font-semibold leading-[1.35] tracking-[-0.02em] text-brand-primary">
                     {t("sidebar_report_title")}
                 </h3>
                 <div className="space-y-3">
@@ -93,17 +92,19 @@ export default function SubmitUrl({ reportType, errors }: SubmitUrlProps) {
                             <CheckCircle
                                 size={18}
                                 weight="fill"
-                                className="text-brand-secondary flex-shrink-0 mt-0.5"
+                                className="mt-0.5 shrink-0 text-brand-secondary"
                             />
-                            <p className="text-sm text-brand-neutral">{text}</p>
+                            <p className="text-[14px] leading-[1.65] text-brand-primary/78">
+                                {text}
+                            </p>
                         </div>
                     ))}
                 </div>
             </div>
 
-            <div className="border border-gray-200 p-6">
+            <div className="border solid-border solid-border-warm bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)] p-6">
                 <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-brand-secondary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-white">
                         <Clock
                             size={22}
                             weight="fill"
@@ -111,45 +112,51 @@ export default function SubmitUrl({ reportType, errors }: SubmitUrlProps) {
                         />
                     </div>
                     <div>
-                        <h4 className="text-sm font-bold text-brand-primary mb-1">
+                        <h4 className="mb-1 text-[0.95rem] font-semibold leading-[1.3] text-brand-primary">
                             {t("sidebar_fast_title")}
                         </h4>
-                        <p className="text-xs text-brand-neutral leading-relaxed">
+                        <p className="text-[14px] leading-[1.65] text-brand-primary/78">
                             {t("sidebar_fast_desc")}
                         </p>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 
     return (
         <PublicLayout>
             <Head title={typeLabels[reportType]} />
-            <WizardLayout currentStep={2} sidebar={sidebar}>
+            <WizardLayout
+                currentStep={2}
+                sidebar={sidebar}
+                reportType={reportType}
+            >
                 <div>
                     <a
-                        href={localePath("/")}
+                        href={localePath("/get-report")}
                         onClick={(e) => {
                             e.preventDefault();
-                            router.visit(localePath("/"));
+                            router.visit(localePath("/get-report"));
                         }}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-brand-neutral hover:text-brand-primary mb-6 transition-colors uppercase tracking-wider"
+                        className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-brand-primary/70 transition-colors hover:text-brand-primary"
                     >
                         <ArrowLeft size={14} />
                         {t("back_to_selection")}
                     </a>
 
-                    <h2 className="text-2xl md:text-3xl font-bold text-brand-primary mb-1 tracking-tight">
+                    <h2 className="mb-2 text-[2.1rem] font-bold leading-[0.98] tracking-[-0.04em] text-brand-primary md:text-[2.7rem]">
                         {typeLabels[reportType]}
                     </h2>
-                    <p className="text-brand-neutral mb-6">{t("enter_url")}</p>
+                    <p className="mb-6 max-w-2xl text-[14px] leading-[1.68] text-brand-primary/78 md:text-base">
+                        {t("enter_url")}
+                    </p>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <Label
                                 htmlFor="url"
-                                className="text-sm font-medium mb-1.5 block"
+                                className="mb-1.5 block text-sm font-semibold text-brand-primary"
                             >
                                 {t("property_url_label")}
                             </Label>
@@ -163,13 +170,13 @@ export default function SubmitUrl({ reportType, errors }: SubmitUrlProps) {
                                 }}
                                 onBlur={() => setTouched(true)}
                                 required
-                                className={
+                                className={`solid-border text-brand-primary placeholder:text-brand-primary/55 ${
                                     urlError
                                         ? "border-red-500"
                                         : isValid
                                           ? "border-green-500"
-                                          : ""
-                                }
+                                          : "border-brand-primary/30"
+                                }`}
                             />
                             {urlError && (
                                 <p className="text-sm text-red-600 mt-1.5">
@@ -179,16 +186,14 @@ export default function SubmitUrl({ reportType, errors }: SubmitUrlProps) {
                         </div>
 
                         <div className="flex justify-end">
-                            <Button
+                            <button
                                 type="submit"
                                 disabled={processing || !isValid}
-                                className="bg-brand-secondary hover:bg-brand-secondary/90 text-white px-6 cursor-pointer"
+                                className="inline-flex cursor-pointer items-center gap-2 bg-brand-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-primary/92 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {processing ? t("validating") : t("continue")}
-                                {!processing && (
-                                    <ArrowRight size={16} className="ml-2" />
-                                )}
-                            </Button>
+                                {!processing && <ArrowRight size={16} />}
+                            </button>
                         </div>
                     </form>
                 </div>

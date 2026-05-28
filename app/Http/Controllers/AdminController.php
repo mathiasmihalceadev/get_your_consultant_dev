@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Mail\ReportMail;
 use App\Models\Report;
+use App\Services\StripeCheckoutService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class AdminController extends Controller
@@ -28,6 +30,11 @@ class AdminController extends Controller
         $counts = [
             'total' => Report::count(),
             'pending' => Report::where('status', 'pending')->count(),
+            'awaiting_payment' => Report::where('status', 'awaiting_payment')->count(),
+            'payment_processing' => Report::where('status', 'payment_processing')->count(),
+            'payment_cancelled' => Report::where('status', 'payment_cancelled')->count(),
+            'payment_failed' => Report::where('status', 'payment_failed')->count(),
+            'test_completed' => Report::where('status', 'test_completed')->count(),
             'to_be_sent' => Report::where('status', 'to_be_sent')->count(),
             'sent' => Report::where('status', 'sent')->count(),
             'error' => Report::where('status', 'error')->count(),
@@ -36,6 +43,11 @@ class AdminController extends Controller
 
         return Inertia::render('Admin/Dashboard', [
             'reports' => $reports,
+            'billingTests' => Report::query()
+                ->where('is_test', true)
+                ->orderByDesc('created_at')
+                ->limit(5)
+                ->get(),
             'counts' => $counts,
             'filters' => [
                 'status' => $request->query('status', ''),
@@ -46,28 +58,158 @@ class AdminController extends Controller
 
     public function show(int $id)
     {
-        $report = Report::findOrFail($id);
+        $report = Report::with(['latestPurchase.smartBillInvoice'])->findOrFail($id);
 
         return Inertia::render('Admin/ReportDetail', [
             'report' => $report,
         ]);
     }
 
+    public function createBillingTestCheckout(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email'],
+            'locale' => ['required', 'in:ro,en'],
+            'report_type' => ['required', 'in:rental_living,buying_living'],
+            'send_test_email' => ['nullable', 'boolean'],
+        ]);
+
+        $uuid = (string) Str::uuid();
+        $baseUrl = rtrim((string) config('app.url', 'https://example.test'), '/');
+        $report = Report::create([
+            'report_type' => $validated['report_type'],
+            'url' => $baseUrl . '/admin/billing-test/' . $uuid,
+            'email' => $validated['email'],
+            'locale' => $validated['locale'],
+            'is_test' => true,
+            'status' => 'pending',
+            'page_token' => hash('sha256', 'billing-test|' . $uuid),
+            'error_message' => null,
+        ]);
+
+        /** @var StripeCheckoutService $stripe */
+        $stripe = app(StripeCheckoutService::class);
+
+        try {
+            $checkoutUrl = $stripe->createBillingTestCheckoutSession(
+                $report,
+                (bool) ($validated['send_test_email'] ?? false),
+            );
+        } catch (\Throwable $e) {
+            Log::channel('stripe')->error('Unable to start Stripe billing test checkout', [
+                'report_id' => $report->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            $report->update([
+                'status' => 'error',
+                'error_message' => 'Fluxul de test pentru Stripe + SmartBill nu a putut fi pornit.',
+            ]);
+
+            return back()->with('error', 'Fluxul de test pentru Stripe + SmartBill nu a putut fi pornit.');
+        }
+
+        return Inertia::location($checkoutUrl);
+    }
+
+    public function billingTestSuccess(Request $request, int $id, StripeCheckoutService $stripe)
+    {
+        $report = Report::where('is_test', true)->findOrFail($id);
+        $purchaseId = $request->integer('purchase');
+
+        try {
+            $stripe->markCheckoutSuccessReturn(
+                $report,
+                $purchaseId > 0 ? $purchaseId : null,
+                $request->query('session_id'),
+            );
+        } catch (\Throwable $e) {
+            Log::channel('stripe')->error('Unable to sync Stripe billing test success redirect', [
+                'report_id' => $report->id,
+                'purchase_id' => $purchaseId > 0 ? $purchaseId : null,
+                'session_id' => $request->query('session_id'),
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.reports.show', ['id' => $report->id])
+            ->with('success', 'Checkout-ul de test a fost confirmat. SmartBill se sincronizeaza in fundal.');
+    }
+
+    public function billingTestCancel(Request $request, int $id, StripeCheckoutService $stripe)
+    {
+        $report = Report::where('is_test', true)->findOrFail($id);
+        $purchaseId = $request->integer('purchase');
+
+        $stripe->markCheckoutCanceled(
+            $report,
+            $purchaseId > 0 ? $purchaseId : null,
+        );
+
+        return redirect()
+            ->route('admin.reports.show', ['id' => $report->id])
+            ->with('success', 'Checkout-ul de test a fost anulat.');
+    }
+
     public function send(int $id)
     {
         $report = Report::findOrFail($id);
 
-        if ($report->status !== 'to_be_sent') {
-            return back()->with('error', 'Report cannot be sent — status is not "to_be_sent".');
+        if ($report->is_test) {
+            return back()->with('error', 'Fluxurile de test nu genereaza si nu trimit raportul final pe email.');
         }
 
-        Mail::to($report->email)->send(new ReportMail($report));
+        if (!$report->email) {
+            return back()->with('error', 'Report cannot be sent because the email address is missing.');
+        }
+
+        $hasGeneratedReport = filled($report->report_url) || file_exists($report->pdfStoragePath());
+
+        if (!$hasGeneratedReport) {
+            return back()->with(
+                'error',
+                'Report email could not be sent because the generated report file is missing.',
+            );
+        }
+
+        $isResend = $report->status === 'sent';
+
+        try {
+            Mail::to($report->email)->sendNow(new ReportMail($report));
+        } catch (\Throwable $e) {
+            Log::channel('report')->error('Admin report email failed to send', [
+                'report_id' => $report->id,
+                'email' => $report->email,
+                'mailer' => config('mail.default'),
+                'mail_host' => config('mail.mailers.smtp.host'),
+                'mail_port' => config('mail.mailers.smtp.port'),
+                'mail_scheme' => config('mail.mailers.smtp.scheme'),
+                'from_address' => config('mail.from.address'),
+                'queue_connection' => config('queue.default'),
+                'pdf_path' => $report->pdfStoragePath(),
+                'pdf_exists' => file_exists($report->pdfStoragePath()),
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with(
+                'error',
+                'Report email could not be sent. Check the report log for the exact mail error.',
+            );
+        }
+
         $report->update(['status' => 'sent']);
 
         Log::channel('report')->info('Report manually sent by admin', [
             'report_id' => $report->id,
+            'action' => $isResend ? 'resent' : 'sent',
         ]);
 
-        return back()->with('success', "Report has been sent to {$report->email}.");
+        return back()->with(
+            'success',
+            $isResend
+                ? "Report has been resent to {$report->email}."
+                : "Report has been sent to {$report->email}.",
+        );
     }
 }

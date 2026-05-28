@@ -19,94 +19,132 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        Settings::set('rental_living_prompt', $this->rentalLivingPrompt());
-        Settings::set('rental_living_prompt_ro', $this->rentalLivingPromptRo());
-        Settings::set('rental_business_prompt', $this->rentalBusinessPrompt());
-        Settings::set('rental_business_prompt_ro', $this->rentalBusinessPromptRo());
-        Settings::set('buying_living_prompt', $this->buyingLivingPrompt());
-        Settings::set('buying_living_prompt_ro', $this->buyingLivingPromptRo());
-        Settings::set('buying_business_prompt', $this->buyingBusinessPrompt());
-        Settings::set('buying_business_prompt_ro', $this->buyingBusinessPromptRo());
-        Settings::set('auto_send', false);
+        User::firstOrCreate(
+            ['email' => 'admin@getyourconsultant.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('parola1234'),
+            ]
+        );
+
+        $this->seedSettingIfMissing('rental_living_ro', $this->rentalLivingPromptRo());
+        $this->seedSettingIfMissing('rental_living_eng', $this->rentalLivingPromptEng());
+        $this->seedSettingIfMissing('buying_living_ro', $this->buyingLivingPromptRo());
+        $this->seedSettingIfMissing('buying_living_eng', $this->buyingLivingPromptEng());
+        $this->seedSettingIfMissing('auto_send', false);
     }
 
-    private function rentalLivingPrompt(): string
+    private function seedSettingIfMissing(string $key, mixed $value): void
     {
-        return 'You are an AI consultant and professional rental market analyst. Your task is to analyze a residential rental listing from a provided URL. Extract all relevant information and evaluate the property as a rental opportunity for living purposes using realistic market logic. Adapt your evaluation to the local rental market, city characteristics, and economic context. Estimate reasonable values when data is missing.
+        if (Settings::query()->where('key', $key)->exists()) {
+            return;
+        }
 
-Return strictly valid JSON. Do not include explanations, comments, or additional text.
-
-Output structure:
-{ "property_summary": { "property_type": "", "city": "", "area": "", "size_sqm": 0, "rooms": 0, "floor": "", "year_built": "", "condition": "", "asking_rent_monthly": 0, "price_per_sqm_monthly": 0 }, "rent_evaluation": { "estimated_fair_rent": 0, "rent_positioning": "below_market | fair | overpriced", "market_difference_percent": 0, "value_increasing_factors": [], "value_decreasing_factors": [], "rent_score": 1 }, "area_analysis": { "suitable_for_living": true, "safety": 1, "quietness": 1, "pollution": 1, "traffic": 1, "amenities": { "schools": true, "kindergartens": true, "hospitals": true, "public_transport": true, "shopping_centers": true }, "area_trend": "growth | stagnation | decline", "area_score": 1 }, "parking": { "exists": true, "type": "underground | outdoor | street | none", "included_in_rent": true, "estimated_extra_cost": 0, "parking_score": 1 }, "livability": { "natural_light": "good | medium | poor", "noise_level": "low | medium | high", "ventilation": "good | medium | poor", "storage": "adequate | limited | none", "ideal_tenant_profile": "", "livability_score": 1 }, "air_quality": { "quality": "good | medium | poor", "impact_on_living": "" }, "risk_analysis": { "landlord_risk": "", "legal_risk": "", "possible_hidden_costs": [] }, "final_score": { "overall_score": 0, "recommendation": "recommended | acceptable | risky", "suitable_for": [], "verdict": "RENT | NEGOTIATE | AVOID" } }';
+        Settings::set($key, $value);
     }
 
-    private function rentalBusinessPrompt(): string
+    private function rentalLivingPromptEng(): string
     {
-        return 'You are an AI consultant and professional commercial rental market analyst. Your task is to analyze a commercial rental listing from a provided URL. Evaluate the space for business use, lease terms, and location suitability using realistic commercial real estate logic. Adapt to the local market. Estimate reasonable values when data is missing.
-
-Return strictly valid JSON. Do not include explanations, comments, or additional text.
-
-Output structure:
-{ "property_summary": { "property_type": "", "city": "", "area": "", "size_sqm": 0, "floor": "", "year_built": "", "condition": "", "asking_rent_monthly": 0, "price_per_sqm_monthly": 0, "zoning": "" }, "rent_evaluation": { "estimated_fair_rent": 0, "rent_positioning": "below_market | fair | overpriced", "market_difference_percent": 0, "value_increasing_factors": [], "value_decreasing_factors": [], "rent_score": 1 }, "area_analysis": { "foot_traffic": "low | medium | high", "visibility": "low | medium | high", "accessibility": 1, "competition_density": "low | medium | high", "public_transport": true, "parking_nearby": true, "area_trend": "growth | stagnation | decline", "area_score": 1 }, "parking": { "exists": true, "type": "underground | outdoor | street | none", "spaces": 0, "included_in_rent": true, "estimated_extra_cost": 0, "parking_score": 1 }, "business_suitability": { "ideal_business_type": [], "layout_flexibility": "good | medium | poor", "client_accessibility": "good | medium | poor", "signage_potential": "good | medium | poor", "suitability_score": 1 }, "air_quality": { "quality": "good | medium | poor", "impact_on_business": "" }, "risk_analysis": { "landlord_risk": "", "legal_risk": "", "zoning_risk": "", "possible_hidden_costs": [] }, "final_score": { "overall_score": 0, "recommendation": "recommended | acceptable | risky", "suitable_for": [], "verdict": "RENT | NEGOTIATE | AVOID" } }';
+        return $this->buildPrompt(
+            'English',
+            'Analyze the listing as a residential rental opportunity for someone looking to live in the property.',
+            'rental_eng.json'
+        );
     }
 
-    private function buyingLivingPrompt(): string
+    private function buyingLivingPromptEng(): string
     {
-        return 'You are an AI consultant and professional real estate market analyst. Your task is to analyze a property listing from a provided URL. Extract all relevant information from the listing and evaluate the property for residential living purposes using realistic market logic. The property may be located in any country. Adapt your evaluation to the local market conditions, city characteristics, and economic context. If some information is missing from the listing, estimate reasonable values using typical market patterns for the location.
-
-Return strictly valid JSON. Do not include explanations, comments, or additional text.
-
-Output structure:
-{ "property_summary": { "property_type": "", "city": "", "area": "", "size_sqm": 0, "rooms": 0, "floor": "", "year_built": "", "condition": "", "asking_price": 0, "price_per_sqm": 0 }, "price_evaluation": { "estimated_market_value": 0, "price_positioning": "below_market | fair | overpriced", "market_difference_percent": 0, "value_increasing_factors": [], "value_decreasing_factors": [], "price_score": 1 }, "area_analysis": { "suitable_for_living": true, "suitable_for_investment": true, "safety": 1, "quietness": 1, "pollution": 1, "traffic": 1, "amenities": { "schools": true, "kindergartens": true, "hospitals": true, "public_transport": true, "shopping_centers": true }, "area_trend": "growth | stagnation | decline", "area_score": 1 }, "parking": { "exists": true, "type": "underground | outdoor | street | none", "value_impact": "", "estimated_cost_if_missing": 0, "parking_score": 1 }, "investment": { "estimated_monthly_rent": 0, "demand_level": "low | medium | high", "gross_yield": 0, "net_yield": 0, "occupancy_rate": 0, "ideal_tenant": "", "investment_score": 1 }, "air_quality": { "quality": "good | medium | poor", "impact_on_living": "" }, "risk_analysis": { "construction_risk": "", "legal_risk": "", "possible_hidden_costs": [] }, "final_score": { "overall_score": 0, "recommendation": "recommended | acceptable | risky", "suitable_for": [], "verdict": "BUY | NEGOTIATE | AVOID" } }';
-    }
-
-    private function buyingBusinessPrompt(): string
-    {
-        return 'You are an AI consultant and professional commercial real estate analyst. Your task is to analyze a commercial property listing from a provided URL. Evaluate the space for business use, investment potential, and market positioning using realistic commercial real estate logic. Adapt to the local market. Estimate reasonable values when data is missing.
-
-Return strictly valid JSON. Do not include explanations, comments, or additional text.
-
-Output structure:
-{ "property_summary": { "property_type": "", "city": "", "area": "", "size_sqm": 0, "floor": "", "year_built": "", "condition": "", "asking_price": 0, "asking_rent_monthly": 0, "price_per_sqm": 0, "zoning": "" }, "price_evaluation": { "estimated_market_value": 0, "estimated_fair_rent": 0, "price_positioning": "below_market | fair | overpriced", "market_difference_percent": 0, "value_increasing_factors": [], "value_decreasing_factors": [], "price_score": 1 }, "area_analysis": { "foot_traffic": "low | medium | high", "visibility": "low | medium | high", "accessibility": 1, "competition_density": "low | medium | high", "public_transport": true, "parking_nearby": true, "area_trend": "growth | stagnation | decline", "area_score": 1 }, "parking": { "exists": true, "type": "underground | outdoor | street | none", "spaces": 0, "value_impact": "", "parking_score": 1 }, "investment": { "estimated_monthly_rent": 0, "demand_level": "low | medium | high", "gross_yield": 0, "net_yield": 0, "occupancy_rate": 0, "ideal_business_type": [], "investment_score": 1 }, "air_quality": { "quality": "good | medium | poor", "impact_on_business": "" }, "risk_analysis": { "construction_risk": "", "legal_risk": "", "zoning_risk": "", "possible_hidden_costs": [] }, "final_score": { "overall_score": 0, "recommendation": "recommended | acceptable | risky", "suitable_for": [], "verdict": "BUY | NEGOTIATE | AVOID" } }';
+        return $this->buildPrompt(
+            'English',
+            'Analyze the listing as a residential purchase opportunity for an owner-occupier, while also covering the investment angle present in the sample structure.',
+            'buying_eng.json'
+        );
     }
 
     private function rentalLivingPromptRo(): string
     {
-        return 'Ești un consultant AI și analist profesionist al pieței de închiriere. Sarcina ta este să analizezi un anunț de închiriere rezidențială de la un URL furnizat. Extrage toate informațiile relevante și evaluează proprietatea ca oportunitate de închiriere pentru locuit, folosind o logică realistă de piață. Adaptează evaluarea la piața locală de închiriere, caracteristicile orașului și contextul economic. Estimează valori rezonabile când lipsesc date.
-
-Returnează strict JSON valid. Nu include explicații, comentarii sau text suplimentar. Toate valorile text din JSON trebuie să fie în limba română.
-
-Structura output:
-{ "property_summary": { "property_type": "", "city": "", "area": "", "size_sqm": 0, "rooms": 0, "floor": "", "year_built": "", "condition": "", "asking_rent_monthly": 0, "price_per_sqm_monthly": 0 }, "rent_evaluation": { "estimated_fair_rent": 0, "rent_positioning": "below_market | fair | overpriced", "market_difference_percent": 0, "value_increasing_factors": [], "value_decreasing_factors": [], "rent_score": 1 }, "area_analysis": { "suitable_for_living": true, "safety": 1, "quietness": 1, "pollution": 1, "traffic": 1, "amenities": { "schools": true, "kindergartens": true, "hospitals": true, "public_transport": true, "shopping_centers": true }, "area_trend": "growth | stagnation | decline", "area_score": 1 }, "parking": { "exists": true, "type": "underground | outdoor | street | none", "included_in_rent": true, "estimated_extra_cost": 0, "parking_score": 1 }, "livability": { "natural_light": "good | medium | poor", "noise_level": "low | medium | high", "ventilation": "good | medium | poor", "storage": "adequate | limited | none", "ideal_tenant_profile": "", "livability_score": 1 }, "air_quality": { "quality": "good | medium | poor", "impact_on_living": "" }, "risk_analysis": { "landlord_risk": "", "legal_risk": "", "possible_hidden_costs": [] }, "final_score": { "overall_score": 0, "recommendation": "recommended | acceptable | risky", "suitable_for": [], "verdict": "RENT | NEGOTIATE | AVOID" } }';
-    }
-
-    private function rentalBusinessPromptRo(): string
-    {
-        return 'Ești un consultant AI și analist profesionist al pieței de închiriere comercială. Sarcina ta este să analizezi un anunț de închiriere comercială de la un URL furnizat. Evaluează spațiul pentru utilizare business, termenii de închiriere și potrivirea locației, folosind o logică realistă de imobiliare comercială. Adaptează la piața locală. Estimează valori rezonabile când lipsesc date.
-
-Returnează strict JSON valid. Nu include explicații, comentarii sau text suplimentar. Toate valorile text din JSON trebuie să fie în limba română.
-
-Structura output:
-{ "property_summary": { "property_type": "", "city": "", "area": "", "size_sqm": 0, "floor": "", "year_built": "", "condition": "", "asking_rent_monthly": 0, "price_per_sqm_monthly": 0, "zoning": "" }, "rent_evaluation": { "estimated_fair_rent": 0, "rent_positioning": "below_market | fair | overpriced", "market_difference_percent": 0, "value_increasing_factors": [], "value_decreasing_factors": [], "rent_score": 1 }, "area_analysis": { "foot_traffic": "low | medium | high", "visibility": "low | medium | high", "accessibility": 1, "competition_density": "low | medium | high", "public_transport": true, "parking_nearby": true, "area_trend": "growth | stagnation | decline", "area_score": 1 }, "parking": { "exists": true, "type": "underground | outdoor | street | none", "spaces": 0, "included_in_rent": true, "estimated_extra_cost": 0, "parking_score": 1 }, "business_suitability": { "ideal_business_type": [], "layout_flexibility": "good | medium | poor", "client_accessibility": "good | medium | poor", "signage_potential": "good | medium | poor", "suitability_score": 1 }, "air_quality": { "quality": "good | medium | poor", "impact_on_business": "" }, "risk_analysis": { "landlord_risk": "", "legal_risk": "", "zoning_risk": "", "possible_hidden_costs": [] }, "final_score": { "overall_score": 0, "recommendation": "recommended | acceptable | risky", "suitable_for": [], "verdict": "RENT | NEGOTIATE | AVOID" } }';
+        return $this->buildPromptRo(
+            'Analizează anunțul ca oportunitate de închiriere rezidențială pentru locuire.',
+            'rental_ro.json'
+        );
     }
 
     private function buyingLivingPromptRo(): string
     {
-        return 'Ești un consultant AI și analist profesionist al pieței imobiliare. Sarcina ta este să analizezi un anunț imobiliar de la un URL furnizat. Extrage toate informațiile relevante din anunț și evaluează proprietatea pentru scopuri de locuire rezidențială, folosind o logică realistă de piață. Proprietatea poate fi situată în orice țară. Adaptează evaluarea la condițiile pieței locale, caracteristicile orașului și contextul economic. Dacă lipsesc informații din anunț, estimează valori rezonabile folosind modele tipice de piață pentru locația respectivă.
-
-Returnează strict JSON valid. Nu include explicații, comentarii sau text suplimentar. Toate valorile text din JSON trebuie să fie în limba română.
-
-Structura output:
-{ "property_summary": { "property_type": "", "city": "", "area": "", "size_sqm": 0, "rooms": 0, "floor": "", "year_built": "", "condition": "", "asking_price": 0, "price_per_sqm": 0 }, "price_evaluation": { "estimated_market_value": 0, "price_positioning": "below_market | fair | overpriced", "market_difference_percent": 0, "value_increasing_factors": [], "value_decreasing_factors": [], "price_score": 1 }, "area_analysis": { "suitable_for_living": true, "suitable_for_investment": true, "safety": 1, "quietness": 1, "pollution": 1, "traffic": 1, "amenities": { "schools": true, "kindergartens": true, "hospitals": true, "public_transport": true, "shopping_centers": true }, "area_trend": "growth | stagnation | decline", "area_score": 1 }, "parking": { "exists": true, "type": "underground | outdoor | street | none", "value_impact": "", "estimated_cost_if_missing": 0, "parking_score": 1 }, "investment": { "estimated_monthly_rent": 0, "demand_level": "low | medium | high", "gross_yield": 0, "net_yield": 0, "occupancy_rate": 0, "ideal_tenant": "", "investment_score": 1 }, "air_quality": { "quality": "good | medium | poor", "impact_on_living": "" }, "risk_analysis": { "construction_risk": "", "legal_risk": "", "possible_hidden_costs": [] }, "final_score": { "overall_score": 0, "recommendation": "recommended | acceptable | risky", "suitable_for": [], "verdict": "BUY | NEGOTIATE | AVOID" } }';
+        return $this->buildPromptRo(
+            'Analizează anunțul ca oportunitate de cumpărare rezidențială pentru locuire, păstrând și unghiul investițional existent în structura exemplului.',
+            'buying_ro.json'
+        );
     }
 
-    private function buyingBusinessPromptRo(): string
+    private function buildPrompt(string $languageName, string $goal, string $sampleFile): string
     {
-        return 'Ești un consultant AI și analist profesionist de imobiliare comercială. Sarcina ta este să analizezi un anunț de proprietate comercială de la un URL furnizat. Evaluează spațiul pentru utilizare business, potențial de investiție și poziționare pe piață, folosind o logică realistă de imobiliare comercială. Adaptează la piața locală. Estimează valori rezonabile când lipsesc date.
+        $schemaExample = $this->loadSampleJson($sampleFile);
 
-Returnează strict JSON valid. Nu include explicații, comentarii sau text suplimentar. Toate valorile text din JSON trebuie să fie în limba română.
+        return <<<PROMPT
+You are an AI real-estate analyst. Analyze the property listing available at the provided URL.
 
-Structura output:
-{ "property_summary": { "property_type": "", "city": "", "area": "", "size_sqm": 0, "floor": "", "year_built": "", "condition": "", "asking_price": 0, "asking_rent_monthly": 0, "price_per_sqm": 0, "zoning": "" }, "price_evaluation": { "estimated_market_value": 0, "estimated_fair_rent": 0, "price_positioning": "below_market | fair | overpriced", "market_difference_percent": 0, "value_increasing_factors": [], "value_decreasing_factors": [], "price_score": 1 }, "area_analysis": { "foot_traffic": "low | medium | high", "visibility": "low | medium | high", "accessibility": 1, "competition_density": "low | medium | high", "public_transport": true, "parking_nearby": true, "area_trend": "growth | stagnation | decline", "area_score": 1 }, "parking": { "exists": true, "type": "underground | outdoor | street | none", "spaces": 0, "value_impact": "", "parking_score": 1 }, "investment": { "estimated_monthly_rent": 0, "demand_level": "low | medium | high", "gross_yield": 0, "net_yield": 0, "occupancy_rate": 0, "ideal_business_type": [], "investment_score": 1 }, "air_quality": { "quality": "good | medium | poor", "impact_on_business": "" }, "risk_analysis": { "construction_risk": "", "legal_risk": "", "zoning_risk": "", "possible_hidden_costs": [] }, "final_score": { "overall_score": 0, "recommendation": "recommended | acceptable | risky", "suitable_for": [], "verdict": "BUY | NEGOTIATE | AVOID" } }';
+{$goal}
+
+Rules:
+- Return strictly valid JSON only.
+- Use {$languageName} for every human-readable value in the JSON.
+- Preserve the exact overall structure from the schema example below.
+- Keep the same top-level keys, nested keys, object nesting, chart ids, chart types, section ids, and array/object shapes.
+- Replace the example values with values inferred from the listing.
+- If information is missing, estimate a realistic value and keep the expected data type.
+- page_one.badges must fit within 2 rows on the first page, so keep only the most decision-relevant badges and never exceed 8 badges.
+- page_one.verdict.ideal_for must contain at most 3 short items.
+- page_one.verdict.not_ideal_for must contain at most 3 short items.
+- If the chart id is total_acquisition_cost, every data.segments.label must be a single word.
+- Do not add markdown, explanations, comments, or extra text.
+
+Schema example to follow exactly:
+{$schemaExample}
+PROMPT;
+    }
+
+    private function buildPromptRo(string $goal, string $sampleFile): string
+    {
+        $schemaExample = $this->loadSampleJson($sampleFile);
+
+        return <<<PROMPT
+Ești un analist AI de real-estate. Analizează anunțul imobiliar disponibil la URL-ul primit.
+
+{$goal}
+
+Reguli:
+- Returnează strict JSON valid și nimic altceva.
+- Toate valorile lizibile pentru utilizator trebuie să fie în limba română.
+- Păstrează exact structura generală din exemplul de mai jos.
+- Menține aceleași chei de top, chei imbricate, nivele de obiecte, id-uri de grafice, tipuri de grafice, id-uri de secțiuni și forme de array/object.
+- Înlocuiește valorile de exemplu cu valori deduse din anunț.
+- Dacă lipsesc informații, estimează o valoare realistă și păstrează tipul de date așteptat.
+- page_one.badges trebuie să încapă în 2 rânduri pe prima pagină, deci păstrează doar badge-urile cele mai relevante și nu depăși 8 badge-uri.
+- page_one.verdict.ideal_for trebuie să conțină maximum 3 elemente scurte.
+- page_one.verdict.not_ideal_for trebuie să conțină maximum 3 elemente scurte.
+- Dacă graficul are id-ul total_acquisition_cost, fiecare data.segments.label trebuie să fie dintr-un singur cuvânt.
+- Nu adăuga markdown, explicații, comentarii sau text suplimentar.
+
+Exemplu de schemă de urmat întocmai:
+{$schemaExample}
+PROMPT;
+    }
+
+    private function loadSampleJson(string $sampleFile): string
+    {
+        $path = storage_path('app/' . $sampleFile);
+
+        if (!is_file($path)) {
+            throw new \RuntimeException("Missing sample JSON for prompt seeding: {$sampleFile}");
+        }
+
+        $content = file_get_contents($path);
+
+        if ($content === false) {
+            throw new \RuntimeException("Unable to read sample JSON for prompt seeding: {$sampleFile}");
+        }
+
+        return trim($content);
     }
 }

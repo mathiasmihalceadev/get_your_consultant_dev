@@ -6,6 +6,7 @@ declare module "@inertiajs/core" {
         auth: {
             user: import("./").User | null;
         };
+        appFlags: import("./").AppFlags;
         flash: import("./").FlashMessages;
     }
 }

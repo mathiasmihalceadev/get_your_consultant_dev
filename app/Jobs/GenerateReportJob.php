@@ -8,6 +8,8 @@ use App\Mail\ReportMail;
 use App\Models\Report;
 use App\Models\Settings;
 use App\Services\OpenAIService;
+use App\Services\RemotePdfRenderer;
+use App\Support\ReportDataNormalizer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -15,8 +17,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
-use Spatie\LaravelPdf\Facades\Pdf;
 
 class GenerateReportJob implements ShouldQueue
 {
@@ -28,7 +28,7 @@ class GenerateReportJob implements ShouldQueue
         public int $reportId,
     ) {}
 
-    public function handle(OpenAIService $openAI): void
+    public function handle(OpenAIService $openAI, RemotePdfRenderer $pdfRenderer): void
     {
         $report = Report::find($this->reportId);
 
@@ -42,20 +42,12 @@ class GenerateReportJob implements ShouldQueue
             'type' => $report->report_type,
         ]);
 
-        $locale = $report->locale ?? 'en';
-        $suffix = $locale === 'ro' ? '_ro' : '';
-
-        $baseField = match ($report->report_type) {
-            'rental_living' => 'rental_living_prompt',
-            'rental_business' => 'rental_business_prompt',
-            'buying_living' => 'buying_living_prompt',
-            'buying_business' => 'buying_business_prompt',
-        };
-
-        $prompt = Settings::get($baseField . $suffix) ?? Settings::get($baseField);
+        $locale = $report->locale === 'ro' ? 'ro' : 'en';
+        $prompt = $this->resolvePrompt($report, $locale);
 
         try {
             $reportData = $openAI->generateReportData($report->url, $prompt);
+            $reportData = ReportDataNormalizer::normalize($reportData, $locale);
         } catch (OpenAIJsonException|OpenAIRequestException $e) {
             Log::channel('report')->error('OpenAI request failed', [
                 'report_id' => $report->id,
@@ -75,13 +67,19 @@ class GenerateReportJob implements ShouldQueue
             if (!is_dir($dir)) {
                 mkdir($dir, 0755, true);
             }
-            $path = $dir . "/{$report->page_token}.pdf";
+            $filename = $report->pdfStorageFilename();
+            $path = $dir . '/' . $filename;
 
-            Pdf::view('reports.template', ['data' => $reportData, 'report' => $report, 'trans' => $this->loadTranslations($report->locale ?? 'en')])
-                ->format('a4')
-                ->save($path);
+            $templateView = $this->resolveTemplateView($report);
 
-            $report->report_url = "/storage/reports/{$report->page_token}.pdf";
+            $pdfRenderer->saveView($templateView, [
+                'data' => $reportData,
+                'report' => $report,
+                'locale' => $locale,
+                'trans' => $this->loadTranslations($locale),
+            ], $path, $filename, now());
+
+            $report->report_url = $report->pdfPublicUrl();
         } catch (\Exception $e) {
             Log::channel('report')->error('PDF generation failed', [
                 'report_id' => $report->id,
@@ -95,7 +93,7 @@ class GenerateReportJob implements ShouldQueue
             return;
         }
 
-        $report->processed_at = now();
+        $report->setAttribute('processed_at', now());
 
         Log::channel('report')->info('PDF generated and stored', [
             'report_id' => $report->id,
@@ -125,4 +123,58 @@ class GenerateReportJob implements ShouldQueue
         }
         return [];
     }
+
+    private function resolvePrompt(Report $report, string $locale): string
+    {
+        $keys = $this->resolvePromptKeys($report, $locale);
+
+        foreach ($keys as $key) {
+            $value = Settings::get($key);
+
+            if (is_string($value) && trim($value) !== '') {
+                return $this->appendRenderingConstraints($value, $locale);
+            }
+        }
+
+        throw new OpenAIRequestException('No report prompt is configured for the selected report type and locale.');
+    }
+
+    private function resolvePromptKeys(Report $report, string $locale): array
+    {
+        $localeSuffix = $locale === 'ro' ? 'ro' : 'eng';
+
+        return match ($report->report_type) {
+            'buying_living', 'buying_business' => array_values(array_filter([
+                "buying_living_{$localeSuffix}",
+                $locale === 'ro' ? 'buying_living_prompt_ro' : 'buying_living_prompt',
+            ])),
+            default => array_values(array_filter([
+                "rental_living_{$localeSuffix}",
+                $locale === 'ro' ? 'rental_living_prompt_ro' : 'rental_living_prompt',
+            ])),
+        };
+    }
+
+    private function resolveTemplateView(Report $report): string
+    {
+        return match ($report->report_type) {
+            'buying_living', 'buying_business' => 'reports.template-buying',
+            default => 'reports.template-rental',
+        };
+    }
+
+    private function appendRenderingConstraints(string $prompt, string $locale): string
+    {
+        $oneWordExamples = $locale === 'en'
+            ? 'Price, Notary, Registry, Agency, Bank, Renovation, Reserve'
+            : 'Preț, Notar, Carte, Comision, Bancă, Renovare, Rezervă';
+
+        return rtrim($prompt) . "\n\nAdditional hard output constraints:\n"
+            . "- page_one.badges must fit visually within 2 rows on the first page. Keep only the most decision-relevant badges and never exceed 8 badges.\n"
+            . "- page_one.verdict.ideal_for must contain at most 3 short items.\n"
+            . "- page_one.verdict.not_ideal_for must contain at most 3 short items.\n"
+            . "- page_one.verdict.one_liner must stay concise and scannable.\n"
+            . "- If the chart id is total_acquisition_cost, every data.segments[].label must be a single word. Use labels like: {$oneWordExamples}.\n";
+    }
 }
+

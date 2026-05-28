@@ -128,10 +128,27 @@ return [
         ],
 
         'report' => [
-            'driver' => 'single',
+            'driver' => 'daily',
             'path' => storage_path('logs/report.log'),
             'level' => 'debug',
-            'days' => 30,
+            'days' => 60,
+            'replace_placeholders' => true,
+        ],
+
+        'stripe' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/stripe.log'),
+            'level' => 'debug',
+            'days' => 60,
+            'replace_placeholders' => true,
+        ],
+
+        'smartbill' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/smartbill.log'),
+            'level' => 'debug',
+            'days' => 60,
+            'replace_placeholders' => true,
         ],
 
     ],

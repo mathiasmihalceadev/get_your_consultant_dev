@@ -3,20 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
-use App\Models\Settings;
-use App\Jobs\GenerateReportJob;
-use App\Mail\ReportMail;
 use App\Services\OpenAIService;
+use App\Services\ReportPricingService;
+use App\Services\StripeCheckoutService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class PublicReportController extends Controller
 {
-    public function landing()
+    public function landing(Request $request, ReportPricingService $pricing)
     {
-        return Inertia::render('Public/Landing');
+        return Inertia::render('Public/Landing', [
+            'pricingCatalog' => $pricing->catalogForRequest(app()->getLocale(), $request),
+        ]);
     }
 
     public function index()
@@ -24,12 +24,31 @@ class PublicReportController extends Controller
         return Inertia::render('Public/Index');
     }
 
+    public function privacyPolicy()
+    {
+        return $this->renderLegalDocument('privacy-policy');
+    }
+
+    public function termsAndConditions()
+    {
+        return $this->renderLegalDocument('terms-and-conditions');
+    }
+
+    public function cookiePolicy()
+    {
+        return $this->renderLegalDocument('cookie-policy');
+    }
+
     public function showUrlForm(Request $request)
     {
+        if ($this->publicWizardMaintenanceEnabled()) {
+            return redirect()->route('get-report');
+        }
+
         $type = $request->query('type');
 
-        if (!in_array($type, ['rental_living', 'rental_business', 'buying_living', 'buying_business'])) {
-            return redirect('/' . app()->getLocale());
+        if (!in_array($type, ['rental_living', 'buying_living'])) {
+            return redirect()->route('home');
         }
 
         return Inertia::render('Public/SubmitUrl', [
@@ -39,11 +58,21 @@ class PublicReportController extends Controller
 
     public function validateUrl(Request $request, OpenAIService $openAI)
     {
+        if ($this->publicWizardMaintenanceEnabled()) {
+            return redirect()->route('get-report');
+        }
+
         $locale = app()->getLocale();
-        $validated = $request->validate([
-            'url' => ['required', 'url'],
-            'report_type' => ['required', 'in:rental_living,rental_business,buying_living,buying_business'],
-        ]);
+        $validated = $request->validate(
+            [
+                'url' => ['required', 'url'],
+                'report_type' => ['required', 'in:rental_living,buying_living'],
+            ],
+            [
+                'url.required' => __('wizard_url_required'),
+                'url.url' => __('wizard_url_invalid'),
+            ],
+        );
 
         $report = Report::create([
             'url' => $validated['url'],
@@ -59,11 +88,13 @@ class PublicReportController extends Controller
         ]);
 
         try {
-            $result = $openAI->validateUrl($validated['url']);
+            $result = $openAI->validateUrl($validated['url'], $validated['report_type']);
         } catch (\Exception $e) {
+            $message = __('wizard_url_validation_failed');
+
             $report->update([
                 'status' => 'not_accessible',
-                'error_message' => $e->getMessage(),
+                'error_message' => $message,
             ]);
 
             Log::channel('report')->error('URL validation exception', [
@@ -72,23 +103,26 @@ class PublicReportController extends Controller
             ]);
 
             return back()->withErrors([
-                'url' => 'This URL could not be accessed or does not appear to be a property listing.',
+                'url' => $message,
             ]);
         }
 
         if (!$result['success']) {
+            $message = $this->resolveUrlValidationMessage($result['reason_code'] ?? null);
+
             $report->update([
                 'status' => 'not_accessible',
-                'error_message' => $result['message'],
+                'error_message' => $message,
             ]);
 
             Log::channel('report')->info('URL validation failed', [
                 'report_id' => $report->id,
+                'reason_code' => $result['reason_code'] ?? 'unknown',
                 'reason' => $result['message'],
             ]);
 
             return back()->withErrors([
-                'url' => 'This URL could not be accessed or does not appear to be a property listing.',
+                'url' => $message,
             ]);
         }
 
@@ -98,22 +132,21 @@ class PublicReportController extends Controller
             'report_id' => $report->id,
         ]);
 
-        return redirect("/{$locale}/submit-email");
+        return redirect()->route('submit-email');
     }
 
     public function showEmailForm()
     {
-        $locale = app()->getLocale();
         $reportId = session('report_id');
 
         if (!$reportId) {
-            return redirect("/{$locale}");
+            return redirect()->route('home');
         }
 
         $report = Report::find($reportId);
 
         if (!$report) {
-            return redirect("/{$locale}");
+            return redirect()->route('home');
         }
 
         return Inertia::render('Public/SubmitEmail', [
@@ -125,25 +158,34 @@ class PublicReportController extends Controller
         ]);
     }
 
-    public function submitEmail(Request $request)
+    public function submitEmail(Request $request, StripeCheckoutService $stripe)
     {
-        $locale = app()->getLocale();
-        $validated = $request->validate([
-            'email' => ['required', 'email'],
-            'report_id' => ['required', 'exists:reports,id'],
-        ]);
+        $validated = $request->validate(
+            [
+                'email' => ['required', 'email'],
+                'report_id' => ['required', 'exists:reports,id'],
+            ],
+            [
+                'email.required' => __('wizard_email_required'),
+                'email.email' => __('wizard_email_invalid'),
+            ],
+        );
 
         $report = Report::findOrFail($validated['report_id']);
 
         if ($report->status !== 'pending') {
-            return redirect("/{$locale}")->withErrors(['error' => 'This report is no longer pending.']);
+            if ($report->page_token) {
+                return redirect()->route('report.status', ['pageToken' => $report->page_token]);
+            }
+
+            return redirect()->route('home')->withErrors(['error' => 'This report is no longer pending.']);
         }
 
         $pageToken = hash('sha256', $validated['email'] . $report->url . $report->report_type);
 
         // If a report with this page_token already exists, redirect to it
         $existingByToken = Report::where('page_token', $pageToken)->first();
-        if ($existingByToken) {
+        if ($existingByToken && $existingByToken->id !== $report->id) {
             $report->delete();
             session()->forget('report_id');
 
@@ -151,61 +193,117 @@ class PublicReportController extends Controller
                 'existing_report_id' => $existingByToken->id,
             ]);
 
-            return redirect("/{$locale}/report/{$pageToken}");
+            return redirect()->route('report.status', ['pageToken' => $pageToken]);
         }
 
         $report->update([
             'email' => $validated['email'],
             'page_token' => $pageToken,
+            'error_message' => null,
         ]);
 
-        // Duplicate URL + type check (same URL+type but different email)
-        $existing = Report::where('url', $report->url)
-            ->where('report_type', $report->report_type)
-            ->where('id', '!=', $report->id)
-            ->whereNotNull('report_url')
-            ->whereIn('status', ['sent', 'to_be_sent'])
-            ->first();
-
-        if ($existing) {
-            Log::channel('report')->info('Duplicate detected — reusing existing PDF', [
+        try {
+            $checkoutUrl = $stripe->createCheckoutSession($report);
+        } catch (\Throwable $e) {
+            Log::channel('stripe')->error('Unable to start Stripe checkout for report', [
                 'report_id' => $report->id,
-                'existing_report_id' => $existing->id,
+                'error' => $e->getMessage(),
             ]);
 
-            $report->update(['report_url' => $existing->report_url]);
-
-            if (Settings::get('auto_send')) {
-                Mail::to($report->email)->send(new ReportMail($report));
-                $report->update(['status' => 'sent', 'processed_at' => now()]);
-            } else {
-                $report->update(['status' => 'to_be_sent', 'processed_at' => now()]);
-            }
-        } else {
-            $report->update(['status' => 'pending']);
-            GenerateReportJob::dispatch($report->id);
-            Log::channel('report')->info('GenerateReportJob dispatched', [
-                'report_id' => $report->id,
+            return back()->withErrors([
+                'email' => __('payment_unavailable'),
             ]);
         }
 
         session()->forget('report_id');
 
-        return redirect("/{$locale}/report/{$pageToken}");
+        return Inertia::location($checkoutUrl);
     }
 
-    public function status(string $locale, string $pageToken)
+    public function retryCheckout(string $pageToken, StripeCheckoutService $stripe)
+    {
+        $report = Report::where('page_token', $pageToken)->firstOrFail();
+
+        if (!in_array($report->status, ['awaiting_payment', 'payment_cancelled', 'payment_failed'], true)) {
+            return redirect()->route('report.status', ['pageToken' => $pageToken])
+                ->with('error', __('payment_retry_unavailable'));
+        }
+
+        if (!$report->email) {
+            return redirect()->route('report.status', ['pageToken' => $pageToken])
+                ->with('error', __('payment_unavailable'));
+        }
+
+        try {
+            $checkoutUrl = $stripe->createCheckoutSession($report);
+        } catch (\Throwable $e) {
+            Log::channel('stripe')->error('Unable to retry Stripe checkout for report', [
+                'report_id' => $report->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('report.status', ['pageToken' => $pageToken])
+                ->with('error', __('payment_unavailable'));
+        }
+
+        return Inertia::location($checkoutUrl);
+    }
+
+    public function paymentSuccess(Request $request, string $pageToken, StripeCheckoutService $stripe)
+    {
+        $report = Report::where('page_token', $pageToken)->firstOrFail();
+        $purchaseId = $request->integer('purchase');
+
+        try {
+            $stripe->markCheckoutSuccessReturn(
+                $report,
+                $purchaseId > 0 ? $purchaseId : null,
+                $request->query('session_id'),
+            );
+        } catch (\Throwable $e) {
+            Log::channel('stripe')->error('Unable to sync Stripe success redirect', [
+                'report_id' => $report->id,
+                'purchase_id' => $purchaseId > 0 ? $purchaseId : null,
+                'session_id' => $request->query('session_id'),
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('report.status', ['pageToken' => $pageToken])
+                ->with('error', __('payment_status_sync_error'));
+        }
+
+        return redirect()->route('report.status', ['pageToken' => $pageToken])
+            ->with('success', __('payment_return_success'));
+    }
+
+    public function paymentCancel(Request $request, string $pageToken, StripeCheckoutService $stripe)
+    {
+        $report = Report::where('page_token', $pageToken)->firstOrFail();
+        $purchaseId = $request->integer('purchase');
+
+        try {
+            $stripe->markCheckoutCanceled($report, $purchaseId > 0 ? $purchaseId : null);
+        } catch (\Throwable $e) {
+            Log::channel('stripe')->error('Unable to sync Stripe cancel redirect', [
+                'report_id' => $report->id,
+                'purchase_id' => $purchaseId > 0 ? $purchaseId : null,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('report.status', ['pageToken' => $pageToken])
+                ->with('error', __('payment_status_sync_error'));
+        }
+
+        return redirect()->route('report.status', ['pageToken' => $pageToken])
+            ->with('error', __('payment_return_cancelled'));
+    }
+
+    public function status(string $pageToken)
     {
         $report = Report::where('page_token', $pageToken)->firstOrFail();
 
         return Inertia::render('Public/ReportStatus', [
-            'report' => [
-                'url' => $report->url,
-                'report_type' => $report->report_type,
-                'status' => $report->status,
-                'report_url' => $report->report_url,
-                'error_message' => $report->error_message,
-            ],
+            'report' => $this->reportStatusPayload($report),
             'pageToken' => $pageToken,
         ]);
     }
@@ -218,9 +316,97 @@ class PublicReportController extends Controller
             return response()->json(['error' => 'Report not found'], 404);
         }
 
-        return response()->json([
+        return response()->json($this->reportStatusPayload($report));
+    }
+
+    private function reportStatusPayload(Report $report): array
+    {
+        return [
+            'url' => $report->url,
+            'report_type' => $report->report_type,
             'status' => $report->status,
             'report_url' => $report->report_url,
+            'error_message' => $report->error_message,
+        ];
+    }
+
+    private function publicWizardMaintenanceEnabled(): bool
+    {
+        return (bool) config('app.public_wizard_maintenance', false);
+    }
+
+    private function renderLegalDocument(string $documentKey)
+    {
+        $locale = app()->getLocale();
+        $documents = [
+            'privacy-policy' => [
+                'title' => [
+                    'en' => 'Privacy Policy',
+                    'ro' => 'Politica de confidențialitate',
+                ],
+                'description' => [
+                    'en' => 'Learn how Get Your Consultant collects, uses, stores, and protects personal data across the website and report generation flow.',
+                    'ro' => 'Află cum Get Your Consultant colectează, utilizează, stochează și protejează datele personale pe website și în fluxul de generare a rapoartelor.',
+                ],
+                'file' => [
+                    'en' => 'GYC_Privacy-Policy.md',
+                    'ro' => 'GYC_Politica-de-Confidentialitate.md',
+                ],
+            ],
+            'terms-and-conditions' => [
+                'title' => [
+                    'en' => 'Terms and Conditions',
+                    'ro' => 'Termeni și condiții',
+                ],
+                'description' => [
+                    'en' => 'Read the contractual terms for using Get Your Consultant, ordering reports, payments, delivery, refunds, and digital-content rights.',
+                    'ro' => 'Consultă termenii contractuali pentru utilizarea Get Your Consultant, comandarea rapoartelor, plăți, livrare, rambursări și drepturile asupra conținutului digital.',
+                ],
+                'file' => [
+                    'en' => 'GYC_Terms-and-Conditions.md',
+                    'ro' => 'GYC_Termeni-si-Conditii.md',
+                ],
+            ],
+            'cookie-policy' => [
+                'title' => [
+                    'en' => 'Cookie Policy',
+                    'ro' => 'Politica de cookie-uri',
+                ],
+                'description' => [
+                    'en' => 'See what cookies Get Your Consultant uses, why they are used, how consent works, and how you can manage your preferences.',
+                    'ro' => 'Vezi ce cookie-uri folosește Get Your Consultant, de ce sunt folosite, cum funcționează consimțământul și cum îți poți gestiona preferințele.',
+                ],
+                'file' => [
+                    'en' => 'GYC_Cookie-Policy.md',
+                    'ro' => 'GYC_Politica-de-Cookies.md',
+                ],
+            ],
+        ];
+
+        abort_unless(isset($documents[$documentKey]), 404);
+
+        $document = $documents[$documentKey];
+        $filePath = storage_path('app/public/'.$document['file'][$locale]);
+
+        abort_unless(file_exists($filePath), 404);
+
+        $markdown = file_get_contents($filePath);
+
+        return Inertia::render('Public/LegalDocument', [
+            'title' => $document['title'][$locale],
+            'description' => $document['description'][$locale],
+            'markdown' => $markdown,
         ]);
+    }
+
+    private function resolveUrlValidationMessage(?string $reasonCode): string
+    {
+        return match ($reasonCode) {
+            'not_property' => __('wizard_url_not_property'),
+            'not_buying_property' => __('wizard_url_not_buying_property'),
+            'not_renting_property' => __('wizard_url_not_renting_property'),
+            'source_blocked', 'accessible_property', null => __('wizard_url_access_failed'),
+            default => __('wizard_url_access_failed'),
+        };
     }
 }
