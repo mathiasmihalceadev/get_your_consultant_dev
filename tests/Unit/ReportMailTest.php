@@ -148,7 +148,43 @@ class ReportMailTest extends TestCase
 
         $this->assertSame(2000, $report->pdfStorageNumber());
         $this->assertSame('gyc_02000.pdf', $report->pdfStorageFilename());
-        $this->assertSame('/storage/reports/gyc_02000.pdf', $report->pdfPublicUrl());
+        $this->assertSame('reports/gyc_02000.pdf', $report->pdfStorageRelativePath());
+    }
+
+    public function test_it_can_attach_a_legacy_public_report_pdf_when_it_has_not_been_migrated_yet(): void
+    {
+        $reportPdf = "%PDF-report\n";
+        $report = $this->makeReportWithInvoice('report-mail-legacy.pdf', $this->makeInvoice('FCT', '0026'));
+
+        $this->writeLegacyReportPdf($report, $reportPdf);
+
+        Http::fake([
+            'https://smartbill.test/SBORO/api/invoice/pdf?*' => Http::response([
+                'errorText' => 'Factura nu a fost gasita!',
+            ], 404),
+        ]);
+
+        $attachments = (new ReportMail($report))->attachments();
+
+        $this->assertCount(1, $attachments);
+        $this->assertTrue(
+            $attachments[0]->isEquivalent(
+                Attachment::fromPath($report->legacyPublicPdfStoragePath())
+                    ->as('raport.pdf')
+                    ->withMime('application/pdf')
+            )
+        );
+    }
+
+    public function test_it_renders_an_attachment_message_without_a_public_download_button(): void
+    {
+        $report = $this->makeReportWithInvoice('report-mail-copy.pdf', $this->makeInvoice('FCT', '0027'));
+
+        $html = (new ReportMail($report))->render();
+
+        $this->assertStringContainsString('Raportul și factura sunt atașate acestui email.', $html);
+        $this->assertStringNotContainsString('Descarcă raportul complet', $html);
+        $this->assertStringNotContainsString((string) $report->report_url, $html);
     }
 
     private function makeReportWithInvoice(string $filename, SmartBillInvoice $invoice): Report
@@ -186,6 +222,15 @@ class ReportMailTest extends TestCase
     private function writeReportPdf(Report $report, string $contents): void
     {
         $path = $report->pdfStoragePath();
+        File::ensureDirectoryExists(dirname($path));
+        File::put($path, $contents);
+
+        $this->createdFiles[] = $path;
+    }
+
+    private function writeLegacyReportPdf(Report $report, string $contents): void
+    {
+        $path = $report->legacyPublicPdfStoragePath();
         File::ensureDirectoryExists(dirname($path));
         File::put($path, $contents);
 

@@ -325,7 +325,7 @@ class PublicReportController extends Controller
             'url' => $report->url,
             'report_type' => $report->report_type,
             'status' => $report->status,
-            'report_url' => $report->report_url,
+            'report_url' => null,
             'error_message' => $report->error_message,
         ];
     }

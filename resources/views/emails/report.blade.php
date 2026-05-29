@@ -6,13 +6,16 @@
             ? 'Mesaj automat — te rugăm să nu răspunzi direct la acest email.'
             : 'Automated message — please do not reply directly to this email.',
         'intro' => $isRomanian
-            ? 'Analiza proprietății tale a fost finalizată. Mai jos găsești raportul complet.'
-            : 'Your property analysis has been completed. You can access the full report below.',
-        'downloadTitle' => $isRomanian ? 'Raport complet' : 'Full report',
+            ? 'Analiza proprietății tale a fost finalizată.'
+            : 'Your property analysis has been completed.',
+        'downloadTitle' => $isRomanian ? 'Fișiere atașate' : 'Attached files',
         'downloadBody' => $isRomanian
-            ? 'Accesează raportul complet direct din butonul de mai jos.'
-            : 'Access the full report directly from the button below.',
-        'downloadCta' => $isRomanian ? 'Descarcă raportul complet' : 'Download full report',
+            ? ($invoiceAttached
+                ? 'Raportul și factura sunt atașate acestui email.'
+                : 'Raportul este atașat acestui email. Factura va fi atașată separat când este disponibilă.')
+            : ($invoiceAttached
+                ? 'The report and invoice are attached to this email.'
+                : 'The report is attached to this email. The invoice will be attached separately when it becomes available.'),
         'supportTitle' => $isRomanian ? 'Întrebări sau nelămuriri?' : 'Questions or anything unclear?',
         'supportBody' => $isRomanian
             ? 'Răspundem rapid la orice întrebare.'
@@ -343,17 +346,6 @@
             <div class="download-section">
                 <p class="download-title">{{ $copy['downloadTitle'] }}</p>
                 <p class="download-copy">{{ $copy['downloadBody'] }}</p>
-
-                <table class="download-row" role="presentation">
-                    <tr>
-                        <td class="pdf-badge-cell">
-                            <span class="pdf-badge">{{ $copy['pdfLabel'] }}</span>
-                        </td>
-                        <td>
-                            <a href="{{ $downloadUrl }}" class="button">{{ $copy['downloadCta'] }}</a>
-                        </td>
-                    </tr>
-                </table>
             </div>
 
             <table class="support-box" role="presentation">

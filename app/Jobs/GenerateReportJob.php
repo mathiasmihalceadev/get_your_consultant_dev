@@ -63,12 +63,12 @@ class GenerateReportJob implements ShouldQueue
 
         // Generate PDF
         try {
-            $dir = storage_path('app/public/reports');
+            $dir = dirname($report->pdfStoragePath());
             if (!is_dir($dir)) {
                 mkdir($dir, 0755, true);
             }
             $filename = $report->pdfStorageFilename();
-            $path = $dir . '/' . $filename;
+            $path = $report->pdfStoragePath();
 
             $templateView = $this->resolveTemplateView($report);
 
@@ -79,7 +79,7 @@ class GenerateReportJob implements ShouldQueue
                 'trans' => $this->loadTranslations($locale),
             ], $path, $filename, now());
 
-            $report->report_url = $report->pdfPublicUrl();
+            $report->report_url = $report->pdfStorageRelativePath();
         } catch (\Exception $e) {
             Log::channel('report')->error('PDF generation failed', [
                 'report_id' => $report->id,

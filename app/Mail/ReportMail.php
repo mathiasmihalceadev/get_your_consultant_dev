@@ -43,16 +43,12 @@ class ReportMail extends Mailable
 
         $typeKey = "type_{$this->report->report_type}";
         $typeLabel = $translations[$typeKey] ?? $this->report->report_type;
-        $statusUrl = LocalizedUrl::publicUrlForLocale($locale, "/report/{$this->report->page_token}");
-        $downloadPath = $this->report->report_url ?: $this->report->pdfPublicUrl();
 
         return new Content(
             view: 'emails.report',
             with: [
                 'report' => $this->report,
                 'typeLabel' => $typeLabel,
-                'downloadUrl' => LocalizedUrl::publicUrlForLocale($locale, $downloadPath),
-                'statusUrl' => $statusUrl,
                 'contactUrl' => LocalizedUrl::publicUrlForLocale($locale, '/contact'),
                 'logoUrl' => LocalizedUrl::publicUrlForLocale($locale, '/images/main-logo-transparent.png'),
                 'contactEmail' => $publicLocale === 'ro'
@@ -63,6 +59,7 @@ class ReportMail extends Mailable
                     ? 'getyourconsultant.ro'
                     : 'getyourconsultant.com',
                 'currentYear' => now()->year,
+                'invoiceAttached' => $this->latestSmartBillInvoice() !== null,
                 'trans' => $translations,
             ],
         );
@@ -78,9 +75,9 @@ class ReportMail extends Mailable
 
     private function reportPdfAttachment(): ?Attachment
     {
-        $path = $this->report->pdfStoragePath();
+        $path = $this->report->storedPdfPath();
 
-        if (!is_file($path)) {
+        if (!$path || !is_file($path)) {
             return null;
         }
 

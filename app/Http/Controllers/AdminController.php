@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class AdminController extends Controller
 {
@@ -164,7 +165,7 @@ class AdminController extends Controller
             return back()->with('error', 'Report cannot be sent because the email address is missing.');
         }
 
-        $hasGeneratedReport = filled($report->report_url) || file_exists($report->pdfStoragePath());
+        $hasGeneratedReport = $report->hasStoredPdf();
 
         if (!$hasGeneratedReport) {
             return back()->with(
@@ -187,8 +188,8 @@ class AdminController extends Controller
                 'mail_scheme' => config('mail.mailers.smtp.scheme'),
                 'from_address' => config('mail.from.address'),
                 'queue_connection' => config('queue.default'),
-                'pdf_path' => $report->pdfStoragePath(),
-                'pdf_exists' => file_exists($report->pdfStoragePath()),
+                'pdf_path' => $report->storedPdfPath(),
+                'pdf_exists' => $report->hasStoredPdf(),
                 'error' => $e->getMessage(),
             ]);
 
@@ -211,5 +212,18 @@ class AdminController extends Controller
                 ? "Report has been resent to {$report->email}."
                 : "Report has been sent to {$report->email}.",
         );
+    }
+
+    public function pdf(int $id): BinaryFileResponse
+    {
+        $report = Report::findOrFail($id);
+        $path = $report->storedPdfPath();
+
+        abort_unless($path && is_file($path), 404);
+
+        return response()->file($path, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $report->resolvedPdfStorageFilename() . '"',
+        ]);
     }
 }
