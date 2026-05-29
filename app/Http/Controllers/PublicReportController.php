@@ -6,16 +6,28 @@ use App\Models\Report;
 use App\Services\OpenAIService;
 use App\Services\ReportPricingService;
 use App\Services\StripeCheckoutService;
+use App\Support\LocalizedUrl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use League\CommonMark\GithubFlavoredMarkdownConverter;
 
 class PublicReportController extends Controller
 {
     public function landing(Request $request, ReportPricingService $pricing)
     {
-        return Inertia::render('Public/Landing', [
+        $locale = app()->getLocale();
+        $alternates = collect(LocalizedUrl::publicLocales())
+            ->mapWithKeys(fn (string $publicLocale) => [
+                $publicLocale === 'ro' ? 'ro-RO' : 'en-US' => LocalizedUrl::publicUrlForLocale($publicLocale, '/'),
+            ])
+            ->all();
+
+        return response()->view('public.landing', [
             'pricingCatalog' => $pricing->catalogForRequest(app()->getLocale(), $request),
+            'canonical' => LocalizedUrl::publicUrlForLocale($locale, '/'),
+            'alternates' => $alternates,
+            'xDefault' => LocalizedUrl::publicUrlForLocale(LocalizedUrl::publicXDefaultLocale(), '/'),
         ]);
     }
 
@@ -352,6 +364,7 @@ class PublicReportController extends Controller
                     'en' => 'GYC_Privacy-Policy.md',
                     'ro' => 'GYC_Politica-de-Confidentialitate.md',
                 ],
+                'path' => '/privacy-policy',
             ],
             'terms-and-conditions' => [
                 'title' => [
@@ -366,6 +379,7 @@ class PublicReportController extends Controller
                     'en' => 'GYC_Terms-and-Conditions.md',
                     'ro' => 'GYC_Termeni-si-Conditii.md',
                 ],
+                'path' => '/terms-and-conditions',
             ],
             'cookie-policy' => [
                 'title' => [
@@ -380,6 +394,7 @@ class PublicReportController extends Controller
                     'en' => 'GYC_Cookie-Policy.md',
                     'ro' => 'GYC_Politica-de-Cookies.md',
                 ],
+                'path' => '/cookie-policy',
             ],
         ];
 
@@ -391,11 +406,25 @@ class PublicReportController extends Controller
         abort_unless(file_exists($filePath), 404);
 
         $markdown = file_get_contents($filePath);
+        $canonicalPath = $document['path'];
+        $alternates = collect(LocalizedUrl::publicLocales())
+            ->mapWithKeys(fn (string $publicLocale) => [
+                $publicLocale === 'ro' ? 'ro-RO' : 'en-US' => LocalizedUrl::publicUrlForLocale($publicLocale, $canonicalPath),
+            ])
+            ->all();
 
-        return Inertia::render('Public/LegalDocument', [
+        $converter = new GithubFlavoredMarkdownConverter([
+            'html_input' => 'strip',
+            'allow_unsafe_links' => false,
+        ]);
+
+        return response()->view('public.legal-document', [
             'title' => $document['title'][$locale],
             'description' => $document['description'][$locale],
-            'markdown' => $markdown,
+            'contentHtml' => (string) $converter->convert($markdown),
+            'canonical' => LocalizedUrl::publicUrlForLocale($locale, $canonicalPath),
+            'alternates' => $alternates,
+            'xDefault' => LocalizedUrl::publicUrlForLocale(LocalizedUrl::publicXDefaultLocale(), $canonicalPath),
         ]);
     }
 

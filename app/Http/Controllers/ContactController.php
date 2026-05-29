@@ -2,16 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\LocalizedUrl;
 use App\Models\ContactInquiry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Inertia\Inertia;
 
 class ContactController extends Controller
 {
     public function show()
     {
-        return Inertia::render('Public/Contact');
+        $locale = app()->getLocale();
+        $path = '/contact';
+        $alternates = collect(LocalizedUrl::publicLocales())
+            ->mapWithKeys(fn (string $publicLocale) => [
+                $publicLocale === 'ro' ? 'ro-RO' : 'en-US' => LocalizedUrl::publicUrlForLocale($publicLocale, $path),
+            ])
+            ->all();
+
+        return response()->view('public.contact', [
+            'canonical' => LocalizedUrl::publicUrlForLocale($locale, $path),
+            'alternates' => $alternates,
+            'xDefault' => LocalizedUrl::publicUrlForLocale(LocalizedUrl::publicXDefaultLocale(), $path),
+        ]);
     }
 
     public function store(Request $request)
