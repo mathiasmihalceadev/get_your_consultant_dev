@@ -67,7 +67,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
             <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
                 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-3">
                     <div className="flex items-center justify-between gap-4 lg:gap-6">
-                        <Link
+                        <a
                             href={localePath("/")}
                             className="shrink-0 flex items-center gap-2.5 text-brand-primary font-bold text-lg hover:opacity-80 transition-opacity"
                         >
@@ -75,7 +75,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                 className="h-10 w-auto object-contain md:h-12"
                                 src="/images/logo-white.jpg"
                             />
-                        </Link>
+                        </a>
 
                         <nav className="hidden lg:flex min-w-0 flex-1 items-center justify-center gap-1 px-2">
                             {navItems.map((item) => (
