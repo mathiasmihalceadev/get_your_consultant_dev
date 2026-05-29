@@ -12,7 +12,7 @@ class OpenAIService
 {
     private const RESPONSES_ENDPOINT = 'https://api.openai.com/v1/responses';
     private string $apiKey;
-    private string $urlValidationModel = 'gpt-5.4-mini';
+    private string $urlValidationModel = 'gpt-5.5';
     private string $reportGenerationModel = 'gpt-5.5';
     private const URL_VALIDATION_REASON_CODES = [
         'accessible_property',
