@@ -72,6 +72,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/billing-tests/{id}/checkout/success', [AdminController::class, 'billingTestSuccess'])->name('admin.billing-tests.success');
     Route::get('/billing-tests/{id}/checkout/cancel', [AdminController::class, 'billingTestCancel'])->name('admin.billing-tests.cancel');
     Route::get('/reports/{id}', [AdminController::class, 'show'])->name('admin.reports.show');
+    Route::get('/reports/{id}/pdf', [AdminController::class, 'pdf'])->name('admin.reports.pdf');
     Route::post('/reports/{id}/send', [AdminController::class, 'send'])->name('admin.reports.send');
     Route::get('/settings', [AdminSettingsController::class, 'show'])->name('admin.settings');
     Route::get('/settings/exchange-rate', [AdminSettingsController::class, 'exchangeRate'])->name('admin.settings.exchange-rate');

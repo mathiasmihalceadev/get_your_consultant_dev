@@ -317,7 +317,7 @@ export default function ReportDetail({ report }: { report: Report }) {
 
                             {report.report_url && (
                                 <a
-                                    href={report.report_url}
+                                    href={`/admin/reports/${report.id}/pdf`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className={cn(
@@ -423,7 +423,7 @@ export default function ReportDetail({ report }: { report: Report }) {
                         <div className="flex items-center gap-3 pt-2">
                             {report.report_url && (
                                 <a
-                                    href={report.report_url}
+                                    href={`/admin/reports/${report.id}/pdf`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >

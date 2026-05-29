@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Report extends Model
 {
     private const PDF_STORAGE_NUMBER_OFFSET = 1999;
+    private const PDF_STORAGE_DIRECTORY = 'reports';
 
     protected $fillable = [
         'report_type',
@@ -51,6 +52,11 @@ class Report extends Model
         return sprintf('gyc_%05d.pdf', $this->pdfStorageNumber());
     }
 
+    public function pdfStorageRelativePath(): string
+    {
+        return self::PDF_STORAGE_DIRECTORY . '/' . $this->resolvedPdfStorageFilename();
+    }
+
     public function resolvedPdfStorageFilename(): string
     {
         $reportUrl = (string) ($this->report_url ?? '');
@@ -69,12 +75,30 @@ class Report extends Model
 
     public function pdfStoragePath(): string
     {
-        return storage_path('app/public/reports/' . $this->resolvedPdfStorageFilename());
+        return storage_path('app/private/' . $this->pdfStorageRelativePath());
     }
 
-    public function pdfPublicUrl(): string
+    public function legacyPublicPdfStoragePath(): string
     {
-        return '/storage/reports/' . $this->pdfStorageFilename();
+        return storage_path('app/public/' . self::PDF_STORAGE_DIRECTORY . '/' . $this->resolvedPdfStorageFilename());
+    }
+
+    public function storedPdfPath(): ?string
+    {
+        $privatePath = $this->pdfStoragePath();
+
+        if (is_file($privatePath)) {
+            return $privatePath;
+        }
+
+        $legacyPath = $this->legacyPublicPdfStoragePath();
+
+        return is_file($legacyPath) ? $legacyPath : null;
+    }
+
+    public function hasStoredPdf(): bool
+    {
+        return $this->storedPdfPath() !== null;
     }
 
     public function pdfStorageNumber(): int

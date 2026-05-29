@@ -267,7 +267,7 @@ function MobileReportRow({ report }: { report: Report }) {
 
                 {report.report_url && (
                     <a
-                        href={report.report_url}
+                        href={`/admin/reports/${report.id}/pdf`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={cn(
@@ -538,7 +538,7 @@ export default function Dashboard({
 
                                             {report.report_url && (
                                                 <a
-                                                    href={report.report_url}
+                                                    href={`/admin/reports/${report.id}/pdf`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className={cn(
