@@ -56,6 +56,8 @@ class PaidReportFulfillmentService
                 'processed_at' => now(),
             ]);
 
+            app(ReportReadyNotificationService::class)->send($report);
+
             return;
         }
 

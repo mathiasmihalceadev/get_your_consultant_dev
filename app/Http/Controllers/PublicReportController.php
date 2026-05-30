@@ -173,14 +173,8 @@ class PublicReportController extends Controller
     public function submitEmail(Request $request, StripeCheckoutService $stripe)
     {
         $validated = $request->validate(
-            [
-                'email' => ['required', 'email'],
-                'report_id' => ['required', 'exists:reports,id'],
-            ],
-            [
-                'email.required' => __('wizard_email_required'),
-                'email.email' => __('wizard_email_invalid'),
-            ],
+            $this->submitEmailValidationRules(),
+            $this->submitEmailValidationMessages(),
         );
 
         $report = Report::findOrFail($validated['report_id']);
@@ -339,6 +333,24 @@ class PublicReportController extends Controller
             'status' => $report->status,
             'report_url' => null,
             'error_message' => $report->error_message,
+        ];
+    }
+
+    private function submitEmailValidationRules(): array
+    {
+        return [
+            'email' => ['required', 'email'],
+            'report_id' => ['required', 'exists:reports,id'],
+            'accept_terms' => ['accepted'],
+        ];
+    }
+
+    private function submitEmailValidationMessages(): array
+    {
+        return [
+            'email.required' => __('wizard_email_required'),
+            'email.email' => __('wizard_email_invalid'),
+            'accept_terms.accepted' => __('wizard_accept_terms_required'),
         ];
     }
 

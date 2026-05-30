@@ -22,6 +22,7 @@ interface SettingsForm {
     buying_living_ro: string;
     buying_living_eng: string;
     auto_send: boolean;
+    report_ready_notification_emails: string;
     pricing_rental_living_eur: string;
     pricing_buying_living_eur: string;
     pricing_exchange_rate_eur_ron: string;
@@ -158,6 +159,8 @@ export default function Settings({
         buying_living_ro: settings?.buying_living_ro || "",
         buying_living_eng: settings?.buying_living_eng || "",
         auto_send: settings?.auto_send || false,
+        report_ready_notification_emails:
+            settings?.report_ready_notification_emails || "",
         pricing_rental_living_eur:
             settings?.pricing_rental_living_eur || "17.99",
         pricing_buying_living_eur:
@@ -817,20 +820,64 @@ export default function Settings({
 
                 <Card className="mb-6">
                     <CardContent>
-                        <div className="flex items-center gap-3">
-                            <Checkbox
-                                id="auto_send"
-                                checked={form.auto_send}
-                                onCheckedChange={(checked) =>
-                                    setForm({ ...form, auto_send: !!checked })
-                                }
-                            />
-                            <Label
-                                htmlFor="auto_send"
-                                className="cursor-pointer"
-                            >
-                                Trimite automat rapoartele după generare
-                            </Label>
+                        <div className="space-y-5">
+                            <div className="flex items-center gap-3">
+                                <Checkbox
+                                    id="auto_send"
+                                    checked={form.auto_send}
+                                    onCheckedChange={(checked) =>
+                                        setForm({
+                                            ...form,
+                                            auto_send: !!checked,
+                                        })
+                                    }
+                                />
+                                <Label
+                                    htmlFor="auto_send"
+                                    className="cursor-pointer"
+                                >
+                                    Trimite automat rapoartele după generare
+                                </Label>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="report_ready_notification_emails">
+                                    Emailuri interne pentru rapoartele de trimis
+                                </Label>
+                                <Textarea
+                                    id="report_ready_notification_emails"
+                                    rows={4}
+                                    value={
+                                        form.report_ready_notification_emails
+                                    }
+                                    onChange={(e) =>
+                                        setForm({
+                                            ...form,
+                                            report_ready_notification_emails:
+                                                e.target.value,
+                                        })
+                                    }
+                                    placeholder={[
+                                        "ops@example.com",
+                                        "team@example.com",
+                                    ].join("\n")}
+                                    className="border-brand-primary/15 text-brand-primary"
+                                />
+                                <p className="text-sm leading-6 text-brand-primary/66">
+                                    Aceste adrese primesc notificări când un
+                                    raport ajunge în starea „De trimis” și
+                                    necesită trimitere manuală către client.
+                                    Poți separa adresele prin linie nouă,
+                                    virgulă sau punct și virgulă.
+                                </p>
+                                {errors?.report_ready_notification_emails ? (
+                                    <p className="text-sm text-red-600">
+                                        {String(
+                                            errors.report_ready_notification_emails,
+                                        )}
+                                    </p>
+                                ) : null}
+                            </div>
                         </div>
                     </CardContent>
                 </Card>

@@ -8,6 +8,7 @@ use App\Mail\ReportMail;
 use App\Models\Report;
 use App\Models\Settings;
 use App\Services\OpenAIService;
+use App\Services\ReportReadyNotificationService;
 use App\Services\RemotePdfRenderer;
 use App\Support\ReportDataNormalizer;
 use Illuminate\Bus\Queueable;
@@ -28,7 +29,11 @@ class GenerateReportJob implements ShouldQueue
         public int $reportId,
     ) {}
 
-    public function handle(OpenAIService $openAI, RemotePdfRenderer $pdfRenderer): void
+    public function handle(
+        OpenAIService $openAI,
+        RemotePdfRenderer $pdfRenderer,
+        ReportReadyNotificationService $reportReadyNotifications,
+    ): void
     {
         $report = Report::find($this->reportId);
 
@@ -108,6 +113,10 @@ class GenerateReportJob implements ShouldQueue
         }
 
         $report->save();
+
+        if ($report->status === 'to_be_sent') {
+            $reportReadyNotifications->send($report);
+        }
 
         Log::channel('report')->info('GenerateReportJob completed', [
             'report_id' => $report->id,

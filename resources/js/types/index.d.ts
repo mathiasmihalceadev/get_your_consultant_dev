@@ -94,6 +94,7 @@ export interface Settings {
     buying_living_ro: string;
     buying_living_eng: string;
     auto_send: boolean;
+    report_ready_notification_emails: string;
     pricing_rental_living_eur: string;
     pricing_buying_living_eur: string;
     pricing_exchange_rate_eur_ron: string;
