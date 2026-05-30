@@ -84,16 +84,19 @@ interface SubmitEmailProps {
 }
 
 export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
-    const { t, localePath } = useTranslation();
+    const { t, locale, localePath } = useTranslation();
     const [email, setEmail] = useState("");
+    const [acceptTerms, setAcceptTerms] = useState(false);
     const [processing, setProcessing] = useState(false);
+    const termsPath =
+        locale === "ro" ? "/termeni-si-conditii" : "/terms-and-conditions";
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
         router.post(
             localePath("/submit-email"),
-            { email, report_id: report.id },
+            { email, report_id: report.id, accept_terms: acceptTerms },
             { onFinish: () => setProcessing(false) },
         );
     };
@@ -192,10 +195,42 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                             )}
                         </div>
 
+                        <div>
+                            <label className="flex items-start gap-3 border border-brand-primary/10 bg-brand-primary/3 px-4 py-3 text-sm leading-6 text-brand-primary/76">
+                                <input
+                                    id="accept_terms"
+                                    type="checkbox"
+                                    checked={acceptTerms}
+                                    onChange={(e) =>
+                                        setAcceptTerms(e.target.checked)
+                                    }
+                                    required
+                                    className="mt-1 h-4 w-4 shrink-0 border-brand-primary/25 text-brand-primary"
+                                />
+                                <span>
+                                    {t("wizard_accept_terms_intro")}
+                                    <a
+                                        href={termsPath}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="font-semibold text-brand-secondary underline decoration-brand-secondary/35 underline-offset-3 hover:text-brand-primary"
+                                    >
+                                        {t("wizard_terms_link")}
+                                    </a>
+                                    {t("wizard_accept_terms_outro")}
+                                </span>
+                            </label>
+                            {errors?.accept_terms && (
+                                <p className="mt-1.5 text-sm text-red-600">
+                                    {errors.accept_terms}
+                                </p>
+                            )}
+                        </div>
+
                         <div className="flex justify-end">
                             <button
                                 type="submit"
-                                disabled={processing || !email}
+                                disabled={processing || !email || !acceptTerms}
                                 className="inline-flex cursor-pointer items-center gap-2 bg-brand-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-primary/92 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {processing
@@ -206,9 +241,9 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                         </div>
                     </form>
 
-                    <p className="mt-6 text-[14px] leading-[1.68] text-brand-primary/78">
+                    {/* <p className="mt-6 text-[14px] leading-[1.68] text-brand-primary/78">
                         {t("payment_checkout_note")}
-                    </p>
+                    </p> */}
                 </div>
             </WizardLayout>
         </PublicLayout>

@@ -34,6 +34,19 @@ class AdminSettingsController extends Controller
             'buying_living_ro' => ['required', 'string'],
             'buying_living_eng' => ['required', 'string'],
             'auto_send' => ['boolean'],
+            'report_ready_notification_emails' => [
+                'nullable',
+                'string',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    foreach (Settings::parseNotificationEmailList((string) $value) as $email) {
+                        if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+                            $fail('Introdu una sau mai multe adrese de email valide, separate prin virgulă sau pe linii separate.');
+
+                            return;
+                        }
+                    }
+                },
+            ],
             'pricing_rental_living_eur' => ['required', 'numeric', 'gt:0'],
             'pricing_buying_living_eur' => ['required', 'numeric', 'gt:0'],
             'pricing_exchange_rate_eur_ron' => ['required', 'numeric', 'gt:0'],
@@ -61,6 +74,9 @@ class AdminSettingsController extends Controller
         );
         $validated['stripe_product_rental_living'] = trim((string) ($validated['stripe_product_rental_living'] ?? ''));
         $validated['stripe_product_buying_living'] = trim((string) ($validated['stripe_product_buying_living'] ?? ''));
+        $validated['report_ready_notification_emails'] = Settings::normalizeNotificationEmailList(
+            (string) ($validated['report_ready_notification_emails'] ?? ''),
+        );
 
         foreach ($validated as $key => $value) {
             Settings::set($key, $value);
