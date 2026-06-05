@@ -7,8 +7,10 @@ use App\Services\OpenAIService;
 use App\Services\ReportPricingService;
 use App\Services\StripeCheckoutService;
 use App\Support\LocalizedUrl;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Cookie;
 use Inertia\Inertia;
 use League\CommonMark\GithubFlavoredMarkdownConverter;
 
@@ -49,6 +51,62 @@ class PublicReportController extends Controller
     public function cookiePolicy()
     {
         return $this->renderLegalDocument('cookie-policy');
+    }
+
+    public function storeCookieConsent(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'consent' => ['required', 'in:accepted,customized'],
+            'preferences.statistics' => ['nullable', 'boolean'],
+            'preferences.marketing' => ['nullable', 'boolean'],
+            'preferences.preferences' => ['nullable', 'boolean'],
+        ]);
+
+        $preferences = $validated['consent'] === 'accepted'
+            ? [
+                'necessary' => true,
+                'statistics' => true,
+                'marketing' => true,
+                'preferences' => true,
+            ]
+            : [
+                'necessary' => true,
+                'statistics' => $request->boolean('preferences.statistics'),
+                'marketing' => $request->boolean('preferences.marketing'),
+                'preferences' => $request->boolean('preferences.preferences'),
+            ];
+
+        $response = back(status: 303);
+
+        $response->headers->setCookie(
+            Cookie::create(
+                'gyc_cookie_consent',
+                $validated['consent'],
+                now()->addDays(180),
+                '/',
+                null,
+                $request->isSecure(),
+                false,
+                false,
+                Cookie::SAMESITE_LAX,
+            )
+        );
+
+        $response->headers->setCookie(
+            Cookie::create(
+                'gyc_cookie_preferences',
+                json_encode($preferences, JSON_UNESCAPED_SLASHES),
+                now()->addDays(180),
+                '/',
+                null,
+                $request->isSecure(),
+                false,
+                false,
+                Cookie::SAMESITE_LAX,
+            )
+        );
+
+        return $response;
     }
 
     public function showUrlForm(Request $request)

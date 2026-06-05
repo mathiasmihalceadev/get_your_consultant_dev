@@ -21,6 +21,7 @@ Route::get('/checkout/cancel/{pageToken}', [PublicReportController::class, 'paym
 Route::get('/privacy-policy', [PublicReportController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/terms-and-conditions', [PublicReportController::class, 'termsAndConditions'])->name('terms-and-conditions');
 Route::get('/cookie-policy', [PublicReportController::class, 'cookiePolicy'])->name('cookie-policy');
+Route::post('/cookie-consent', [PublicReportController::class, 'storeCookieConsent'])->name('cookie-consent.store');
 Route::get('/politica-de-confidentialitate', [PublicReportController::class, 'privacyPolicy']);
 Route::get('/termeni-si-conditii', [PublicReportController::class, 'termsAndConditions']);
 Route::get('/politica-de-cookie-uri', [PublicReportController::class, 'cookiePolicy']);
@@ -75,6 +76,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/reports/{id}/pdf', [AdminController::class, 'pdf'])->name('admin.reports.pdf');
     Route::post('/reports/{id}/send', [AdminController::class, 'send'])->name('admin.reports.send');
     Route::get('/settings', [AdminSettingsController::class, 'show'])->name('admin.settings');
+    Route::get('/tests', [AdminSettingsController::class, 'tests'])->name('admin.tests');
     Route::get('/settings/exchange-rate', [AdminSettingsController::class, 'exchangeRate'])->name('admin.settings.exchange-rate');
     Route::post('/settings', [AdminSettingsController::class, 'update'])->name('admin.settings.update');
     Route::get('/test-pdf', [AdminSettingsController::class, 'testPdf'])->name('admin.test-pdf');

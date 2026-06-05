@@ -2,6 +2,7 @@ import { Link, usePage, router } from "@inertiajs/react";
 import {
     ChartBar,
     EnvelopeSimple,
+    FilePdf,
     Gear,
     SignOut,
     Icon,
@@ -32,14 +33,17 @@ const navItems: NavItem[] = [
         href: "/admin/settings",
         icon: Gear,
     },
+    {
+        name: "Teste",
+        href: "/admin/tests",
+        icon: FilePdf,
+    },
 ];
 
 export default function AdminLayout({ children }: PropsWithChildren) {
     const page = usePage<PageProps>();
     const { auth, flash } = page.props;
     const currentUrl = page.url;
-    const activeNavItem =
-        navItems.find(({ href }) => currentUrl.startsWith(href)) ?? navItems[0];
 
     const handleLogout = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -94,14 +98,11 @@ export default function AdminLayout({ children }: PropsWithChildren) {
             <div className="flex min-h-screen flex-1 flex-col lg:ml-64">
                 <header className="sticky top-0 z-30 border-b border-brand-primary/10 bg-white/95 backdrop-blur lg:hidden">
                     <div className="px-4 py-4 sm:px-6">
-                        <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center justify-between gap-4">
                             <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-primary/55">
+                                <p className="text-sm font-medium text-brand-primary">
                                     Get Your Consultant
                                 </p>
-                                <h1 className="mt-1 text-lg font-semibold text-brand-primary">
-                                    {activeNavItem.name}
-                                </h1>
                                 {auth?.user?.email && (
                                     <p className="mt-1 text-xs text-brand-neutral">
                                         {auth.user.email}
@@ -111,7 +112,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
 
                             <button
                                 onClick={handleLogout}
-                                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-brand-primary/10 bg-brand-primary/4 text-brand-primary transition-colors hover:bg-brand-primary/10"
+                                className="inline-flex h-10 w-10 items-center justify-center border border-brand-primary/10 bg-brand-primary/4 text-brand-primary transition-colors hover:bg-brand-primary/10"
                                 aria-label="Deconectare"
                             >
                                 <SignOut size={18} />
@@ -136,7 +137,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                 </main>
 
                 <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-primary/10 bg-white/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
-                    <div className="grid grid-cols-3 gap-1">
+                    <div className="grid grid-cols-4 gap-1">
                         {navItems.map(({ name, href, icon: Icon }) => {
                             const isActive = currentUrl.startsWith(href);
 
@@ -145,10 +146,10 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                                     key={href}
                                     href={href}
                                     className={cn(
-                                        "flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-medium transition-colors",
+                                        "flex min-h-14 flex-col items-center justify-center gap-1 border px-2 py-2 text-[11px] font-medium transition-colors",
                                         isActive
-                                            ? "bg-brand-primary text-white shadow-[0_12px_30px_rgba(52,48,106,0.18)]"
-                                            : "text-brand-primary/65 hover:bg-brand-primary/6 hover:text-brand-primary",
+                                            ? "border-brand-primary bg-brand-primary text-white"
+                                            : "border-transparent text-brand-primary/65 hover:bg-brand-primary/6 hover:text-brand-primary",
                                     )}
                                 >
                                     <Icon

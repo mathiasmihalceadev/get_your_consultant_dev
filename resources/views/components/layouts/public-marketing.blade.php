@@ -33,6 +33,7 @@
             <link rel="alternate" hrefLang="x-default" href="{{ $xDefault }}">
         @endif
         @vite('resources/css/app.css')
+        <x-marketing.google-tag />
         @stack('head')
     </head>
     <body class="font-sans antialiased">
@@ -46,5 +47,7 @@
 
             <x-marketing.footer />
         </div>
+
+        <x-marketing.cookie-banner />
     </body>
 </html>

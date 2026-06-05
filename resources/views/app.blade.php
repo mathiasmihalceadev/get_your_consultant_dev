@@ -12,8 +12,15 @@
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/Pages/{$page['component']}.tsx"])
         @inertiaHead
+        @unless (str_starts_with($page['component'], 'Admin/'))
+            <x-marketing.google-tag />
+        @endunless
+        @stack('head')
     </head>
     <body class="font-sans antialiased">
         @inertia
+        @unless (str_starts_with($page['component'], 'Admin/'))
+            <x-marketing.cookie-banner />
+        @endunless
     </body>
 </html>

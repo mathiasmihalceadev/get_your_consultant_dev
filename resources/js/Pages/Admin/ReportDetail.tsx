@@ -35,6 +35,13 @@ const typeBadgeColors: Record<ReportType, string> = {
     buying_business: "bg-rose-100 text-rose-800",
 };
 
+const typeLabels: Record<ReportType, string> = {
+    rental_living: "Închiriere – Rezidențial",
+    rental_business: "Închiriere – Business",
+    buying_living: "Cumpărare – Rezidențial",
+    buying_business: "Cumpărare – Business",
+};
+
 const statusLabels: Record<ReportStatus, string> = {
     not_accessible: "Inaccesibil",
     awaiting_payment: "Așteaptă plata",
@@ -74,47 +81,43 @@ export default function ReportDetail({ report }: { report: Report }) {
                 Înapoi la Panou
             </Link>
 
-            <div className="max-w-2xl lg:hidden space-y-4">
-                <Card className="overflow-hidden border-0 bg-[linear-gradient(145deg,#34306A_0%,#4A4788_56%,#D89A4B_165%)] text-white shadow-[0_22px_54px_rgba(52,48,106,0.24)]">
-                    <CardContent className="p-5">
-                        <div className="flex flex-wrap gap-2">
-                            <span className="inline-flex items-center rounded-full bg-white/12 px-3 py-1 text-[11px] font-semibold tracking-[0.12em] text-white/84 backdrop-blur uppercase">
-                                {report.report_type}
-                            </span>
-                            <span className="inline-flex items-center rounded-full bg-white/12 px-3 py-1 text-[11px] font-semibold tracking-[0.12em] text-white/84 backdrop-blur uppercase">
-                                {statusLabels[report.status] || report.status}
-                            </span>
-                        </div>
-
-                        <div className="mt-4">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/54">
-                                Raport detaliat
+            <div className="max-w-2xl space-y-4 lg:hidden">
+                <Card className="rounded-none border border-brand-primary/10 bg-white shadow-none">
+                    <CardContent className="space-y-5 px-5 py-5">
+                        <div>
+                            <p className="text-sm text-brand-primary/60">
+                                {typeLabels[report.report_type] ||
+                                    report.report_type}
                             </p>
-                            <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
+                            <h1 className="mt-1 text-2xl font-semibold text-brand-primary">
                                 Raport #{report.id}
                             </h1>
+                            <p className="mt-2 text-sm text-brand-primary/68">
+                                Status:{" "}
+                                {statusLabels[report.status] || report.status}
+                            </p>
                             {report.is_test && (
-                                <p className="mt-2 text-sm font-medium text-white/78">
+                                <p className="mt-2 text-sm text-brand-primary/60">
                                     Flux intern de test pentru Stripe +
                                     SmartBill
                                 </p>
                             )}
                         </div>
 
-                        <div className="mt-5 grid grid-cols-2 gap-3">
-                            <div className="rounded-3xl border border-white/10 bg-white/10 px-3 py-3 backdrop-blur">
-                                <p className="text-[11px] uppercase tracking-[0.16em] text-white/52">
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="border border-brand-primary/10 bg-brand-primary/2 px-4 py-4">
+                                <p className="text-sm text-brand-primary/60">
                                     Creat
                                 </p>
-                                <p className="mt-2 text-sm font-medium text-white">
+                                <p className="mt-1 text-sm font-medium text-brand-primary">
                                     {formatDateTime(report.created_at)}
                                 </p>
                             </div>
-                            <div className="rounded-3xl border border-white/10 bg-white/10 px-3 py-3 backdrop-blur">
-                                <p className="text-[11px] uppercase tracking-[0.16em] text-white/52">
+                            <div className="border border-brand-primary/10 bg-brand-primary/2 px-4 py-4">
+                                <p className="text-sm text-brand-primary/60">
                                     Procesat
                                 </p>
-                                <p className="mt-2 text-sm font-medium text-white">
+                                <p className="mt-1 text-sm font-medium text-brand-primary">
                                     {formatDateTime(report.processed_at)}
                                 </p>
                             </div>
