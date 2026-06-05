@@ -17,6 +17,12 @@ class AdminSettingsController extends Controller
     {
         return Inertia::render('Admin/Settings', [
             'settings' => Settings::getAllSettings(),
+        ]);
+    }
+
+    public function tests()
+    {
+        return Inertia::render('Admin/TestTools', [
             'billingTests' => Report::query()
                 ->where('is_test', true)
                 ->orderByDesc('created_at')
@@ -82,7 +88,7 @@ class AdminSettingsController extends Controller
             Settings::set($key, $value);
         }
 
-        return back()->with('success', 'Settings saved successfully.');
+        return back()->with('success', 'Setările au fost salvate.');
     }
 
     public function exchangeRate(ExchangeRateService $exchangeRates)

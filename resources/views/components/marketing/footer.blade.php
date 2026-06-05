@@ -12,23 +12,32 @@
 <footer class="bg-brand-primary">
     <div class="h-0.75 bg-brand-secondary"></div>
     <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        <div class="mb-8 flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+        <div class="mb-8 grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(220px,0.7fr)_minmax(0,0.95fr)] lg:items-start">
             <div>
                 <img src="{{ asset('images/logo-footer.png') }}" alt="{{ __('site_name') }}" class="mb-4 h-18 w-auto object-contain md:h-22">
                 <p class="max-w-md text-[14px] text-white/80 md:text-base">{{ __('landing_footer_desc') }}</p>
             </div>
 
-            <div>
+            <div class="flex flex-col gap-4 lg:items-center lg:justify-end">
+                <a href="https://reclamatiisal.anpc.ro/" target="_blank" rel="noopener noreferrer" class="block transition-colors" aria-label="ANPC">
+                    <img src="{{ asset('images/anpc.png') }}" alt="ANPC" class="h-auto w-full max-w-64 md:max-w-84 object-contain">
+                </a>
+                <a href="https://consumer-redress.ec.europa.eu/index_en?prefLang=ro" target="_blank" rel="noopener noreferrer" class="block transition-colors" aria-label="Soluționarea litigiilor online">
+                    <img src="{{ asset('images/solutionare.png') }}" alt="Soluționarea litigiilor online" class="h-auto w-full max-w-64 md:max-w-84 object-contain">
+                </a>
+            </div>
+
+           <div class="lg:justify-self-end lg:text-right">
                 <h4 class="mb-3 text-[14px] text-white/80 md:text-base">{{ __('footer_follow_us') }}</h4>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 lg:justify-end">
                     <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white">
-                        <x-marketing.icon name="facebook-logo" weight="duotone" class="h-[18px] w-[18px]" />
+                        <x-marketing.icon name="facebook-logo" weight="duotone" class="h-4.5 w-4.5" />
                     </a>
                     <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white">
-                        <x-marketing.icon name="instagram-logo" weight="duotone" class="h-[18px] w-[18px]" />
+                        <x-marketing.icon name="instagram-logo" weight="duotone" class="h-4.5 w-4.5" />
                     </a>
                     <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok" class="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white">
-                        <x-marketing.icon name="tiktok-logo" weight="duotone" class="h-[18px] w-[18px]" />
+                        <x-marketing.icon name="tiktok-logo" weight="duotone" class="h-4.5 w-4.5" />
                     </a>
                 </div>
                 <div class="mt-4">

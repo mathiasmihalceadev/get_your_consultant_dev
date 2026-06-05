@@ -82,6 +82,10 @@ return [
         'timeout' => (int) env('EXCHANGE_RATE_TIMEOUT', 10),
     ],
 
+    'google' => [
+        'tag_id' => env('GOOGLE_TAG_ID'),
+    ],
+
     'browsershot' => [
         'chrome_path' => env('BROWSERSHOT_CHROME_PATH') ?: env('PUPPETEER_EXECUTABLE_PATH'),
         'node_binary' => env('BROWSERSHOT_NODE_BINARY'),
