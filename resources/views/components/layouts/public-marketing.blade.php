@@ -37,6 +37,8 @@
         @stack('head')
     </head>
     <body class="font-sans antialiased">
+        <x-marketing.google-tag placement="body" />
+
         <div class="min-h-screen flex flex-col bg-white">
             <div class="h-0.75 bg-brand-secondary"></div>
             <x-marketing.header />
@@ -49,5 +51,6 @@
         </div>
 
         <x-marketing.cookie-banner />
+        <x-marketing.data-layer-events :events="session('dataLayerEvents', [])" />
     </body>
 </html>

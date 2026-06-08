@@ -336,8 +336,25 @@ class PublicReportController extends Controller
                 ->with('error', __('payment_status_sync_error'));
         }
 
-        return redirect()->route('report.status', ['pageToken' => $pageToken])
+        $report->refresh();
+        $latestPurchase = $report->latestPurchase()->latest('id')->first();
+        $hasConfirmedPayment = in_array($report->status, ['payment_processing', 'pending', 'to_be_sent', 'sent'], true)
+            || in_array($latestPurchase?->status, ['payment_processing', 'paid'], true);
+
+        $redirect = redirect()->route('report.status', ['pageToken' => $pageToken])
             ->with('success', __('payment_return_success'));
+
+        if ($hasConfirmedPayment) {
+            $redirect->with('dataLayerEvents', [[
+                'event' => 'report_purchased',
+                'event_id' => 'report_purchased_'.$report->id.'_'.$latestPurchase?->id,
+                'report_id' => $report->id,
+                'purchase_id' => $latestPurchase?->id,
+                'report_type' => $report->report_type,
+            ]]);
+        }
+
+        return $redirect;
     }
 
     public function paymentCancel(Request $request, string $pageToken, StripeCheckoutService $stripe)

@@ -18,6 +18,10 @@
         @stack('head')
     </head>
     <body class="font-sans antialiased">
+        @unless (str_starts_with($page['component'], 'Admin/'))
+            <x-marketing.google-tag placement="body" />
+        @endunless
+
         @inertia
         @unless (str_starts_with($page['component'], 'Admin/'))
             <x-marketing.cookie-banner />

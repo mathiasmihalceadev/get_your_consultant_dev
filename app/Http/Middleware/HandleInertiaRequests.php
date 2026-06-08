@@ -42,6 +42,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
+                'dataLayerEvents' => fn () => $request->session()->get('dataLayerEvents', []),
             ],
             'locale' => fn () => $activeLocale,
             'supportedLocales' => fn () => LocalizedUrl::supportedLocales(),
