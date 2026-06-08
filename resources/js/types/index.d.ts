@@ -3,7 +3,14 @@ import { AxiosInstance } from "axios";
 declare global {
     interface Window {
         axios: AxiosInstance;
+        dataLayer?: Record<string, unknown>[];
     }
+}
+
+export interface DataLayerEvent {
+    event: string;
+    event_id?: string;
+    [key: string]: unknown;
 }
 
 export interface User {
@@ -121,6 +128,7 @@ export interface PaginatedData<T> {
 export interface FlashMessages {
     success?: string;
     error?: string;
+    dataLayerEvents?: DataLayerEvent[];
 }
 
 export interface AppFlags {

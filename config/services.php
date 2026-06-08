@@ -82,8 +82,8 @@ return [
         'timeout' => (int) env('EXCHANGE_RATE_TIMEOUT', 10),
     ],
 
-    'google' => [
-        'tag_id' => env('GOOGLE_TAG_ID'),
+    'google_tag_manager' => [
+        'container_id' => env('GOOGLE_TAG_MANAGER_ID', 'GTM-TDKGXXHL'),
     ],
 
     'browsershot' => [

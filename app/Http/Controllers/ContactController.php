@@ -55,6 +55,12 @@ class ContactController extends Controller
             'subject' => $validated['subject'],
         ]);
 
-        return redirect()->route('contact')->with('success', __('contact_form_success'));
+        return redirect()
+            ->route('contact')
+            ->with('success', __('contact_form_success'))
+            ->with('dataLayerEvents', [[
+                'event' => 'contact_submitted',
+                'event_id' => 'contact_submitted_'.now()->timestamp,
+            ]]);
     }
 }

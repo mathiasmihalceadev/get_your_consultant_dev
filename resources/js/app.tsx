@@ -3,10 +3,17 @@ import "./bootstrap";
 
 import { Head, createInertiaApp } from "@inertiajs/react";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
-import { createElement } from "react";
+import { ComponentType, ReactElement, ReactNode, createElement } from "react";
 import { createRoot } from "react-dom/client";
 
+import PublicAnalyticsBridge from "@/Components/PublicAnalyticsBridge";
+
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
+
+type LayoutComponent = ComponentType<
+    { children: ReactNode } & Record<string, unknown>
+>;
+type LayoutFunction = (page: ReactElement) => ReactNode;
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -31,18 +38,25 @@ createInertiaApp({
             <App {...props}>
                 {({ Component, props: componentProps, key }) => {
                     const page = <Component key={key} {...componentProps} />;
-                    const renderedPage = Array.isArray(Component.layout)
-                        ? Component.layout
-                              .concat(page)
+                    const layout = Component.layout as
+                        | LayoutComponent[]
+                        | LayoutFunction
+                        | undefined;
+
+                    const renderedPage = Array.isArray(layout)
+                        ? [...layout]
                               .reverse()
-                              .reduce((children, Layout) => {
+                              .reduce<ReactNode>((children, Layout) => {
                                   return createElement(Layout, {
                                       children,
-                                      ...componentProps,
+                                      ...(componentProps as Record<
+                                          string,
+                                          unknown
+                                      >),
                                   });
-                              })
-                        : typeof Component.layout === "function"
-                          ? Component.layout(page)
+                              }, page)
+                        : typeof layout === "function"
+                          ? layout(page)
                           : page;
 
                     return (
@@ -83,6 +97,7 @@ createInertiaApp({
                                     />
                                 ) : null}
                             </Head>
+                            <PublicAnalyticsBridge />
                             {renderedPage}
                         </>
                     );
