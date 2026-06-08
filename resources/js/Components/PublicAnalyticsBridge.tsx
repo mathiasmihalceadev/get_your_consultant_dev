@@ -37,9 +37,9 @@ export default function PublicAnalyticsBridge() {
 
     useEffect(() => {
         if (
-            isAdminPage
-            || flashEvents.length === 0
-            || typeof window === "undefined"
+            isAdminPage ||
+            flashEvents.length === 0 ||
+            typeof window === "undefined"
         ) {
             return;
         }

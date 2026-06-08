@@ -10,7 +10,9 @@ import PublicAnalyticsBridge from "@/Components/PublicAnalyticsBridge";
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
 
-type LayoutComponent = ComponentType<{ children: ReactNode } & Record<string, unknown>>;
+type LayoutComponent = ComponentType<
+    { children: ReactNode } & Record<string, unknown>
+>;
 type LayoutFunction = (page: ReactElement) => ReactNode;
 
 createInertiaApp({
@@ -42,12 +44,17 @@ createInertiaApp({
                         | undefined;
 
                     const renderedPage = Array.isArray(layout)
-                        ? [...layout].reverse().reduce<ReactNode>((children, Layout) => {
-                              return createElement(Layout, {
-                                  children,
-                                  ...(componentProps as Record<string, unknown>),
-                              });
-                          }, page)
+                        ? [...layout]
+                              .reverse()
+                              .reduce<ReactNode>((children, Layout) => {
+                                  return createElement(Layout, {
+                                      children,
+                                      ...(componentProps as Record<
+                                          string,
+                                          unknown
+                                      >),
+                                  });
+                              }, page)
                         : typeof layout === "function"
                           ? layout(page)
                           : page;
