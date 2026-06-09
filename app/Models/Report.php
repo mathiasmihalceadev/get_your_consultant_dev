@@ -22,6 +22,7 @@ class Report extends Model
         'page_token',
         'error_message',
         'processed_at',
+        'feedback_sent_at',
     ];
 
     protected function casts(): array
@@ -29,6 +30,7 @@ class Report extends Model
         return [
             'is_test' => 'boolean',
             'processed_at' => 'datetime',
+            'feedback_sent_at' => 'datetime',
         ];
     }
 
@@ -40,6 +42,11 @@ class Report extends Model
     public function latestPurchase(): HasOne
     {
         return $this->hasOne(ReportPurchase::class)->latestOfMany();
+    }
+
+    public function feedback(): HasOne
+    {
+        return $this->hasOne(ReportFeedback::class);
     }
 
     public function smartBillInvoices(): HasMany

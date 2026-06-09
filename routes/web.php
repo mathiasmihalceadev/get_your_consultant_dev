@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminInquiryController;
 use App\Http\Controllers\AdminSettingsController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PublicReportController;
+use App\Http\Controllers\ReportFeedbackController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Support\LocalizedUrl;
 use Illuminate\Http\Request;
@@ -16,6 +17,8 @@ Route::get('/get-report', [PublicReportController::class, 'index'])->name('get-r
 Route::get('/submit-url', [PublicReportController::class, 'showUrlForm'])->name('submit-url');
 Route::get('/submit-email', [PublicReportController::class, 'showEmailForm'])->name('submit-email');
 Route::get('/report/{pageToken}', [PublicReportController::class, 'status'])->name('report.status');
+Route::get('/feedback/{pageToken}', [ReportFeedbackController::class, 'show'])->name('report.feedback.show');
+Route::post('/feedback/{pageToken}', [ReportFeedbackController::class, 'store'])->name('report.feedback.store');
 Route::get('/checkout/success/{pageToken}', [PublicReportController::class, 'paymentSuccess'])->name('checkout.success');
 Route::get('/checkout/cancel/{pageToken}', [PublicReportController::class, 'paymentCancel'])->name('checkout.cancel');
 Route::get('/privacy-policy', [PublicReportController::class, 'privacyPolicy'])->name('privacy-policy');
@@ -69,12 +72,14 @@ Route::get('/api/report-status/{page_token}', [PublicReportController::class, 's
 Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/inquiries', [AdminInquiryController::class, 'index'])->name('admin.inquiries');
+    Route::get('/feedbacks', [AdminController::class, 'feedbacks'])->name('admin.feedbacks');
     Route::post('/billing-tests/checkout', [AdminController::class, 'createBillingTestCheckout'])->name('admin.billing-tests.create');
     Route::get('/billing-tests/{id}/checkout/success', [AdminController::class, 'billingTestSuccess'])->name('admin.billing-tests.success');
     Route::get('/billing-tests/{id}/checkout/cancel', [AdminController::class, 'billingTestCancel'])->name('admin.billing-tests.cancel');
     Route::get('/reports/{id}', [AdminController::class, 'show'])->name('admin.reports.show');
     Route::get('/reports/{id}/pdf', [AdminController::class, 'pdf'])->name('admin.reports.pdf');
     Route::post('/reports/{id}/send', [AdminController::class, 'send'])->name('admin.reports.send');
+    Route::post('/reports/{id}/feedback/send', [AdminController::class, 'sendFeedback'])->name('admin.reports.feedback.send');
     Route::get('/settings', [AdminSettingsController::class, 'show'])->name('admin.settings');
     Route::get('/tests', [AdminSettingsController::class, 'tests'])->name('admin.tests');
     Route::get('/settings/exchange-rate', [AdminSettingsController::class, 'exchangeRate'])->name('admin.settings.exchange-rate');

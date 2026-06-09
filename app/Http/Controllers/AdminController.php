@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\ReportMail;
 use App\Models\Report;
+use App\Services\ReportFeedbackService;
 use App\Services\StripeCheckoutService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +17,7 @@ class AdminController extends Controller
 {
     public function dashboard(Request $request)
     {
-        $query = Report::query();
+        $query = Report::query()->with('feedback');
 
         if ($request->filled('status')) {
             $query->where('status', $request->query('status'));
@@ -59,10 +60,31 @@ class AdminController extends Controller
 
     public function show(int $id)
     {
-        $report = Report::with(['latestPurchase.smartBillInvoice'])->findOrFail($id);
+        $report = Report::with(['latestPurchase.smartBillInvoice', 'feedback'])->findOrFail($id);
 
         return Inertia::render('Admin/ReportDetail', [
             'report' => $report,
+        ]);
+    }
+
+    public function feedbacks()
+    {
+        $reports = Report::query()
+            ->with('feedback')
+            ->whereNotNull('feedback_sent_at')
+            ->orderByDesc('feedback_sent_at')
+            ->paginate(20)
+            ->withQueryString();
+
+        return Inertia::render('Admin/Feedbacks', [
+            'reports' => $reports,
+            'counts' => [
+                'sent' => Report::whereNotNull('feedback_sent_at')->count(),
+                'received' => Report::whereHas('feedback')->count(),
+                'pending' => Report::whereNotNull('feedback_sent_at')
+                    ->whereDoesntHave('feedback')
+                    ->count(),
+            ],
         ]);
     }
 
@@ -212,6 +234,28 @@ class AdminController extends Controller
                 ? "Report has been resent to {$report->email}."
                 : "Report has been sent to {$report->email}.",
         );
+    }
+
+    public function sendFeedback(int $id, ReportFeedbackService $feedback): \Illuminate\Http\RedirectResponse
+    {
+        $report = Report::findOrFail($id);
+
+        try {
+            $feedback->send($report, force: true);
+        } catch (\Throwable $e) {
+            Log::channel('report')->error('Admin feedback email failed to send', [
+                'report_id' => $report->id,
+                'email' => $report->email,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with(
+                'error',
+                'Feedback email could not be sent. The report must be generated, non-test, and have an email address.',
+            );
+        }
+
+        return back()->with('success', "Feedback email has been sent to {$report->email}.");
     }
 
     public function pdf(int $id): BinaryFileResponse

@@ -1,6 +1,7 @@
 import { Link, usePage, router } from "@inertiajs/react";
 import {
     ChartBar,
+    ChatCenteredText,
     EnvelopeSimple,
     FilePdf,
     Gear,
@@ -27,6 +28,11 @@ const navItems: NavItem[] = [
         name: "Mesaje",
         href: "/admin/inquiries",
         icon: EnvelopeSimple,
+    },
+    {
+        name: "Feedback",
+        href: "/admin/feedbacks",
+        icon: ChatCenteredText,
     },
     {
         name: "Setări",
@@ -137,7 +143,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                 </main>
 
                 <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-primary/10 bg-white/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
-                    <div className="grid grid-cols-4 gap-1">
+                    <div className="grid grid-cols-5 gap-1">
                         {navItems.map(({ name, href, icon: Icon }) => {
                             const isActive = currentUrl.startsWith(href);
 
