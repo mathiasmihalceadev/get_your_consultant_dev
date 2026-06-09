@@ -68,6 +68,19 @@ export interface ReportPurchase {
     smart_bill_invoice?: SmartBillInvoice | null;
 }
 
+export interface ReportFeedback {
+    id: number;
+    report_id: number;
+    rating: number;
+    most_useful_info: string;
+    wanted_extra: string | null;
+    would_recommend: boolean;
+    trust_improvement: string | null;
+    submitted_at: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Report {
     id: number;
     report_type: ReportType;
@@ -79,9 +92,11 @@ export interface Report {
     page_token: string | null;
     error_message: string | null;
     processed_at: string | null;
+    feedback_sent_at: string | null;
     created_at: string;
     updated_at: string;
     latest_purchase?: ReportPurchase | null;
+    feedback?: ReportFeedback | null;
 }
 
 export interface ContactInquiry {

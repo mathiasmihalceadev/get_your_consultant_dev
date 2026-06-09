@@ -33,10 +33,10 @@
                     <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white">
                         <x-marketing.icon name="facebook-logo" weight="duotone" class="h-4.5 w-4.5" />
                     </a>
-                    <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white">
+                    <a href="https://www.instagram.com/getyourconsultant" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white">
                         <x-marketing.icon name="instagram-logo" weight="duotone" class="h-4.5 w-4.5" />
                     </a>
-                    <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok" class="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white">
+                    <a href="https://www.tiktok.com/@getyourconsultant" target="_blank" rel="noopener noreferrer" aria-label="TikTok" class="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white">
                         <x-marketing.icon name="tiktok-logo" weight="duotone" class="h-4.5 w-4.5" />
                     </a>
                 </div>

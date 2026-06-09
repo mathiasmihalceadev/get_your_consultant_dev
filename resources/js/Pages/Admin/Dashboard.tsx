@@ -104,8 +104,23 @@ function canEmailReport(report: Report): boolean {
     );
 }
 
+function canSendFeedbackEmail(report: Report): boolean {
+    return (
+        !report.is_test &&
+        Boolean(report.email) &&
+        Boolean(report.processed_at) &&
+        (report.status === "to_be_sent" ||
+            report.status === "sent" ||
+            Boolean(report.report_url))
+    );
+}
+
 function emailActionLabel(report: Report): string {
     return report.status === "sent" ? "Retrimite" : "Trimite";
+}
+
+function feedbackActionLabel(report: Report): string {
+    return report.feedback_sent_at ? "Retrimite feedback" : "Trimite feedback";
 }
 
 function truncate(str: string | null, len = 88): string {
@@ -118,7 +133,7 @@ function truncate(str: string | null, len = 88): string {
 
 function formatDateTime(value: string | null): string {
     if (!value) {
-        return "—";
+        return "-";
     }
 
     return new Date(value).toLocaleString("ro-RO", {
@@ -173,6 +188,21 @@ function ActionableReportCard({ report }: { report: Report }) {
                         <PaperPlaneTilt size={15} weight="duotone" />
                         {emailActionLabel(report)}
                     </Button>
+
+                    {canSendFeedbackEmail(report) && (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className={outlineButtonClass}
+                            onClick={() =>
+                                router.post(
+                                    `/admin/reports/${report.id}/feedback/send`,
+                                )
+                            }
+                        >
+                            {feedbackActionLabel(report)}
+                        </Button>
+                    )}
 
                     <Link
                         href={`/admin/reports/${report.id}`}
@@ -254,6 +284,21 @@ function MobileReportRow({ report }: { report: Report }) {
                         <FilePdf size={15} weight="duotone" />
                         PDF
                     </a>
+                )}
+
+                {canSendFeedbackEmail(report) && (
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        className={outlineButtonClass}
+                        onClick={() =>
+                            router.post(
+                                `/admin/reports/${report.id}/feedback/send`,
+                            )
+                        }
+                    >
+                        {feedbackActionLabel(report)}
+                    </Button>
                 )}
 
                 <Link
@@ -453,7 +498,7 @@ export default function Dashboard({
                         </div>
 
                         <div className="hidden overflow-x-auto lg:block">
-                            <table className="w-full text-sm">
+                            <table className="min-w-[980px] w-full text-sm">
                                 <thead>
                                     <tr className="border-b border-brand-primary/10 bg-brand-primary/2">
                                         <th className="px-5 py-3 text-left text-sm font-medium text-brand-primary/72">
@@ -585,6 +630,27 @@ export default function Dashboard({
                                                             />
                                                             PDF
                                                         </a>
+                                                    )}
+
+                                                    {canSendFeedbackEmail(
+                                                        report,
+                                                    ) && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className={
+                                                                outlineButtonClass
+                                                            }
+                                                            onClick={() =>
+                                                                router.post(
+                                                                    `/admin/reports/${report.id}/feedback/send`,
+                                                                )
+                                                            }
+                                                        >
+                                                            {feedbackActionLabel(
+                                                                report,
+                                                            )}
+                                                        </Button>
                                                     )}
 
                                                     <Link

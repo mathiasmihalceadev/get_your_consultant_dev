@@ -182,7 +182,7 @@
         .support-box {
             width: 100%;
             margin-top: 28px;
-            border-radius: 16px;
+            border-radius: 0;
             background: #eef3ff;
             border-collapse: separate;
             border-spacing: 0;

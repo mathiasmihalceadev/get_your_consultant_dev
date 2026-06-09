@@ -68,6 +68,21 @@ function formatDateTime(value: string | null): string {
     });
 }
 
+function canSendFeedbackEmail(report: Report): boolean {
+    return (
+        !report.is_test &&
+        Boolean(report.email) &&
+        Boolean(report.processed_at) &&
+        (report.status === "to_be_sent" ||
+            report.status === "sent" ||
+            Boolean(report.report_url))
+    );
+}
+
+function feedbackActionLabel(report: Report): string {
+    return report.feedback_sent_at ? "Retrimite feedback" : "Trimite feedback";
+}
+
 export default function ReportDetail({ report }: { report: Report }) {
     return (
         <AdminLayout>
@@ -121,6 +136,26 @@ export default function ReportDetail({ report }: { report: Report }) {
                                     {formatDateTime(report.processed_at)}
                                 </p>
                             </div>
+                            <div className="border border-brand-primary/10 bg-brand-primary/2 px-4 py-4">
+                                <p className="text-sm text-brand-primary/60">
+                                    Feedback email
+                                </p>
+                                <p className="mt-1 text-sm font-medium text-brand-primary">
+                                    {formatDateTime(report.feedback_sent_at)}
+                                </p>
+                            </div>
+                            <div className="border border-brand-primary/10 bg-brand-primary/2 px-4 py-4">
+                                <p className="text-sm text-brand-primary/60">
+                                    Feedback primit
+                                </p>
+                                <p className="mt-1 text-sm font-medium text-brand-primary">
+                                    {report.feedback
+                                        ? formatDateTime(
+                                              report.feedback.submitted_at,
+                                          )
+                                        : "-"}
+                                </p>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -131,6 +166,50 @@ export default function ReportDetail({ report }: { report: Report }) {
                             {report.error_message}
                         </AlertDescription>
                     </Alert>
+                )}
+
+                {report.feedback && (
+                    <Card className="rounded-none border border-brand-primary/10 bg-white shadow-none">
+                        <CardContent className="space-y-3 px-5 py-5 text-sm text-brand-primary/82">
+                            <div className="font-semibold text-brand-primary">
+                                Feedback client
+                            </div>
+                            <p>
+                                <span className="text-brand-primary/56">
+                                    Nota:
+                                </span>{" "}
+                                {report.feedback.rating}/10
+                            </p>
+                            <p>
+                                <span className="text-brand-primary/56">
+                                    Recomanda:
+                                </span>{" "}
+                                {report.feedback.would_recommend ? "DA" : "NU"}
+                            </p>
+                            <p>
+                                <span className="text-brand-primary/56">
+                                    Cea mai utila informatie:
+                                </span>{" "}
+                                {report.feedback.most_useful_info}
+                            </p>
+                            {report.feedback.wanted_extra && (
+                                <p>
+                                    <span className="text-brand-primary/56">
+                                        In plus:
+                                    </span>{" "}
+                                    {report.feedback.wanted_extra}
+                                </p>
+                            )}
+                            {report.feedback.trust_improvement && (
+                                <p>
+                                    <span className="text-brand-primary/56">
+                                        Incredere:
+                                    </span>{" "}
+                                    {report.feedback.trust_improvement}
+                                </p>
+                            )}
+                        </CardContent>
+                    </Card>
                 )}
 
                 <Card className="border border-brand-primary/10 shadow-[0_14px_34px_rgba(20,20,43,0.06)]">
@@ -339,6 +418,21 @@ export default function ReportDetail({ report }: { report: Report }) {
                                     Vezi PDF
                                 </a>
                             )}
+
+                            {canSendFeedbackEmail(report) && (
+                                <Button
+                                    onClick={() =>
+                                        router.post(
+                                            `/admin/reports/${report.id}/feedback/send`,
+                                        )
+                                    }
+                                    variant="outline"
+                                    className="h-11 w-full gap-2 border-brand-primary/15 text-brand-primary"
+                                >
+                                    <EnvelopeSimple size={18} />
+                                    {feedbackActionLabel(report)}
+                                </Button>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
@@ -402,6 +496,28 @@ export default function ReportDetail({ report }: { report: Report }) {
                                             : "—"}
                                     </p>
                                 </div>
+                                <div>
+                                    <span className="text-muted-foreground">
+                                        Feedback email:
+                                    </span>
+                                    <p className="font-medium">
+                                        {formatDateTime(
+                                            report.feedback_sent_at,
+                                        )}
+                                    </p>
+                                </div>
+                                <div>
+                                    <span className="text-muted-foreground">
+                                        Feedback primit:
+                                    </span>
+                                    <p className="font-medium">
+                                        {report.feedback
+                                            ? formatDateTime(
+                                                  report.feedback.submitted_at,
+                                              )
+                                            : "-"}
+                                    </p>
+                                </div>
                             </div>
                             {report.page_token && (
                                 <div>
@@ -421,6 +537,55 @@ export default function ReportDetail({ report }: { report: Report }) {
                                     {report.error_message}
                                 </AlertDescription>
                             </Alert>
+                        )}
+
+                        {report.feedback && (
+                            <div className="rounded-2xl border border-brand-primary/8 bg-brand-primary/2 p-4 text-sm text-brand-primary/82">
+                                <div className="mb-3 font-semibold text-brand-primary">
+                                    Feedback client
+                                </div>
+                                <div className="space-y-3">
+                                    <p>
+                                        <span className="text-brand-primary/56">
+                                            Nota:
+                                        </span>{" "}
+                                        {report.feedback.rating}/10
+                                    </p>
+                                    <p>
+                                        <span className="text-brand-primary/56">
+                                            Recomanda:
+                                        </span>{" "}
+                                        {report.feedback.would_recommend
+                                            ? "DA"
+                                            : "NU"}
+                                    </p>
+                                    <p>
+                                        <span className="text-brand-primary/56">
+                                            Cea mai utila informatie:
+                                        </span>{" "}
+                                        {report.feedback.most_useful_info}
+                                    </p>
+                                    {report.feedback.wanted_extra && (
+                                        <p>
+                                            <span className="text-brand-primary/56">
+                                                In plus:
+                                            </span>{" "}
+                                            {report.feedback.wanted_extra}
+                                        </p>
+                                    )}
+                                    {report.feedback.trust_improvement && (
+                                        <p>
+                                            <span className="text-brand-primary/56">
+                                                Incredere:
+                                            </span>{" "}
+                                            {
+                                                report.feedback
+                                                    .trust_improvement
+                                            }
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
                         )}
 
                         <div className="flex items-center gap-3 pt-2">
@@ -457,6 +622,21 @@ export default function ReportDetail({ report }: { report: Report }) {
                                         Trimite Raport
                                     </Button>
                                 )}
+
+                            {canSendFeedbackEmail(report) && (
+                                <Button
+                                    onClick={() =>
+                                        router.post(
+                                            `/admin/reports/${report.id}/feedback/send`,
+                                        )
+                                    }
+                                    variant="outline"
+                                    className="gap-2 cursor-pointer"
+                                >
+                                    <EnvelopeSimple size={18} />
+                                    {feedbackActionLabel(report)}
+                                </Button>
+                            )}
                         </div>
 
                         {report.is_test &&
