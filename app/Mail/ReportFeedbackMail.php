@@ -19,7 +19,7 @@ class ReportFeedbackMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $locale = $this->locale();
+        $locale = $this->reportLocale();
 
         return new Envelope(
             subject: $locale === 'ro'
@@ -30,7 +30,7 @@ class ReportFeedbackMail extends Mailable
 
     public function content(): Content
     {
-        $locale = $this->locale();
+        $locale = $this->reportLocale();
 
         return new Content(
             view: 'emails.report-feedback',
@@ -46,7 +46,7 @@ class ReportFeedbackMail extends Mailable
         );
     }
 
-    private function locale(): string
+    private function reportLocale(): string
     {
         return strtolower((string) ($this->report->locale ?? 'ro')) === 'en' ? 'en' : 'ro';
     }
