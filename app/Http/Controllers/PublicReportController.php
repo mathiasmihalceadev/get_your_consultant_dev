@@ -345,13 +345,11 @@ class PublicReportController extends Controller
             ->with('success', __('payment_return_success'));
 
         if ($hasConfirmedPayment) {
-            $redirect->with('dataLayerEvents', [[
-                'event' => 'report_purchased',
-                'event_id' => 'report_purchased_'.$report->id.'_'.$latestPurchase?->id,
-                'report_id' => $report->id,
-                'purchase_id' => $latestPurchase?->id,
-                'report_type' => $report->report_type,
-            ]]);
+            $purchaseEvent = $this->purchaseDataLayerEvent($report, $latestPurchase?->id);
+
+            if ($purchaseEvent !== null) {
+                $redirect->with('dataLayerEvents', [$purchaseEvent]);
+            }
         }
 
         return $redirect;
@@ -432,6 +430,33 @@ class PublicReportController extends Controller
     private function publicWizardMaintenanceEnabled(): bool
     {
         return (bool) config('app.public_wizard_maintenance', false);
+    }
+
+    private function purchaseDataLayerEvent(Report $report, ?int $purchaseId): ?array
+    {
+        return match (true) {
+            str_starts_with($report->report_type, 'buying_') => [
+                'event' => 'report_purchased_buying',
+                'event_id' => 'report_purchased_buying_'.$report->id.'_'.$purchaseId,
+                'report_id' => $report->id,
+                'purchase_id' => $purchaseId,
+                'report_type' => $report->report_type,
+                'currency' => 'EUR',
+                'value' => 27.99,
+                'content_name' => 'Raport Cumparare',
+            ],
+            str_starts_with($report->report_type, 'rental_') => [
+                'event' => 'report_purchased_rental',
+                'event_id' => 'report_purchased_rental_'.$report->id.'_'.$purchaseId,
+                'report_id' => $report->id,
+                'purchase_id' => $purchaseId,
+                'report_type' => $report->report_type,
+                'currency' => 'EUR',
+                'value' => 17.99,
+                'content_name' => 'Raport Inchiriere',
+            ],
+            default => null,
+        };
     }
 
     private function renderLegalDocument(string $documentKey)
