@@ -31,13 +31,13 @@ const copies = {
         submittedTitle: "Mul\u021Bumim pentru feedback!",
         submittedBody: "R\u0103spunsurile tale au fost \u00EEnregistrate.",
         title: "Cum \u021Bi s-a p\u0103rut raportul GetYourConsultant?",
-        intro:
-            "Mul\u021Bumim c\u0103 ai folosit GetYourConsultant\u2122. \u00CEncerc\u0103m s\u0103 \u00EEmbun\u0103t\u0103\u021Bim constant platforma \u0219i feedback-ul t\u0103u ne ajut\u0103 enorm.",
+        intro: "Mul\u021Bumim c\u0103 ai folosit GetYourConsultant\u2122. \u00CEncerc\u0103m s\u0103 \u00EEmbun\u0103t\u0103\u021Bim constant platforma \u0219i feedback-ul t\u0103u ne ajut\u0103 enorm.",
         ratingLabel: "Ce not\u0103 ai acorda raportului?",
         ratingHint: "Alege o not\u0103 de la 1 la 10.",
         usefulLabel:
             "Care informa\u021Bie \u021Bi s-a p\u0103rut cea mai util\u0103?",
-        extraLabel: "Ce ai vrea s\u0103 vezi \u00EEn plus \u00EEn raport?",
+        extraLabel:
+            "Ce informa\u{021B}ii ai fi vrut s\u{0103} g\u{0103}se\u{0219}ti \u{00EE}n acest raport \u{0219}i nu au fost incluse?",
         recommendLabel: "Ai recomanda platforma unui prieten?",
         yes: "DA",
         no: "NU",
@@ -51,8 +51,7 @@ const copies = {
         submittedTitle: "Thank you for your feedback!",
         submittedBody: "Your answers have been recorded.",
         title: "How was your GetYourConsultant report?",
-        intro:
-            "Thank you for using GetYourConsultant\u2122. We are constantly improving the platform, and your feedback helps us a lot.",
+        intro: "Thank you for using GetYourConsultant\u2122. We are constantly improving the platform, and your feedback helps us a lot.",
         ratingLabel: "What rating would you give the report?",
         ratingHint: "Choose a rating from 1 to 10.",
         usefulLabel: "Which information did you find most useful?",
@@ -165,9 +164,7 @@ export default function Feedback({
                                             <button
                                                 key={value}
                                                 type="button"
-                                                onClick={() =>
-                                                    setRating(value)
-                                                }
+                                                onClick={() => setRating(value)}
                                                 className={`h-11 border text-sm font-semibold transition-colors ${
                                                     rating === value
                                                         ? "border-brand-primary bg-brand-primary text-white"

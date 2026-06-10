@@ -30,7 +30,7 @@
            <div class="lg:justify-self-end lg:text-right">
                 <h4 class="mb-3 text-[14px] text-white/80 md:text-base">{{ __('footer_follow_us') }}</h4>
                 <div class="flex items-center gap-2 lg:justify-end">
-                    <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white">
+                    <a href="https://www.facebook.com/profile.php?id=61590563915563&locale=ro_RO" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white">
                         <x-marketing.icon name="facebook-logo" weight="duotone" class="h-4.5 w-4.5" />
                     </a>
                     <a href="https://www.instagram.com/getyourconsultant" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white">

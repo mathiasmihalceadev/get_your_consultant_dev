@@ -79,7 +79,7 @@ class ReportFeedbackMail extends Mailable
             'questions' => [
                 ['label' => "Ce not\u{0103} ai acorda raportului?", 'hint' => '1-10'],
                 ['label' => "Care informa\u{021B}ie \u{021B}i s-a p\u{0103}rut cea mai util\u{0103}?", 'hint' => null],
-                ['label' => "Ce ai vrea s\u{0103} vezi \u{00EE}n plus \u{00EE}n raport?", 'hint' => null],
+                ['label' => "Ce informa\u{021B}ii ai fi vrut s\u{0103} g\u{0103}se\u{0219}ti \u{00EE}n acest raport \u{0219}i nu au fost incluse?", 'hint' => null],
                 ['label' => 'Ai recomanda platforma unui prieten?', 'hint' => 'DA / NU'],
                 ['label' => "Ce te-ar face s\u{0103} ai \u{0219}i mai mult\u{0103} \u{00EE}ncredere \u{00EE}n acest raport?", 'hint' => null],
             ],
