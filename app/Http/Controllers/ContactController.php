@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Support\LocalizedUrl;
 use App\Models\ContactInquiry;
+use App\Services\RecaptchaService;
+use App\Support\LocalizedUrl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class ContactController extends Controller
 {
-    public function show()
+    public function show(RecaptchaService $recaptcha)
     {
         $locale = app()->getLocale();
         $path = '/contact';
@@ -23,10 +25,11 @@ class ContactController extends Controller
             'canonical' => LocalizedUrl::publicUrlForLocale($locale, $path),
             'alternates' => $alternates,
             'xDefault' => LocalizedUrl::publicUrlForLocale(LocalizedUrl::publicXDefaultLocale(), $path),
+            'recaptchaSiteKey' => $recaptcha->enabled() ? $recaptcha->siteKey() : null,
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, RecaptchaService $recaptcha)
     {
         $validated = $request->validate(
             [
@@ -43,6 +46,12 @@ class ContactController extends Controller
                 'message.required' => __('contact_validation_message_required'),
             ],
         );
+
+        if (!$recaptcha->verify($request, 'contact_form')) {
+            throw ValidationException::withMessages([
+                'recaptcha_token' => __('contact_validation_recaptcha_failed'),
+            ]);
+        }
 
         ContactInquiry::create([
             ...$validated,

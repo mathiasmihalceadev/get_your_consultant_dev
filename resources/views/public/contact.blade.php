@@ -35,6 +35,9 @@
 
                     <form id="contact-form" action="{{ route('contact.store') }}" method="POST" class="mt-6 space-y-4">
                         @csrf
+                        @if ($recaptchaSiteKey)
+                            <input type="hidden" name="recaptcha_token" id="recaptcha-token">
+                        @endif
 
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div>
@@ -127,6 +130,10 @@
                             @enderror
                         </div>
 
+                        @error('recaptcha_token')
+                            <p class="text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+
                         <div class="flex justify-end pt-2">
                             <button type="submit" class="inline-flex items-center gap-2 bg-brand-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-primary/92 md:text-base">
                                 <x-marketing.icon name="envelope-simple" weight="bold" class="h-4 w-4" />
@@ -170,4 +177,34 @@
             </div>
         </div>
     </section>
+
+    @if ($recaptchaSiteKey)
+        <script src="https://www.google.com/recaptcha/api.js?render={{ $recaptchaSiteKey }}"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const form = document.getElementById('contact-form');
+                const tokenInput = document.getElementById('recaptcha-token');
+
+                if (!form || !tokenInput || typeof grecaptcha === 'undefined') {
+                    return;
+                }
+
+                form.addEventListener('submit', function (event) {
+                    if (tokenInput.value) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    grecaptcha.ready(function () {
+                        grecaptcha.execute(@json($recaptchaSiteKey), { action: 'contact_form' })
+                            .then(function (token) {
+                                tokenInput.value = token;
+                                form.submit();
+                            });
+                    });
+                });
+            });
+        </script>
+    @endif
 </x-layouts.public-marketing>

@@ -144,6 +144,10 @@ function formatDateTime(value: string | null): string {
     });
 }
 
+function affiliateLabel(report: Report): string {
+    return report.affiliate_ref || "-";
+}
+
 function ActionableReportCard({ report }: { report: Report }) {
     return (
         <Card className={sectionClass}>
@@ -169,6 +173,7 @@ function ActionableReportCard({ report }: { report: Report }) {
 
                 <div className="space-y-2 text-sm text-brand-primary/68">
                     <p>Raport #{report.id}</p>
+                    <p>Afiliat: {affiliateLabel(report)}</p>
                     <p>{report.email || "Fără email"}</p>
                     <p>{formatDateTime(report.created_at)}</p>
                 </div>
@@ -254,6 +259,10 @@ function MobileReportRow({ report }: { report: Report }) {
 
             <p className="text-sm text-brand-primary/68">
                 {report.email || "Fără email"}
+            </p>
+
+            <p className="text-sm text-brand-primary/68">
+                Afiliat: {affiliateLabel(report)}
             </p>
 
             <div className="flex flex-wrap gap-2">
@@ -498,7 +507,7 @@ export default function Dashboard({
                         </div>
 
                         <div className="hidden overflow-x-auto lg:block">
-                            <table className="min-w-[980px] w-full text-sm">
+                            <table className="min-w-[1100px] w-full text-sm">
                                 <thead>
                                     <tr className="border-b border-brand-primary/10 bg-brand-primary/2">
                                         <th className="px-5 py-3 text-left text-sm font-medium text-brand-primary/72">
@@ -509,6 +518,9 @@ export default function Dashboard({
                                         </th>
                                         <th className="px-5 py-3 text-left text-sm font-medium text-brand-primary/72">
                                             Email
+                                        </th>
+                                        <th className="px-5 py-3 text-left text-sm font-medium text-brand-primary/72">
+                                            Afiliat
                                         </th>
                                         <th className="px-5 py-3 text-left text-sm font-medium text-brand-primary/72">
                                             Status
@@ -525,7 +537,7 @@ export default function Dashboard({
                                     {reports.data.length === 0 && (
                                         <tr>
                                             <td
-                                                colSpan={6}
+                                                colSpan={7}
                                                 className="px-5 py-10 text-center text-sm text-brand-primary/60"
                                             >
                                                 Nu s-au găsit rapoarte.
@@ -563,6 +575,9 @@ export default function Dashboard({
                                             </td>
                                             <td className="px-5 py-4 text-sm text-brand-primary/70">
                                                 {report.email || "—"}
+                                            </td>
+                                            <td className="px-5 py-4 text-sm text-brand-primary/70">
+                                                {affiliateLabel(report)}
                                             </td>
                                             <td className="px-5 py-4">
                                                 <p

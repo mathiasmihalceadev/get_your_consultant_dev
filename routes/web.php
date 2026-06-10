@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminAffiliateController;
 use App\Http\Controllers\AdminInquiryController;
 use App\Http\Controllers\AdminSettingsController;
 use App\Http\Controllers\ContactController;
@@ -29,8 +30,11 @@ Route::get('/politica-de-confidentialitate', [PublicReportController::class, 'pr
 Route::get('/termeni-si-conditii', [PublicReportController::class, 'termsAndConditions']);
 Route::get('/politica-de-cookie-uri', [PublicReportController::class, 'cookiePolicy']);
 
+Route::post('/validate-url', [PublicReportController::class, 'validateUrl'])
+    ->middleware('throttle:5,1')
+    ->name('validate-url');
+
 Route::middleware('throttle:10,1')->group(function () {
-    Route::post('/validate-url', [PublicReportController::class, 'validateUrl'])->name('validate-url');
     Route::post('/submit-email', [PublicReportController::class, 'submitEmail'])->name('submit-email.store');
     Route::post('/report/{pageToken}/checkout', [PublicReportController::class, 'retryCheckout'])->name('report.checkout');
 });
@@ -73,6 +77,9 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/inquiries', [AdminInquiryController::class, 'index'])->name('admin.inquiries');
     Route::get('/feedbacks', [AdminController::class, 'feedbacks'])->name('admin.feedbacks');
+    Route::get('/affiliates', [AdminAffiliateController::class, 'index'])->name('admin.affiliates');
+    Route::post('/affiliates', [AdminAffiliateController::class, 'store'])->name('admin.affiliates.store');
+    Route::patch('/affiliates/{affiliateTag}', [AdminAffiliateController::class, 'update'])->name('admin.affiliates.update');
     Route::post('/billing-tests/checkout', [AdminController::class, 'createBillingTestCheckout'])->name('admin.billing-tests.create');
     Route::get('/billing-tests/{id}/checkout/success', [AdminController::class, 'billingTestSuccess'])->name('admin.billing-tests.success');
     Route::get('/billing-tests/{id}/checkout/cancel', [AdminController::class, 'billingTestCancel'])->name('admin.billing-tests.cancel');

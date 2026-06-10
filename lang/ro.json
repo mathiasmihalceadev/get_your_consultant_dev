@@ -416,6 +416,7 @@
     "contact_validation_email_invalid": "Te rugăm să introduci o adresă de email validă.",
     "contact_validation_subject_required": "Te rugăm să introduci subiectul mesajului.",
     "contact_validation_message_required": "Te rugăm să introduci mesajul.",
+    "contact_validation_recaptcha_failed": "Nu am putut verifica această trimitere. Te rugăm să încerci din nou.",
     "landing_nav_why": "De ce contează",
     "landing_nav_reviews": "Recenzii",
     "landing_social_proof_label": "rapoarte generate până acum",

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -23,6 +24,8 @@ class Report extends Model
         'error_message',
         'processed_at',
         'feedback_sent_at',
+        'affiliate_tag_id',
+        'affiliate_ref',
     ];
 
     protected function casts(): array
@@ -37,6 +40,11 @@ class Report extends Model
     public function purchases(): HasMany
     {
         return $this->hasMany(ReportPurchase::class);
+    }
+
+    public function affiliateTag(): BelongsTo
+    {
+        return $this->belongsTo(AffiliateTag::class);
     }
 
     public function latestPurchase(): HasOne

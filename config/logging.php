@@ -143,6 +143,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'audit' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/audit.log'),
+            'level' => 'info',
+            'days' => 60,
+            'replace_placeholders' => true,
+        ],
+
         'smartbill' => [
             'driver' => 'daily',
             'path' => storage_path('logs/smartbill.log'),
