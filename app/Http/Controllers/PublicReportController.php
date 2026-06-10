@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
+use App\Services\AffiliateAttributionService;
 use App\Services\OpenAIService;
+use App\Services\RecaptchaService;
 use App\Services\ReportPricingService;
 use App\Services\StripeCheckoutService;
 use App\Support\LocalizedUrl;
+use App\Support\RequestAudit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -109,7 +112,7 @@ class PublicReportController extends Controller
         return $response;
     }
 
-    public function showUrlForm(Request $request)
+    public function showUrlForm(Request $request, RecaptchaService $recaptcha)
     {
         if ($this->publicWizardMaintenanceEnabled()) {
             return redirect()->route('get-report');
@@ -123,11 +126,16 @@ class PublicReportController extends Controller
 
         return Inertia::render('Public/SubmitUrl', [
             'reportType' => $type,
+            'recaptchaSiteKey' => $recaptcha->enabled() ? $recaptcha->siteKey() : null,
         ]);
     }
 
-    public function validateUrl(Request $request, OpenAIService $openAI)
-    {
+    public function validateUrl(
+        Request $request,
+        OpenAIService $openAI,
+        AffiliateAttributionService $affiliates,
+        RecaptchaService $recaptcha,
+    ) {
         if ($this->publicWizardMaintenanceEnabled()) {
             return redirect()->route('get-report');
         }
@@ -144,17 +152,36 @@ class PublicReportController extends Controller
             ],
         );
 
+        if (!$recaptcha->verify($request, 'submit_url')) {
+            return back()->withErrors([
+                'url' => __('contact_validation_recaptcha_failed'),
+            ]);
+        }
+
         $report = Report::create([
             'url' => $validated['url'],
             'report_type' => $validated['report_type'],
             'locale' => $locale,
             'status' => 'pending',
+            ...$affiliates->attributesFromRequest($request),
         ]);
+
+        $affiliates->markUsed($report->affiliate_tag_id);
 
         Log::channel('report')->info('URL submitted for validation', [
             'report_id' => $report->id,
             'type' => $report->report_type,
+            'locale' => $report->locale,
             'url' => $report->url,
+            'affiliate_ref' => $report->affiliate_ref,
+        ]);
+
+        Log::channel('audit')->info('URL submission audit', [
+            'report_id' => $report->id,
+            'report_type' => $report->report_type,
+            'locale' => $report->locale,
+            'url' => $report->url,
+            'audit' => RequestAudit::fromRequest($request),
         ]);
 
         try {
@@ -228,7 +255,11 @@ class PublicReportController extends Controller
         ]);
     }
 
-    public function submitEmail(Request $request, StripeCheckoutService $stripe)
+    public function submitEmail(
+        Request $request,
+        StripeCheckoutService $stripe,
+        AffiliateAttributionService $affiliates,
+    )
     {
         $validated = $request->validate(
             $this->submitEmailValidationRules(),
@@ -243,6 +274,11 @@ class PublicReportController extends Controller
             }
 
             return redirect()->route('home')->withErrors(['error' => 'This report is no longer pending.']);
+        }
+
+        if (!$report->affiliate_tag_id) {
+            $report->forceFill($affiliates->attributesFromRequest($request))->save();
+            $affiliates->markUsed($report->affiliate_tag_id);
         }
 
         $pageToken = hash('sha256', $validated['email'] . $report->url . $report->report_type);
@@ -266,6 +302,12 @@ class PublicReportController extends Controller
             'error_message' => null,
         ]);
 
+        Log::channel('audit')->info('Stripe checkout start audit', $this->checkoutStartAuditContext(
+            $request,
+            $report,
+            retry: false,
+        ));
+
         try {
             $checkoutUrl = $stripe->createCheckoutSession($report);
         } catch (\Throwable $e) {
@@ -284,7 +326,7 @@ class PublicReportController extends Controller
         return Inertia::location($checkoutUrl);
     }
 
-    public function retryCheckout(string $pageToken, StripeCheckoutService $stripe)
+    public function retryCheckout(Request $request, string $pageToken, StripeCheckoutService $stripe)
     {
         $report = Report::where('page_token', $pageToken)->firstOrFail();
 
@@ -297,6 +339,12 @@ class PublicReportController extends Controller
             return redirect()->route('report.status', ['pageToken' => $pageToken])
                 ->with('error', __('payment_unavailable'));
         }
+
+        Log::channel('audit')->info('Stripe checkout retry start audit', $this->checkoutStartAuditContext(
+            $request,
+            $report,
+            retry: true,
+        ));
 
         try {
             $checkoutUrl = $stripe->createCheckoutSession($report);
@@ -457,6 +505,30 @@ class PublicReportController extends Controller
             ],
             default => null,
         };
+    }
+
+    private function checkoutStartAuditContext(Request $request, Report $report, bool $retry): array
+    {
+        return [
+            'report_id' => $report->id,
+            'report_type' => $report->report_type,
+            'locale' => $report->locale,
+            'status' => $report->status,
+            'retry' => $retry,
+            'email_domain' => $this->emailDomain($report->email),
+            'audit' => RequestAudit::fromRequest($request),
+        ];
+    }
+
+    private function emailDomain(?string $email): ?string
+    {
+        $email = trim((string) $email);
+
+        if ($email === '' || !str_contains($email, '@')) {
+            return null;
+        }
+
+        return strtolower(substr(strrchr($email, '@') ?: '', 1)) ?: null;
     }
 
     private function renderLegalDocument(string $documentKey)

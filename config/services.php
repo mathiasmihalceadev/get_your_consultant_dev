@@ -86,6 +86,14 @@ return [
         'container_id' => env('GOOGLE_TAG_MANAGER_ID', 'GTM-TDKGXXHL'),
     ],
 
+    'recaptcha' => [
+        'enabled' => env('RECAPTCHA_ENABLED', true),
+        'site_key' => env('RECAPTCHA_SITE_KEY'),
+        'secret_key' => env('RECAPTCHA_SECRET_KEY'),
+        'minimum_score' => (float) env('RECAPTCHA_MINIMUM_SCORE', 0.5),
+        'timeout' => (int) env('RECAPTCHA_TIMEOUT', 5),
+    ],
+
     'browsershot' => [
         'chrome_path' => env('BROWSERSHOT_CHROME_PATH') ?: env('PUPPETEER_EXECUTABLE_PATH'),
         'node_binary' => env('BROWSERSHOT_NODE_BINARY'),

@@ -38,6 +38,8 @@ class ReportPurchase extends Model
         'latest_webhook_event_type',
         'latest_webhook_payload',
         'metadata',
+        'affiliate_tag_id',
+        'affiliate_ref',
         'checkout_started_at',
         'paid_at',
         'failed_at',
@@ -64,6 +66,11 @@ class ReportPurchase extends Model
     public function report(): BelongsTo
     {
         return $this->belongsTo(Report::class);
+    }
+
+    public function affiliateTag(): BelongsTo
+    {
+        return $this->belongsTo(AffiliateTag::class);
     }
 
     public function smartBillInvoice(): HasOne

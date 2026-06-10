@@ -415,6 +415,7 @@
     "contact_validation_email_invalid": "Please enter a valid email address.",
     "contact_validation_subject_required": "Please enter a subject.",
     "contact_validation_message_required": "Please enter your message.",
+    "contact_validation_recaptcha_failed": "We could not verify this submission. Please try again.",
     "landing_nav_why": "Why It Matters",
     "landing_nav_reviews": "Reviews",
     "landing_social_proof_label": "reports generated so far",

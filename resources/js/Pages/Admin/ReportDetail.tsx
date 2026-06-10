@@ -68,6 +68,10 @@ function formatDateTime(value: string | null): string {
     });
 }
 
+function affiliateLabel(report: Report): string {
+    return report.affiliate_ref || report.latest_purchase?.affiliate_ref || "-";
+}
+
 function canSendFeedbackEmail(report: Report): boolean {
     return (
         !report.is_test &&
@@ -154,6 +158,14 @@ export default function ReportDetail({ report }: { report: Report }) {
                                               report.feedback.submitted_at,
                                           )
                                         : "-"}
+                                </p>
+                            </div>
+                            <div className="border border-brand-primary/10 bg-brand-primary/2 px-4 py-4">
+                                <p className="text-sm text-brand-primary/60">
+                                    Afiliat
+                                </p>
+                                <p className="mt-1 break-all text-sm font-medium text-brand-primary">
+                                    {affiliateLabel(report)}
                                 </p>
                             </div>
                         </div>
@@ -243,6 +255,16 @@ export default function ReportDetail({ report }: { report: Report }) {
                                 <p className="mt-3 text-sm font-medium text-brand-primary/82">
                                     {statusLabels[report.status] ||
                                         report.status}
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-brand-primary/8 bg-white p-4">
+                                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-neutral">
+                                    <Fingerprint size={14} />
+                                    Afiliat
+                                </div>
+                                <p className="mt-3 break-all text-sm font-medium text-brand-primary/82">
+                                    {affiliateLabel(report)}
                                 </p>
                             </div>
                         </div>
@@ -471,6 +493,14 @@ export default function ReportDetail({ report }: { report: Report }) {
                                 </span>
                                 <p className="font-medium">
                                     {report.email || "—"}
+                                </p>
+                            </div>
+                            <div>
+                                <span className="text-muted-foreground">
+                                    Afiliat:
+                                </span>
+                                <p className="break-all font-medium">
+                                    {affiliateLabel(report)}
                                 </p>
                             </div>
                             <div className="grid grid-cols-2 gap-3">

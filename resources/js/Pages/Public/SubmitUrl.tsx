@@ -25,9 +25,14 @@ function isValidUrl(value: string): boolean {
 interface SubmitUrlProps {
     reportType: ReportType;
     errors: Record<string, string>;
+    recaptchaSiteKey?: string | null;
 }
 
-export default function SubmitUrl({ reportType, errors }: SubmitUrlProps) {
+export default function SubmitUrl({
+    reportType,
+    errors,
+    recaptchaSiteKey,
+}: SubmitUrlProps) {
     const { t, localePath } = useTranslation();
     const [url, setUrl] = useState("");
     const [processing, setProcessing] = useState(false);
@@ -65,14 +70,42 @@ export default function SubmitUrl({ reportType, errors }: SubmitUrlProps) {
     const urlError = clientError || errors?.url || null;
     const isValid = touched && !clientError && url.trim().length > 0;
 
+    const submitUrl = (recaptchaToken: string | null = null) => {
+        router.post(
+            localePath("/validate-url"),
+            {
+                url,
+                report_type: reportType,
+                recaptcha_token: recaptchaToken,
+            },
+            { onFinish: () => setProcessing(false) },
+        );
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
-        router.post(
-            localePath("/validate-url"),
-            { url, report_type: reportType },
-            { onFinish: () => setProcessing(false) },
-        );
+
+        if (!recaptchaSiteKey) {
+            submitUrl();
+            return;
+        }
+
+        if (!window.grecaptcha) {
+            setProcessing(false);
+            setClientError(t("contact_validation_recaptcha_failed"));
+            return;
+        }
+
+        window.grecaptcha.ready(() => {
+            window.grecaptcha
+                ?.execute(recaptchaSiteKey, { action: "submit_url" })
+                .then((token) => submitUrl(token))
+                .catch(() => {
+                    setProcessing(false);
+                    setClientError(t("contact_validation_recaptcha_failed"));
+                });
+        });
     };
 
     const sidebar = (
@@ -126,7 +159,13 @@ export default function SubmitUrl({ reportType, errors }: SubmitUrlProps) {
 
     return (
         <PublicLayout>
-            <Head title={typeLabels[reportType]} />
+            <Head title={typeLabels[reportType]}>
+                {recaptchaSiteKey && (
+                    <script
+                        src={`https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`}
+                    />
+                )}
+            </Head>
             <WizardLayout
                 currentStep={2}
                 sidebar={sidebar}

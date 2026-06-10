@@ -44,6 +44,8 @@ class StripeCheckoutService
             'checkout_amount_minor' => (string) $pricing['checkout_amount_minor'],
             'exchange_rate' => $pricing['exchange_rate'] !== null ? (string) $pricing['exchange_rate'] : null,
             'stripe_product_id' => $pricing['stripe_product_id'],
+            'affiliate_tag_id' => $report->affiliate_tag_id ? (string) $report->affiliate_tag_id : null,
+            'affiliate_ref' => $report->affiliate_ref,
         ], static fn (mixed $value): bool => $value !== null && $value !== '');
 
         $purchase = ReportPurchase::create([
@@ -58,6 +60,8 @@ class StripeCheckoutService
             'checkout_amount_minor' => $pricing['checkout_amount_minor'],
             'exchange_rate' => $pricing['exchange_rate'],
             'stripe_product_id' => $pricing['stripe_product_id'],
+            'affiliate_tag_id' => $report->affiliate_tag_id,
+            'affiliate_ref' => $report->affiliate_ref,
             'metadata' => $metadata,
             'checkout_started_at' => now(),
         ]);
@@ -651,6 +655,12 @@ class StripeCheckoutService
             'latest_webhook_event_id' => $eventId,
             'latest_webhook_event_type' => $eventType,
             'latest_webhook_payload' => $eventPayload,
+            'affiliate_tag_id' => $purchase->affiliate_tag_id
+                ?: (isset($metadata['affiliate_tag_id']) ? (int) $metadata['affiliate_tag_id'] : null)
+                ?: $purchase->report?->affiliate_tag_id,
+            'affiliate_ref' => $purchase->affiliate_ref
+                ?: ($metadata['affiliate_ref'] ?? null)
+                ?: $purchase->report?->affiliate_ref,
             'metadata' => $metadata,
             'checkout_started_at' => $purchase->checkout_started_at ?: $this->stripeTimestamp($session->created) ?: now(),
             'paid_at' => $status === 'paid' ? ($purchase->paid_at ?: now()) : $purchase->paid_at,
@@ -709,6 +719,10 @@ class StripeCheckoutService
             'stripe_checkout_session_id' => $session->id,
             'stripe_price_id' => $metadata['price_id'] ?? null,
             'stripe_product_id' => $metadata['stripe_product_id'] ?? null,
+            'affiliate_tag_id' => isset($metadata['affiliate_tag_id'])
+                ? (int) $metadata['affiliate_tag_id']
+                : $report->affiliate_tag_id,
+            'affiliate_ref' => $metadata['affiliate_ref'] ?? $report->affiliate_ref,
             'metadata' => $metadata,
             'checkout_started_at' => $this->stripeTimestamp($session->created) ?: now(),
         ])->fresh('report');

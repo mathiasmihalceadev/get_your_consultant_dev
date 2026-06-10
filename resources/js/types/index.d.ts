@@ -4,6 +4,13 @@ declare global {
     interface Window {
         axios: AxiosInstance;
         dataLayer?: Record<string, unknown>[];
+        grecaptcha?: {
+            ready: (callback: () => void) => void;
+            execute: (
+                siteKey: string,
+                options: { action: string },
+            ) => Promise<string>;
+        };
     }
 }
 
@@ -60,6 +67,8 @@ export interface ReportPurchase {
     amount_total: number | null;
     currency: string;
     paid_currency: string | null;
+    affiliate_tag_id: number | null;
+    affiliate_ref: string | null;
     customer_email: string | null;
     customer_name: string | null;
     stripe_checkout_session_id: string | null;
@@ -93,10 +102,32 @@ export interface Report {
     error_message: string | null;
     processed_at: string | null;
     feedback_sent_at: string | null;
+    affiliate_tag_id: number | null;
+    affiliate_ref: string | null;
     created_at: string;
     updated_at: string;
     latest_purchase?: ReportPurchase | null;
     feedback?: ReportFeedback | null;
+}
+
+export interface AffiliateRevenueTotal {
+    currency: string;
+    amount_minor: number;
+}
+
+export interface AffiliateTag {
+    id: number;
+    name: string;
+    slug: string;
+    is_active: boolean;
+    notes: string | null;
+    last_used_at: string | null;
+    created_at: string;
+    updated_at: string;
+    reports_count: number;
+    purchases_count: number;
+    paid_purchases_count: number;
+    revenue_totals: AffiliateRevenueTotal[];
 }
 
 export interface ContactInquiry {

@@ -5,6 +5,7 @@ import {
     EnvelopeSimple,
     FilePdf,
     Gear,
+    Tag,
     SignOut,
     Icon,
 } from "@phosphor-icons/react";
@@ -33,6 +34,11 @@ const navItems: NavItem[] = [
         name: "Feedback",
         href: "/admin/feedbacks",
         icon: ChatCenteredText,
+    },
+    {
+        name: "Afiliati",
+        href: "/admin/affiliates",
+        icon: Tag,
     },
     {
         name: "Setări",
@@ -143,7 +149,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                 </main>
 
                 <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-primary/10 bg-white/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
-                    <div className="grid grid-cols-5 gap-1">
+                    <div className="grid grid-cols-6 gap-1">
                         {navItems.map(({ name, href, icon: Icon }) => {
                             const isActive = currentUrl.startsWith(href);
 

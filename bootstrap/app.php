@@ -20,9 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'stripe/webhook',
         ]);
 
+        $middleware->trustProxies(at: '*');
+
         $middleware->web(prepend: [
             \App\Http\Middleware\SetLocale::class,
         ], append: [
+            \App\Http\Middleware\CaptureAffiliateRef::class,
             \App\Http\Middleware\HandleInertiaRequests::class,
             \App\Http\Middleware\ApplySeoIndexingHeaders::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
