@@ -461,6 +461,7 @@ class PublicReportController extends Controller
     {
         return [
             'email' => ['required', 'email'],
+            'email_confirmation' => ['required', 'email', 'same:email'],
             'report_id' => ['required', 'exists:reports,id'],
             'accept_terms' => ['accepted'],
         ];
@@ -471,6 +472,9 @@ class PublicReportController extends Controller
         return [
             'email.required' => __('wizard_email_required'),
             'email.email' => __('wizard_email_invalid'),
+            'email_confirmation.required' => __('wizard_email_confirmation_required'),
+            'email_confirmation.email' => __('wizard_email_invalid'),
+            'email_confirmation.same' => __('wizard_email_confirmation_mismatch'),
             'accept_terms.accepted' => __('wizard_accept_terms_required'),
         ];
     }

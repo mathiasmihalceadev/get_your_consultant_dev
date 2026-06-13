@@ -265,6 +265,11 @@ export default function ReportStatus({
                                     <StepIcon
                                         size={16}
                                         weight={done ? "fill" : "regular"}
+                                        className={
+                                            done
+                                                ? "text-white"
+                                                : "text-brand-primary/55"
+                                        }
                                     />
                                 </div>
                                 <p

@@ -26,7 +26,7 @@ class ReportReadyNotificationMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.report-ready-notification',
+            view: $this->templateView(),
             with: [
                 'report' => $this->report,
                 'copy' => $this->copy(),
@@ -43,6 +43,14 @@ class ReportReadyNotificationMail extends Mailable
         $key = 'type_' . $this->report->report_type;
 
         return $translations[$key] ?? $this->report->report_type;
+    }
+
+    private function templateView(): string
+    {
+        return match ((string) config('services.report_ready_notification_email.template', 'modern')) {
+            'table' => 'emails.report-ready-notification-table',
+            default => 'emails.report-ready-notification',
+        };
     }
 
     private function copy(): array

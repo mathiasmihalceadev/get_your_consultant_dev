@@ -86,6 +86,7 @@ interface SubmitEmailProps {
 export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
     const { t, locale, localePath } = useTranslation();
     const [email, setEmail] = useState("");
+    const [emailConfirmation, setEmailConfirmation] = useState("");
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [processing, setProcessing] = useState(false);
     const termsPath =
@@ -96,10 +97,20 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
         setProcessing(true);
         router.post(
             localePath("/submit-email"),
-            { email, report_id: report.id, accept_terms: acceptTerms },
+            {
+                email,
+                email_confirmation: emailConfirmation,
+                report_id: report.id,
+                accept_terms: acceptTerms,
+            },
             { onFinish: () => setProcessing(false) },
         );
     };
+
+    const emailsMatch =
+        email.trim().length > 0 &&
+        emailConfirmation.trim().length > 0 &&
+        email.trim().toLowerCase() === emailConfirmation.trim().toLowerCase();
 
     const sidebar = (
         <>
@@ -196,7 +207,44 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                         </div>
 
                         <div>
-                            <label className="flex items-start gap-3 border border-brand-primary/10 bg-brand-primary/3 px-4 py-3 text-sm leading-6 text-brand-primary/76">
+                            <Label
+                                htmlFor="email_confirmation"
+                                className="text-sm font-medium mb-1.5 block"
+                            >
+                                {t("your_email_confirmation")}
+                            </Label>
+                            <Input
+                                id="email_confirmation"
+                                type="email"
+                                placeholder={t("email_placeholder")}
+                                value={emailConfirmation}
+                                onChange={(e) =>
+                                    setEmailConfirmation(e.target.value)
+                                }
+                                required
+                                className={`solid-border text-brand-primary placeholder:text-brand-primary/55 ${
+                                    errors?.email_confirmation ||
+                                    (emailConfirmation && !emailsMatch)
+                                        ? "border-red-500"
+                                        : "border-brand-primary/30"
+                                }`}
+                            />
+                            {errors?.email_confirmation ? (
+                                <p className="text-sm text-red-600 mt-1.5">
+                                    {errors.email_confirmation}
+                                </p>
+                            ) : (
+                                emailConfirmation &&
+                                !emailsMatch && (
+                                    <p className="text-sm text-red-600 mt-1.5">
+                                        {t("wizard_email_confirmation_mismatch")}
+                                    </p>
+                                )
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="flex cursor-pointer items-start gap-3 border border-brand-primary/10 bg-brand-primary/3 px-4 py-3 text-sm leading-6 text-brand-primary/76">
                                 <input
                                     id="accept_terms"
                                     type="checkbox"
@@ -205,7 +253,7 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                                         setAcceptTerms(e.target.checked)
                                     }
                                     required
-                                    className="mt-1 h-4 w-4 shrink-0 border-brand-primary/25 text-brand-primary"
+                                    className="mt-1 h-4 w-4 shrink-0 cursor-pointer border-brand-primary/25 text-brand-primary"
                                 />
                                 <span>
                                     {t("wizard_accept_terms_intro")}
@@ -230,7 +278,9 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                         <div className="flex justify-end">
                             <button
                                 type="submit"
-                                disabled={processing || !email || !acceptTerms}
+                                disabled={
+                                    processing || !emailsMatch || !acceptTerms
+                                }
                                 className="inline-flex cursor-pointer items-center gap-2 bg-brand-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-primary/92 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {processing

@@ -373,7 +373,6 @@
             <table class="footer-contact" role="presentation">
                 <tr>
                     <td><a href="mailto:{{ $contactEmail }}">{{ $contactEmail }}</a></td>
-                    <td>{{ str_replace("\n", ', ', $trans['landing_footer_address'] ?? 'Tornimae 5, Tallinn, Estonia 10145') }}</td>
                     <td><a href="{{ $websiteUrl }}">{{ $websiteLabel }}</a></td>
                 </tr>
             </table>

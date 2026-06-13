@@ -104,7 +104,7 @@
                                         placeholder="{{ __('landing_hero_url_placeholder') }}"
                                         class="h-14 border border-brand-primary/12 bg-[#fff] px-5 text-base text-brand-primary shadow-[0_16px_40px_rgba(52,48,106,0.08)] placeholder:text-brand-primary/45 focus:outline-none"
                                     >
-                                    <button type="submit" class="h-14 bg-brand-primary px-7 text-[0.98rem] font-semibold text-white shadow-[0_18px_36px_rgba(52,48,106,0.22)] transition-colors hover:bg-brand-primary/92 sm:-ml-px">
+                                    <button type="submit" class="h-14 cursor-pointer bg-brand-primary px-7 text-[0.98rem] font-semibold text-white shadow-[0_18px_36px_rgba(52,48,106,0.22)] transition-colors hover:bg-brand-primary/92 sm:-ml-px">
                                         <span class="inline-flex items-center gap-2">
                                             {{ __('landing_generate_report') }}
                                             <x-marketing.icon name="arrow-right" class="h-4 w-4" />
@@ -341,7 +341,7 @@
                                         placeholder="{{ __('landing_hero_url_placeholder') }}"
                                         class="h-14 border border-brand-primary/12 bg-[#fff] px-5 text-base text-brand-primary shadow-[0_16px_40px_rgba(52,48,106,0.08)] placeholder:text-brand-primary/45 focus:outline-none"
                                     >
-                                    <button type="submit" class="h-14 bg-brand-primary px-7 text-[0.98rem] font-semibold text-white shadow-[0_18px_36px_rgba(52,48,106,0.22)] transition-colors hover:bg-brand-primary/92 sm:-ml-px">
+                                    <button type="submit" class="h-14 cursor-pointer bg-brand-primary px-7 text-[0.98rem] font-semibold text-white shadow-[0_18px_36px_rgba(52,48,106,0.22)] transition-colors hover:bg-brand-primary/92 sm:-ml-px">
                                         <span class="inline-flex items-center gap-2">
                                             {{ __('landing_generate_report') }}
                                             <x-marketing.icon name="arrow-right" class="h-4 w-4" />
