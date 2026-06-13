@@ -65,9 +65,12 @@
 
     "almost_there": "Almost there!",
     "your_email": "Your email address",
+    "your_email_confirmation": "Confirm your email address",
     "email_placeholder": "you@example.com",
     "wizard_email_required": "Please enter your email address.",
     "wizard_email_invalid": "Please enter a valid email address.",
+    "wizard_email_confirmation_required": "Please confirm your email address.",
+    "wizard_email_confirmation_mismatch": "The email addresses do not match.",
     "wizard_accept_terms_intro": "I agree to the ",
     "wizard_accept_terms_outro": " on the website and want to continue to payment.",
     "wizard_accept_terms_required": "You must accept the terms and conditions before continuing.",

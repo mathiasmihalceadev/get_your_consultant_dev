@@ -45,7 +45,7 @@ class ReportMail extends Mailable
         $typeLabel = $translations[$typeKey] ?? $this->report->report_type;
 
         return new Content(
-            view: 'emails.report',
+            view: $this->templateView(),
             with: [
                 'report' => $this->report,
                 'typeLabel' => $typeLabel,
@@ -186,5 +186,13 @@ class ReportMail extends Mailable
             return json_decode(file_get_contents($path), true) ?? [];
         }
         return [];
+    }
+
+    private function templateView(): string
+    {
+        return match ((string) config('services.report_email.template', 'modern')) {
+            'table' => 'emails.report-table',
+            default => 'emails.report',
+        };
     }
 }

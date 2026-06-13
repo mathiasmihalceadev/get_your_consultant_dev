@@ -33,7 +33,7 @@ class ReportFeedbackMail extends Mailable
         $locale = $this->reportLocale();
 
         return new Content(
-            view: 'emails.report-feedback',
+            view: $this->templateView(),
             with: [
                 'report' => $this->report,
                 'locale' => $locale,
@@ -49,6 +49,14 @@ class ReportFeedbackMail extends Mailable
     private function reportLocale(): string
     {
         return strtolower((string) ($this->report->locale ?? 'ro')) === 'en' ? 'en' : 'ro';
+    }
+
+    private function templateView(): string
+    {
+        return match ((string) config('services.report_feedback_email.template', 'modern')) {
+            'table' => 'emails.report-feedback-table',
+            default => 'emails.report-feedback',
+        };
     }
 
     private function copy(string $locale): array

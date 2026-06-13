@@ -86,6 +86,18 @@ return [
         'container_id' => env('GOOGLE_TAG_MANAGER_ID', 'GTM-TDKGXXHL'),
     ],
 
+    'report_email' => [
+        'template' => env('REPORT_EMAIL_TEMPLATE', 'modern'),
+    ],
+
+    'report_feedback_email' => [
+        'template' => env('REPORT_FEEDBACK_EMAIL_TEMPLATE', 'modern'),
+    ],
+
+    'report_ready_notification_email' => [
+        'template' => env('REPORT_READY_NOTIFICATION_EMAIL_TEMPLATE', 'modern'),
+    ],
+
     'recaptcha' => [
         'enabled' => env('RECAPTCHA_ENABLED', true),
         'site_key' => env('RECAPTCHA_SITE_KEY'),

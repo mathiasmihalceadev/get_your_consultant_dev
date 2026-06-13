@@ -65,9 +65,12 @@
 
     "almost_there": "Aproape gata!",
     "your_email": "Adresa ta de email",
+    "your_email_confirmation": "Confirmă adresa ta de email",
     "email_placeholder": "tu@exemplu.com",
     "wizard_email_required": "Te rugăm să introduci adresa de email.",
     "wizard_email_invalid": "Te rugăm să introduci o adresă de email validă.",
+    "wizard_email_confirmation_required": "Te rugăm să confirmi adresa de email.",
+    "wizard_email_confirmation_mismatch": "Adresele de email nu coincid.",
     "wizard_accept_terms_intro": "Sunt de acord cu ",
     "wizard_accept_terms_outro": " de pe website și vreau să continui către plată.",
     "wizard_accept_terms_required": "Trebuie să accepți termenii și condițiile pentru a continua.",

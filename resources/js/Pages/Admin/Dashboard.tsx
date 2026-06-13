@@ -713,6 +713,7 @@ export default function Dashboard({
                                             link.active
                                                 ? "bg-brand-primary text-white"
                                                 : "text-brand-primary/70 hover:bg-brand-primary/4",
+                                            link.url && "cursor-pointer",
                                             !link.url &&
                                                 "cursor-not-allowed opacity-50",
                                         )}
