@@ -26,5 +26,6 @@
         @unless (str_starts_with($page['component'], 'Admin/'))
             <x-marketing.cookie-banner />
         @endunless
+        <script type="text/javascript" src="https://cdn.ywxi.net/js/1.js" async></script>
     </body>
 </html>
