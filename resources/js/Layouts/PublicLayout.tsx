@@ -130,25 +130,54 @@ export default function PublicLayout({ children }: PropsWithChildren) {
             <footer className="bg-brand-primary">
                 <div className="h-0.75 bg-brand-secondary" />
                 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
-                    <div className="mb-8 flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="mb-8 grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(220px,0.7fr)_minmax(0,0.95fr)] lg:items-start">
                         <div>
                             <img
                                 src="/images/logo-footer.png"
                                 alt={t("site_name")}
                                 className="mb-4 h-18 w-auto object-contain md:h-22"
                             />
-                            <p className="max-w-md text-[14px] text-white/80 md:text-base">
+                            <p className="max-w-md text-[12px] text-white/60 md:text-[14px]">
                                 {t("landing_footer_desc")}
                             </p>
                         </div>
 
-                        <div>
+                        <div className="flex flex-col gap-4 lg:items-center lg:justify-end">
+                            <a
+                                href="https://reclamatiisal.anpc.ro/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block transition-colors"
+                                aria-label="ANPC"
+                            >
+                                <img
+                                    src="/images/anpc.png"
+                                    alt="ANPC"
+                                    className="h-auto w-full max-w-64 object-contain md:max-w-84"
+                                />
+                            </a>
+                            <a
+                                href="https://consumer-redress.ec.europa.eu/index_en?prefLang=ro"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block transition-colors"
+                                aria-label="Online dispute resolution"
+                            >
+                                <img
+                                    src="/images/solutionare.png"
+                                    alt="Online dispute resolution"
+                                    className="h-auto w-full max-w-64 object-contain md:max-w-84"
+                                />
+                            </a>
+                        </div>
+
+                        <div className="lg:justify-self-end lg:text-right">
                             <h4 className="mb-3 text-[14px] text-white/80 md:text-base">
                                 {t("footer_follow_us")}
                             </h4>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 lg:justify-end">
                                 <a
-                                    href="https://www.facebook.com"
+                                    href="https://www.facebook.com/profile.php?id=61590563915563&locale=ro_RO"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="Facebook"
@@ -157,7 +186,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                     <FacebookLogo size={18} weight="duotone" />
                                 </a>
                                 <a
-                                    href="https://www.instagram.com"
+                                    href="https://www.instagram.com/getyourconsultant"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="Instagram"
@@ -166,7 +195,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                     <InstagramLogo size={18} weight="duotone" />
                                 </a>
                                 <a
-                                    href="https://www.tiktok.com"
+                                    href="https://www.tiktok.com/@getyourconsultant"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="TikTok"
@@ -183,6 +212,11 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                     {t("landing_footer_address")}
                                 </p>
                             </div>
+                            <img
+                                src="/images/secure-payment.png"
+                                alt="Secure payment"
+                                className="mt-6 h-auto w-full max-w-64 object-contain md:max-w-64"
+                            />
                         </div>
                     </div>
 

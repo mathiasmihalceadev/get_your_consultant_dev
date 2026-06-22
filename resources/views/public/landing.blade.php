@@ -59,6 +59,37 @@
 
     $buyingSampleReportHref = asset($locale === 'ro' ? 'images/report-example-ro.pdf' : 'images/report-example-en.pdf');
     $rentalSampleReportHref = asset($locale === 'ro' ? 'images/report-example-rental-ro.pdf' : 'images/report-example-rental-en.pdf');
+    $testimonialSection = $locale === 'ro'
+        ? [
+            'eyebrow' => 'Review-uri reale',
+            'title' => 'Ce spun cei care au folosit raportul',
+            'desc' => 'Feedback primit de la oameni care au folosit GetYourConsultant înainte să ia o decizie imobiliară.',
+            'previous' => 'Review-ul anterior',
+            'next' => 'Review-ul următor',
+            'items' => [
+                'Am economisit aproape 20.000 € cu ajutorul raportului. Eram foarte aproape să plătesc prea mult pentru o proprietate supraevaluată.',
+                'Simplu, rapid și ușor de înțeles. A meritat.',
+                'Am cumpărat 5 rapoarte până acum. M-au ajutat să iau decizia corectă. Două proprietăți le-am eliminat din start, pentru că nu luasem în calcul multe riscuri.',
+                'Simplu, clar și direct. Fără interese ascunse, fără presiune. O analiză rece și obiectivă. Exact ce aveam nevoie.',
+                'Am fost încântată. Am descoperit foarte multe informații la care nici nu mă gândisem. Acum știu mult mai bine la ce să fiu atentă.',
+                'De când am descoperit raportul, încă nu am cumpărat nimic… la toate găsesc câte un defect. 😅 Dar măcar știu că nu mă grăbesc și iau o decizie informată.',
+            ],
+        ]
+        : [
+            'eyebrow' => 'Real reviews',
+            'title' => 'What customers say after using the report',
+            'desc' => 'Feedback from people who used GetYourConsultant before making a real estate decision.',
+            'previous' => 'Previous review',
+            'next' => 'Next review',
+            'items' => [
+                'I saved almost €20,000 with the help of the report. I was very close to paying too much for an overvalued property.',
+                'Simple, fast and easy to understand. It was worth it.',
+                'I have bought 5 reports so far. They helped me make the right decision. I eliminated two properties from the start because I had not considered many risks.',
+                'Simple, clear and direct. No hidden interests, no pressure. A cold and objective analysis. Exactly what I needed.',
+                'I was delighted. I discovered a lot of information I had not even thought about. Now I know much better what to pay attention to.',
+                'Since discovering the report, I still have not bought anything… I find a flaw in every property. 😅 But at least I know I am not rushing and I am making an informed decision.',
+            ],
+        ];
     $formatPrice = static function (array $entry, string $fallback) use ($locale): string {
         if ($entry === []) {
             return $fallback;
@@ -170,7 +201,7 @@
                 </div>
             </section>
 
-            <section id="report-example" class="relative overflow-hidden border-b solid-divider bg-white pb-16 pt-12 md:py-18">
+            <section id="report-example" class="relative overflow-hidden bg-white pb-16 pt-12 md:py-18">
                 <img src="{{ asset('images/blue-noise-texture.png') }}" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.045] mix-blend-multiply">
 
                 <div class="relative mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(340px,0.94fr)_minmax(0,1.06fr)] lg:items-center lg:px-8">
@@ -240,7 +271,7 @@
                 </div>
             </section>
 
-            <section id="reviews" class="border-b solid-divider bg-white py-10 md:py-12">
+            <section id="reviews" class=" bg-white py-10 md:py-12">
                 <div class="mx-auto grid max-w-6xl gap-6 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:px-8">
                     <div class="max-w-3xl">
                         <h2 class="text-[2rem] leading-[1.04] font-bold tracking-[-0.04em] text-brand-primary md:text-[2.4rem]">{{ __('landing_reviews_title') }}</h2>
@@ -271,6 +302,39 @@
                             </div>
                             <p class="mt-3 text-[14px] leading-[1.6] text-white/76 md:text-base md:leading-[1.7]">{{ __('landing_reviews_stat_rating_body') }}</p>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="customer-reviews" class="relative overflow-hidden border-b solid-divider bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)] py-16 md:py-18">
+                <div class="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+                        <div class="max-w-3xl">
+                            <h2 class="text-[2rem] leading-[1.04] font-bold tracking-[-0.04em] text-brand-primary md:text-[2.7rem]">{{ $testimonialSection['title'] }}</h2>
+                            <p class="mt-3 max-w-2xl text-[14px] leading-[1.6] text-brand-primary/76 md:mt-4 md:text-lg md:leading-[1.74]">{{ $testimonialSection['desc'] }}</p>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button type="button" data-reviews-prev aria-label="{{ $testimonialSection['previous'] }}" class="flex h-11 w-11 cursor-pointer items-center justify-center border border-brand-primary/15 bg-white text-lg font-semibold text-brand-primary shadow-[0_14px_34px_rgba(52,48,106,0.08)] transition-colors hover:border-brand-primary/30 hover:bg-brand-primary/4 disabled:cursor-not-allowed disabled:opacity-40">&lt;</button>
+                            <button type="button" data-reviews-next aria-label="{{ $testimonialSection['next'] }}" class="flex h-11 w-11 cursor-pointer items-center justify-center border border-brand-primary/15 bg-white text-lg font-semibold text-brand-primary shadow-[0_14px_34px_rgba(52,48,106,0.08)] transition-colors hover:border-brand-primary/30 hover:bg-brand-primary/4 disabled:cursor-not-allowed disabled:opacity-40">&gt;</button>
+                        </div>
+                    </div>
+
+                    <div data-reviews-carousel class="-mx-4 mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto px-4 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] md:mt-10 [&::-webkit-scrollbar]:hidden">
+                        @foreach ($testimonialSection['items'] as $review)
+                            <article data-review-card class="flex min-w-[84%] snap-start flex-col justify-between border border-brand-primary/10 bg-white p-6 shadow-[0_8px_20px_rgba(52,48,106,0.06)] sm:min-w-[420px] lg:min-w-[360px]">
+                                <div>
+                                    <div class="mb-5 flex items-center gap-1 text-[#f3b44f]" aria-label="5/5">
+                                        @for ($star = 0; $star < 5; $star++)
+                                            <x-marketing.icon name="star" weight="fill" class="h-4 w-4" />
+                                        @endfor
+                                    </div>
+                                    <p class="text-[16px] font-semibold leading-[1.62] tracking-[-0.015em] text-brand-primary md:text-[17px]">
+                                        “{{ $review }}”
+                                    </p>
+                                </div>
+                            </article>
+                        @endforeach
                     </div>
                 </div>
             </section>
@@ -367,4 +431,47 @@
                     </div>
                 </div>
     </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const carousel = document.querySelector('[data-reviews-carousel]');
+            const previousButton = document.querySelector('[data-reviews-prev]');
+            const nextButton = document.querySelector('[data-reviews-next]');
+
+            if (!carousel || !previousButton || !nextButton) {
+                return;
+            }
+
+            const getStep = () => {
+                const card = carousel.querySelector('[data-review-card]');
+
+                if (!card) {
+                    return carousel.clientWidth;
+                }
+
+                const style = window.getComputedStyle(carousel);
+                const gap = parseFloat(style.columnGap || style.gap || '0');
+
+                return card.getBoundingClientRect().width + gap;
+            };
+
+            const updateButtons = () => {
+                const maxScroll = carousel.scrollWidth - carousel.clientWidth - 4;
+
+                previousButton.disabled = carousel.scrollLeft <= 4;
+                nextButton.disabled = carousel.scrollLeft >= maxScroll;
+            };
+
+            previousButton.addEventListener('click', () => {
+                carousel.scrollBy({ left: -getStep(), behavior: 'smooth' });
+            });
+
+            nextButton.addEventListener('click', () => {
+                carousel.scrollBy({ left: getStep(), behavior: 'smooth' });
+            });
+
+            carousel.addEventListener('scroll', updateButtons, { passive: true });
+            window.addEventListener('resize', updateButtons);
+            updateButtons();
+        });
+    </script>
 </x-layouts.public-marketing>
