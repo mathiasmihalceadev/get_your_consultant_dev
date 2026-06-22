@@ -15,7 +15,7 @@
         <div class="mb-8 grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(220px,0.7fr)_minmax(0,0.95fr)] lg:items-start">
             <div>
                 <img src="{{ asset('images/logo-footer.png') }}" alt="{{ __('site_name') }}" class="mb-4 h-18 w-auto object-contain md:h-22">
-                <p class="max-w-md text-[14px] text-white/80 md:text-base">{{ __('landing_footer_desc') }}</p>
+                <p class="max-w-md text-[12px] text-white/60 md:text-[14px]">{{ __('landing_footer_desc') }}</p>
             </div>
 
             <div class="flex flex-col gap-4 lg:items-center lg:justify-end">
@@ -43,6 +43,7 @@
                 <div class="mt-4">
                     <p class="whitespace-pre-line text-[14px] leading-[1.7] text-white/70 md:text-base">{{ __('landing_footer_address') }}</p>
                 </div>
+                <img src="{{ asset('images/secure-payment.png') }}" alt="Soluționarea litigiilor online" class="h-auto w-full max-w-64 md:max-w-64 object-contain mt-6">
             </div>
         </div>
 
