@@ -41,6 +41,22 @@ class PublicReportController extends Controller
         return Inertia::render('Public/Index');
     }
 
+    public function about()
+    {
+        $locale = app()->getLocale();
+        $alternates = collect(LocalizedUrl::publicLocales())
+            ->mapWithKeys(fn (string $publicLocale) => [
+                $publicLocale === 'ro' ? 'ro-RO' : 'en-US' => LocalizedUrl::publicUrlForLocale($publicLocale, '/despre-noi'),
+            ])
+            ->all();
+
+        return response()->view('public.about', [
+            'canonical' => LocalizedUrl::publicUrlForLocale($locale, '/despre-noi'),
+            'alternates' => $alternates,
+            'xDefault' => LocalizedUrl::publicUrlForLocale(LocalizedUrl::publicXDefaultLocale(), '/despre-noi'),
+        ]);
+    }
+
     public function privacyPolicy()
     {
         return $this->renderLegalDocument('privacy-policy');
@@ -393,7 +409,7 @@ class PublicReportController extends Controller
             ->with('success', __('payment_return_success'));
 
         if ($hasConfirmedPayment) {
-            $purchaseEvent = $this->purchaseDataLayerEvent($report, $latestPurchase?->id);
+            $purchaseEvent = $this->purchaseDataLayerEvent($report, $latestPurchase?->id, $request);
 
             if ($purchaseEvent !== null) {
                 $redirect->with('dataLayerEvents', [$purchaseEvent]);
@@ -484,10 +500,15 @@ class PublicReportController extends Controller
         return (bool) config('app.public_wizard_maintenance', false);
     }
 
-    private function purchaseDataLayerEvent(Report $report, ?int $purchaseId): ?array
+    private function purchaseDataLayerEvent(Report $report, ?int $purchaseId, Request $request): ?array
     {
+        $userData = $this->enhancedConversionUserData($report, $request);
+        $withUserData = static fn (array $event): array => $userData === null
+            ? $event
+            : [...$event, 'user_data' => $userData];
+
         return match (true) {
-            str_starts_with($report->report_type, 'buying_') => [
+            str_starts_with($report->report_type, 'buying_') => $withUserData([
                 'event' => 'report_purchased_buying',
                 'event_id' => 'report_purchased_buying_'.$report->id.'_'.$purchaseId,
                 'report_id' => $report->id,
@@ -496,8 +517,8 @@ class PublicReportController extends Controller
                 'currency' => 'EUR',
                 'value' => 27.99,
                 'content_name' => 'Raport Cumparare',
-            ],
-            str_starts_with($report->report_type, 'rental_') => [
+            ]),
+            str_starts_with($report->report_type, 'rental_') => $withUserData([
                 'event' => 'report_purchased_rental',
                 'event_id' => 'report_purchased_rental_'.$report->id.'_'.$purchaseId,
                 'report_id' => $report->id,
@@ -506,9 +527,58 @@ class PublicReportController extends Controller
                 'currency' => 'EUR',
                 'value' => 17.99,
                 'content_name' => 'Raport Inchiriere',
-            ],
+            ]),
             default => null,
         };
+    }
+
+    private function enhancedConversionUserData(Report $report, Request $request): ?array
+    {
+        if (!$this->hasMarketingConsent($request)) {
+            return null;
+        }
+
+        $email = $this->normalizeEnhancedConversionEmail($report->email);
+
+        if ($email === null) {
+            return null;
+        }
+
+        return [
+            'sha256_email_address' => hash('sha256', $email),
+        ];
+    }
+
+    private function hasMarketingConsent(Request $request): bool
+    {
+        if ($request->cookie('gyc_cookie_consent') === 'accepted') {
+            return true;
+        }
+
+        $preferences = json_decode((string) $request->cookie('gyc_cookie_preferences', ''), true);
+
+        return is_array($preferences) && (bool) ($preferences['marketing'] ?? false);
+    }
+
+    private function normalizeEnhancedConversionEmail(?string $email): ?string
+    {
+        $email = strtolower(trim((string) $email));
+
+        if ($email === '' || !str_contains($email, '@')) {
+            return null;
+        }
+
+        [$localPart, $domain] = explode('@', $email, 2);
+
+        if ($localPart === '' || $domain === '') {
+            return null;
+        }
+
+        if (in_array($domain, ['gmail.com', 'googlemail.com'], true)) {
+            $localPart = str_replace('.', '', $localPart);
+        }
+
+        return $localPart.'@'.$domain;
     }
 
     private function checkoutStartAuditContext(Request $request, Report $report, bool $retry): array

@@ -3,6 +3,7 @@
 
     $locale = app()->getLocale();
     $navItems = [
+        ['label' => 'Despre noi', 'href' => route('about')],
         ['label' => __('landing_nav_example'), 'href' => url('/').'#report-example'],
         ['label' => __('how_it_works'), 'href' => url('/').'#how-it-works'],
         ['label' => __('landing_nav_reviews'), 'href' => url('/').'#reviews'],

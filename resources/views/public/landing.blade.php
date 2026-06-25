@@ -67,12 +67,12 @@
             'previous' => 'Review-ul anterior',
             'next' => 'Review-ul următor',
             'items' => [
-                'Am economisit aproape 20.000 € cu ajutorul raportului. Eram foarte aproape să plătesc prea mult pentru o proprietate supraevaluată.',
-                'Simplu, rapid și ușor de înțeles. A meritat.',
-                'Am cumpărat 5 rapoarte până acum. M-au ajutat să iau decizia corectă. Două proprietăți le-am eliminat din start, pentru că nu luasem în calcul multe riscuri.',
-                'Simplu, clar și direct. Fără interese ascunse, fără presiune. O analiză rece și obiectivă. Exact ce aveam nevoie.',
-                'Am fost încântată. Am descoperit foarte multe informații la care nici nu mă gândisem. Acum știu mult mai bine la ce să fiu atentă.',
-                'De când am descoperit raportul, încă nu am cumpărat nimic… la toate găsesc câte un defect. 😅 Dar măcar știu că nu mă grăbesc și iau o decizie informată.',
+                ['text' => 'Am economisit aproape 20.000 € cu ajutorul raportului. Eram foarte aproape să plătesc prea mult pentru o proprietate supraevaluată.', 'rating' => 5],
+                ['text' => 'Simplu, rapid și ușor de înțeles. A meritat.', 'rating' => 5],
+                ['text' => 'Am cumpărat 5 rapoarte până acum. M-au ajutat să iau decizia corectă. Două proprietăți le-am eliminat din start, pentru că nu luasem în calcul multe riscuri.', 'rating' => 5],
+                ['text' => 'Simplu, clar și direct. Fără interese ascunse, fără presiune. O analiză rece și obiectivă. Exact ce aveam nevoie.', 'rating' => 5],
+                ['text' => 'Am fost încântată. Am descoperit foarte multe informații la care nici nu mă gândisem. Acum știu mult mai bine la ce să fiu atentă.', 'rating' => 4],
+                ['text' => 'De când am descoperit raportul, încă nu am cumpărat nimic… la toate găsesc câte un defect. 😅 Dar măcar știu că nu mă grăbesc și iau o decizie informată.', 'rating' => 5],
             ],
         ]
         : [
@@ -82,12 +82,157 @@
             'previous' => 'Previous review',
             'next' => 'Next review',
             'items' => [
-                'I saved almost €20,000 with the help of the report. I was very close to paying too much for an overvalued property.',
-                'Simple, fast and easy to understand. It was worth it.',
-                'I have bought 5 reports so far. They helped me make the right decision. I eliminated two properties from the start because I had not considered many risks.',
-                'Simple, clear and direct. No hidden interests, no pressure. A cold and objective analysis. Exactly what I needed.',
-                'I was delighted. I discovered a lot of information I had not even thought about. Now I know much better what to pay attention to.',
-                'Since discovering the report, I still have not bought anything… I find a flaw in every property. 😅 But at least I know I am not rushing and I am making an informed decision.',
+                ['text' => 'I saved almost €20,000 with the help of the report. I was very close to paying too much for an overvalued property.', 'rating' => 5],
+                ['text' => 'Simple, fast and easy to understand. It was worth it.', 'rating' => 5],
+                ['text' => 'I have bought 5 reports so far. They helped me make the right decision. I eliminated two properties from the start because I had not considered many risks.', 'rating' => 5],
+                ['text' => 'Simple, clear and direct. No hidden interests, no pressure. A cold and objective analysis. Exactly what I needed.', 'rating' => 5],
+                ['text' => 'I was delighted. I discovered a lot of information I had not even thought about. Now I know much better what to pay attention to.', 'rating' => 4],
+                ['text' => 'Since discovering the report, I still have not bought anything… I find a flaw in every property. 😅 But at least I know I am not rushing and I am making an informed decision.', 'rating' => 5],
+            ],
+        ];
+    $professionalSection = $locale === 'ro'
+        ? [
+            'eyebrow' => 'Opinii profesionale',
+            'title' => 'Recomandări de la profesioniști',
+            'desc' => 'Perspective de la specialiști care înțeleg cât de mult contează contextul, datele și verificarea atentă înainte de o decizie imobiliară.',
+            'items' => [
+                [
+                    'featured' => true,
+                    'body' => [
+                        'GetYourConsultant a fost creat pentru a ajuta cumpărătorii și chiriașii să ia decizii mai informate. Raportul oferă o analiză independentă bazată pe date și indicatori de piață, însă nu înlocuiește opinia unui agent imobiliar, a unui evaluator autorizat sau a altui specialist. Scopul nostru este să oferim claritate, informații suplimentare și economisirea timpului, înainte de o decizie importantă.',
+                    ],
+                    'role' => 'Fondator & CEO, GetYourConsultant',
+                    'name' => 'Cosmin M.',
+                ],
+                [
+                    'body' => [
+                        'Piața imobiliară din România este extraordinar de diversă — de la blocuri interbelice pline de farmec până la complexe rezidențiale noi sau penthouse-uri exclusiviste. Să evaluezi corect fiecare tipologie implică zeci de criterii pe care, în mod normal, este aproape imposibil să le aduni și să le interpretezi de unul singur.',
+                        'Tocmai aici intervine valoarea unui astfel de raport GetYourConsultant. Beneficiul său nu constă doar în volumul informațiilor oferite, ci în modul în care acestea sunt corelate și puse în context. O proprietate nu ar trebui analizată exclusiv prin prisma prețului sau a aspectului său, ci prin raportarea simultană la contextul urban, riscurile tehnice, costurile viitoare și potențialul real de utilizare.',
+                    ],
+                    'role' => 'Arhitect',
+                    'name' => 'Andrei P.',
+                ],
+                [
+                    'body' => [
+                        'În arhitectură, cele mai bune decizii sunt cele luate pe baza informațiilor corecte, nu doar a impresiilor de moment. Din acest motiv, consider că un astfel de raport reprezintă un instrument valoros pentru oricine dorește să înțeleagă cu adevărat proprietatea pe care urmează să o cumpere și să reducă riscurile unei decizii luate exclusiv pe criterii emoționale.',
+                    ],
+                    'role' => 'Arhitect',
+                    'name' => 'Vlad M.',
+                ],
+                [
+                    'body' => [
+                        'O idee unică până acum. Lucrez de 13 ani în imobiliare și nu am întâlnit nimic asemănător. Site-ul oferă un raport foarte precis, util atât pentru investitori, cât și pentru clienți, care până acum erau nevoiți să se bazeze pe instinct sau pe opinia agentului imobiliar. Într-o economie aflată într-o continuă schimbare, acest instrument poate deveni un partener de încredere.',
+                    ],
+                    'role' => 'Dezvoltator imobiliar',
+                    'name' => 'Costin Girba',
+                ],
+                [
+                    'body' => [
+                        'Fiecare tip de proprietate vine cu propriul set de riscuri, particularități tehnice și întrebări la care, de cele mai multe ori, cumpărătorul obișnuit nu știe nici măcar că ar trebui să le pună. Exact aceasta este valoarea unui raport de analiză bine structurat: nu trebuie să fii specialist ca să iei o decizie informată.',
+                    ],
+                    'role' => 'Arhitect și designer interior',
+                    'name' => 'Andreea S.',
+                ],
+                [
+                    'body' => [
+                        'În calitate de avocat, apreciez în mod deosebit claritatea, structura și relevanța informațiilor prezentate în acest raport. Documentul GetYourConsultant oferă o imagine completă asupra imobilului analizat și contribuie semnificativ la eficientizarea procesului de verificare și evaluare. Îl consider un instrument util pentru orice persoană care dorește să ia decizii informate în domeniul imobiliar.',
+                    ],
+                    'role' => 'Avocat',
+                    'name' => 'Florin Roșu',
+                ],
+                [
+                    'body' => [
+                        'Din perspectiva pieței, cred că astfel de soluții vor deveni tot mai comune, iar cei care vor folosi astfel de instrumente vor avea un avantaj în procesul de tranzacționare.',
+                    ],
+                    'role' => 'Agent imobiliar',
+                    'name' => 'Daniel M.',
+                ],
+                [
+                    'body' => [
+                        'Ca agent imobiliar, cred că un cumpărător informat ia întotdeauna decizii mai bune. GetYourConsultant oferă o perspectivă utilă asupra pieței și poate ajuta la evaluarea unei proprietăți înainte de achiziție.',
+                    ],
+                    'role' => 'Agent imobiliar',
+                    'name' => 'Andrei Pavel',
+                ],
+                [
+                    'body' => [
+                        'În imobiliare, informația contează. Mi se pare util să existe instrumente care ajută cumpărătorii să analizeze mai bine o proprietate înainte de a lua o decizie.',
+                    ],
+                    'role' => 'Agent imobiliar',
+                    'name' => 'Oana V.',
+                ],
+            ],
+        ]
+        : [
+            'eyebrow' => 'Professional opinions',
+            'title' => 'Recommendations from professionals',
+            'desc' => 'Perspectives from specialists who understand how much context, data, and careful verification matter before a real estate decision.',
+            'items' => [
+                [
+                    'featured' => true,
+                    'body' => [
+                        'GetYourConsultant was created to help buyers and tenants make more informed decisions. The report provides an independent analysis based on data and market indicators, but it does not replace the opinion of a real estate agent, an authorized appraiser, or another specialist. Our goal is to provide clarity, additional information, and time savings before an important decision.',
+                    ],
+                    'role' => 'Founder & CEO, GetYourConsultant',
+                    'name' => 'Cosmin M.',
+                ],
+                [
+                    'body' => [
+                        'Romania’s real estate market is extraordinarily diverse, from charming interwar buildings to new residential complexes or exclusive penthouses. Correctly evaluating each typology involves dozens of criteria that are almost impossible to gather and interpret on your own.',
+                        'This is exactly where a GetYourConsultant report adds value. Its benefit is not only the amount of information provided, but the way that information is correlated and placed in context. A property should not be analyzed only through price or appearance, but also through urban context, technical risks, future costs, and real usability potential.',
+                    ],
+                    'role' => 'Architect',
+                    'name' => 'Andrei P.',
+                ],
+                [
+                    'body' => [
+                        'In architecture, the best decisions are made based on correct information, not just momentary impressions. For this reason, I consider this type of report a valuable tool for anyone who wants to truly understand the property they are about to buy and reduce the risks of a decision made exclusively on emotional criteria.',
+                    ],
+                    'role' => 'Architect',
+                    'name' => 'Vlad M.',
+                ],
+                [
+                    'body' => [
+                        'A unique idea so far. I have worked in real estate for 13 years and have not encountered anything similar. The site provides a very precise report, useful both for investors and for clients, who until now had to rely on instinct or on the opinion of the real estate agent. In an economy that is constantly changing, this tool can become a trusted partner.',
+                    ],
+                    'role' => 'Real estate developer',
+                    'name' => 'Costin Girba',
+                ],
+                [
+                    'body' => [
+                        'Every type of property comes with its own risks, technical particularities, and questions that the average buyer often does not even know they should ask. This is exactly the value of a well-structured analysis report: you do not need to be a specialist to make an informed decision.',
+                    ],
+                    'role' => 'Architect and interior designer',
+                    'name' => 'Andreea S.',
+                ],
+                [
+                    'body' => [
+                        'As a lawyer, I particularly appreciate the clarity, structure, and relevance of the information presented in this report. The GetYourConsultant document provides a complete view of the analyzed property and significantly streamlines the verification and evaluation process. I consider it a useful tool for anyone who wants to make informed decisions in real estate.',
+                    ],
+                    'role' => 'Lawyer',
+                    'name' => 'Florin Roșu',
+                ],
+                [
+                    'body' => [
+                        'From a market perspective, I believe these solutions will become increasingly common, and those who use such tools will have an advantage in the transaction process.',
+                    ],
+                    'role' => 'Real estate agent',
+                    'name' => 'Daniel M.',
+                ],
+                [
+                    'body' => [
+                        'As a real estate agent, I believe an informed buyer always makes better decisions. GetYourConsultant offers a useful perspective on the market and can help evaluate a property before purchase.',
+                    ],
+                    'role' => 'Real estate agent',
+                    'name' => 'Andrei Pavel',
+                ],
+                [
+                    'body' => [
+                        'In real estate, information matters. I find it useful to have tools that help buyers analyze a property better before making a decision.',
+                    ],
+                    'role' => 'Real estate agent',
+                    'name' => 'Oana V.',
+                ],
             ],
         ];
     $formatPrice = static function (array $entry, string $fallback) use ($locale): string {
@@ -126,23 +271,12 @@
                         </p>
 
                         <div class="mt-7 max-w-xl md:mt-8">
-                            <form id="hero-form" action="{{ route('get-report') }}" method="GET" class="w-full">
-                                <div class="flex flex-col gap-0 sm:flex-row sm:items-stretch">
-                                    <input
-                                        id="hero-form-url"
-                                        name="url"
-                                        type="url"
-                                        placeholder="{{ __('landing_hero_url_placeholder') }}"
-                                        class="h-14 border border-brand-primary/12 bg-[#fff] px-5 text-base text-brand-primary shadow-[0_16px_40px_rgba(52,48,106,0.08)] placeholder:text-brand-primary/45 focus:outline-none"
-                                    >
-                                    <button type="submit" class="h-14 cursor-pointer bg-brand-primary px-7 text-[0.98rem] font-semibold text-white shadow-[0_18px_36px_rgba(52,48,106,0.22)] transition-colors hover:bg-brand-primary/92 sm:-ml-px">
-                                        <span class="inline-flex items-center gap-2">
-                                            {{ __('landing_generate_report') }}
-                                            <x-marketing.icon name="arrow-right" class="h-4 w-4" />
-                                        </span>
-                                    </button>
-                                </div>
-                            </form>
+                            <a href="{{ route('get-report') }}" class="inline-flex h-14 cursor-pointer items-center justify-center bg-brand-primary px-7 text-[0.98rem] font-semibold text-white shadow-[0_18px_36px_rgba(52,48,106,0.22)] transition-colors hover:bg-brand-primary/92">
+                                <span class="inline-flex items-center gap-2">
+                                    {{ __('landing_generate_report') }}
+                                    <x-marketing.icon name="arrow-right" class="h-4 w-4" />
+                                </span>
+                            </a>
                         </div>
 
                         <div class="mt-5 flex flex-wrap gap-x-5 gap-y-2 md:mt-6 md:gap-x-6">
@@ -306,6 +440,48 @@
                 </div>
             </section>
 
+            <section id="professional-recommendations" class="relative overflow-hidden border-b solid-divider bg-[linear-gradient(180deg,#fff7ed_0%,#fffaf5_100%)] py-16 md:py-18">
+                <div class="pointer-events-none absolute -right-24 top-0 h-72 w-72 rounded-full bg-[#f3b44f]/18 blur-3xl"></div>
+                <div class="pointer-events-none absolute -left-24 bottom-0 h-64 w-64 rounded-full bg-brand-secondary/8 blur-3xl"></div>
+
+                <div class="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+                        <div class="max-w-3xl">
+                            <h2 class="text-[2rem] leading-[1.04] font-bold tracking-[-0.04em] text-brand-primary md:text-[2.7rem]">{{ $professionalSection['title'] }}</h2>
+                            <p class="mt-3 max-w-2xl text-[14px] leading-[1.6] text-brand-primary/76 md:mt-4 md:text-lg md:leading-[1.74]">{{ $professionalSection['desc'] }}</p>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button type="button" data-professionals-prev aria-label="Previous recommendation" class="flex h-11 w-11 cursor-pointer items-center justify-center border border-[#f3b44f]/30 bg-white text-lg font-semibold text-brand-primary shadow-[0_14px_34px_rgba(52,48,106,0.08)] transition-colors hover:border-[#f3b44f]/55 hover:bg-white/78 disabled:cursor-not-allowed disabled:opacity-40">&lt;</button>
+                            <button type="button" data-professionals-next aria-label="Next recommendation" class="flex h-11 w-11 cursor-pointer items-center justify-center border border-[#f3b44f]/30 bg-white text-lg font-semibold text-brand-primary shadow-[0_14px_34px_rgba(52,48,106,0.08)] transition-colors hover:border-[#f3b44f]/55 hover:bg-white/78 disabled:cursor-not-allowed disabled:opacity-40">&gt;</button>
+                        </div>
+                    </div>
+
+                    <div data-professionals-carousel class="-mx-4 mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto px-4 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] md:mt-10 [&::-webkit-scrollbar]:hidden">
+                        @foreach ($professionalSection['items'] as $recommendation)
+                            @php
+                                $isFeaturedRecommendation = (bool) ($recommendation['featured'] ?? false);
+                            @endphp
+                            <article data-professional-card class="flex min-w-[86%] snap-start flex-col justify-between border border-[#f3b44f]/24 bg-white/92 p-6 text-brand-primary shadow-[0_8px_20px_rgba(52,48,106,0.06)] backdrop-blur-sm sm:min-w-[500px] lg:min-w-[520px] md:p-7">
+                                <div>
+                                    <div class="mb-5 h-1 w-16 bg-[#f3b44f]"></div>
+                                    @foreach ($recommendation['body'] as $paragraph)
+                                        <p class="text-[15px] font-medium leading-[1.72] text-brand-primary/82 md:text-base md:leading-[1.78] {{ $loop->first ? '' : 'mt-4' }}">
+                                            “{{ $paragraph }}”
+                                        </p>
+                                    @endforeach
+                                </div>
+
+                                <div class="mt-6 border-t border-[#f3b44f]/24 pt-4">
+                                    <p class="text-sm font-semibold text-[#b86f12]">{{ $recommendation['role'] }}</p>
+                                    <p class="mt-1 text-lg font-bold tracking-[-0.03em] text-brand-primary">{{ $recommendation['name'] }}</p>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+
             <section id="customer-reviews" class="relative overflow-hidden border-b solid-divider bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)] py-16 md:py-18">
                 <div class="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                     <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
@@ -322,15 +498,19 @@
 
                     <div data-reviews-carousel class="-mx-4 mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto px-4 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] md:mt-10 [&::-webkit-scrollbar]:hidden">
                         @foreach ($testimonialSection['items'] as $review)
+                            @php
+                                $reviewText = is_array($review) ? $review['text'] : $review;
+                                $reviewRating = is_array($review) ? (int) ($review['rating'] ?? 5) : 5;
+                            @endphp
                             <article data-review-card class="flex min-w-[84%] snap-start flex-col justify-between border border-brand-primary/10 bg-white p-6 shadow-[0_8px_20px_rgba(52,48,106,0.06)] sm:min-w-[420px] lg:min-w-[360px]">
                                 <div>
-                                    <div class="mb-5 flex items-center gap-1 text-[#f3b44f]" aria-label="5/5">
-                                        @for ($star = 0; $star < 5; $star++)
-                                            <x-marketing.icon name="star" weight="fill" class="h-4 w-4" />
+                                    <div class="mb-5 flex items-center gap-1" aria-label="{{ $reviewRating }}/5">
+                                        @for ($star = 1; $star <= 5; $star++)
+                                            <x-marketing.icon name="star" weight="fill" class="h-4 w-4 {{ $star <= $reviewRating ? 'text-[#f3b44f]' : 'text-brand-primary/16' }}" />
                                         @endfor
                                     </div>
                                     <p class="text-[16px] font-semibold leading-[1.62] tracking-[-0.015em] text-brand-primary md:text-[17px]">
-                                        “{{ $review }}”
+                                        “{{ $reviewText }}”
                                     </p>
                                 </div>
                             </article>
@@ -433,45 +613,50 @@
     </section>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const carousel = document.querySelector('[data-reviews-carousel]');
-            const previousButton = document.querySelector('[data-reviews-prev]');
-            const nextButton = document.querySelector('[data-reviews-next]');
+            const setupCarousel = (carouselSelector, cardSelector, previousSelector, nextSelector) => {
+                const carousel = document.querySelector(carouselSelector);
+                const previousButton = document.querySelector(previousSelector);
+                const nextButton = document.querySelector(nextSelector);
 
-            if (!carousel || !previousButton || !nextButton) {
-                return;
-            }
-
-            const getStep = () => {
-                const card = carousel.querySelector('[data-review-card]');
-
-                if (!card) {
-                    return carousel.clientWidth;
+                if (!carousel || !previousButton || !nextButton) {
+                    return;
                 }
 
-                const style = window.getComputedStyle(carousel);
-                const gap = parseFloat(style.columnGap || style.gap || '0');
+                const getStep = () => {
+                    const card = carousel.querySelector(cardSelector);
 
-                return card.getBoundingClientRect().width + gap;
+                    if (!card) {
+                        return carousel.clientWidth;
+                    }
+
+                    const style = window.getComputedStyle(carousel);
+                    const gap = parseFloat(style.columnGap || style.gap || '0');
+
+                    return card.getBoundingClientRect().width + gap;
+                };
+
+                const updateButtons = () => {
+                    const maxScroll = carousel.scrollWidth - carousel.clientWidth - 4;
+
+                    previousButton.disabled = carousel.scrollLeft <= 4;
+                    nextButton.disabled = carousel.scrollLeft >= maxScroll;
+                };
+
+                previousButton.addEventListener('click', () => {
+                    carousel.scrollBy({ left: -getStep(), behavior: 'smooth' });
+                });
+
+                nextButton.addEventListener('click', () => {
+                    carousel.scrollBy({ left: getStep(), behavior: 'smooth' });
+                });
+
+                carousel.addEventListener('scroll', updateButtons, { passive: true });
+                window.addEventListener('resize', updateButtons);
+                updateButtons();
             };
 
-            const updateButtons = () => {
-                const maxScroll = carousel.scrollWidth - carousel.clientWidth - 4;
-
-                previousButton.disabled = carousel.scrollLeft <= 4;
-                nextButton.disabled = carousel.scrollLeft >= maxScroll;
-            };
-
-            previousButton.addEventListener('click', () => {
-                carousel.scrollBy({ left: -getStep(), behavior: 'smooth' });
-            });
-
-            nextButton.addEventListener('click', () => {
-                carousel.scrollBy({ left: getStep(), behavior: 'smooth' });
-            });
-
-            carousel.addEventListener('scroll', updateButtons, { passive: true });
-            window.addEventListener('resize', updateButtons);
-            updateButtons();
+            setupCarousel('[data-professionals-carousel]', '[data-professional-card]', '[data-professionals-prev]', '[data-professionals-next]');
+            setupCarousel('[data-reviews-carousel]', '[data-review-card]', '[data-reviews-prev]', '[data-reviews-next]');
         });
     </script>
 </x-layouts.public-marketing>

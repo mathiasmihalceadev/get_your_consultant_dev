@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PublicReportController::class, 'landing'])->name('home');
+Route::get('/despre-noi', [PublicReportController::class, 'about'])->name('about');
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::get('/get-report', [PublicReportController::class, 'index'])->name('get-report');
 Route::get('/submit-url', [PublicReportController::class, 'showUrlForm'])->name('submit-url');
@@ -59,7 +60,7 @@ Route::get('/locale-test', function (Request $request) {
 Route::get('/sitemap.xml', function () {
     abort_unless(config('seo.indexing'), 404);
 
-    $paths = ['/', '/contact', '/get-report', '/privacy-policy', '/terms-and-conditions', '/cookie-policy'];
+    $paths = ['/', '/despre-noi', '/contact', '/get-report', '/privacy-policy', '/terms-and-conditions', '/cookie-policy'];
     $urls = collect(LocalizedUrl::publicLocales())
         ->flatMap(fn (string $locale) => collect($paths)->map(fn (string $path) => LocalizedUrl::urlForLocale($locale, $path)))
         ->all();
