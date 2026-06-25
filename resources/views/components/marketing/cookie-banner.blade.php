@@ -152,8 +152,37 @@
         var previousOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
 
+        function updateGoogleConsentFromForm(form) {
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = window.gtag || function () {
+                window.dataLayer.push(arguments);
+            };
+
+            var consentInput = form.querySelector('input[name="consent"]');
+            var acceptsAll = consentInput && consentInput.value === 'accepted';
+            var hasPreference = function (name) {
+                var input = form.querySelector('input[type="checkbox"][name="preferences[' + name + ']"]');
+
+                return acceptsAll || Boolean(input && input.checked);
+            };
+            var statisticsConsent = hasPreference('statistics');
+            var marketingConsent = hasPreference('marketing');
+            var preferencesConsent = hasPreference('preferences');
+
+            window.gtag('consent', 'update', {
+                ad_storage: marketingConsent ? 'granted' : 'denied',
+                ad_user_data: marketingConsent ? 'granted' : 'denied',
+                ad_personalization: marketingConsent ? 'granted' : 'denied',
+                analytics_storage: statisticsConsent ? 'granted' : 'denied',
+                functionality_storage: preferencesConsent ? 'granted' : 'denied',
+                personalization_storage: preferencesConsent ? 'granted' : 'denied',
+                security_storage: 'granted'
+            });
+        }
+
         modal.querySelectorAll('form').forEach(function (form) {
             form.addEventListener('submit', function () {
+                updateGoogleConsentFromForm(form);
                 document.body.style.overflow = previousOverflow;
             });
         });
