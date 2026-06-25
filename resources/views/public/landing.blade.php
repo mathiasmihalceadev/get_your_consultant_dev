@@ -67,12 +67,12 @@
             'previous' => 'Review-ul anterior',
             'next' => 'Review-ul următor',
             'items' => [
-                ['text' => 'Am economisit aproape 20.000 € cu ajutorul raportului. Eram foarte aproape să plătesc prea mult pentru o proprietate supraevaluată.', 'rating' => 5],
-                ['text' => 'Simplu, rapid și ușor de înțeles. A meritat.', 'rating' => 5],
-                ['text' => 'Am cumpărat 5 rapoarte până acum. M-au ajutat să iau decizia corectă. Două proprietăți le-am eliminat din start, pentru că nu luasem în calcul multe riscuri.', 'rating' => 5],
-                ['text' => 'Simplu, clar și direct. Fără interese ascunse, fără presiune. O analiză rece și obiectivă. Exact ce aveam nevoie.', 'rating' => 5],
-                ['text' => 'Am fost încântată. Am descoperit foarte multe informații la care nici nu mă gândisem. Acum știu mult mai bine la ce să fiu atentă.', 'rating' => 4],
-                ['text' => 'De când am descoperit raportul, încă nu am cumpărat nimic… la toate găsesc câte un defect. 😅 Dar măcar știu că nu mă grăbesc și iau o decizie informată.', 'rating' => 5],
+                ['text' => 'Raportul m-a ajutat să-mi dau seama că proprietatea era supraevaluată. Eram foarte aproape să plătesc cu aproape 20.000 € mai mult decât ar fi avut sens.', 'rating' => 5],
+                ['text' => 'Mi s-a părut simplu, rapid și ușor de urmărit. Pentru mine, a meritat.', 'rating' => 5],
+                ['text' => 'Am cumpărat 5 rapoarte până acum și m-au ajutat să filtrez mult mai bine opțiunile. La două proprietăți am renunțat imediat, pentru că raportul mi-a arătat riscuri la care nu mă gândisem.', 'rating' => 5],
+                ['text' => 'Mi-a plăcut că este clar și direct. Nu am simțit presiune sau interese ascunse, ci o analiză rece, obiectivă, exact cum aveam nevoie.', 'rating' => 5],
+                ['text' => 'Am descoperit multe lucruri la care sincer nu mă gândisem. Acum mă uit altfel la o proprietate și știu mai bine ce întrebări să pun.', 'rating' => 4],
+                ['text' => 'De când am descoperit raportul, încă nu am cumpărat nimic, pentru că la fiecare proprietate găsesc câte ceva de verificat. 😅 Dar prefer să nu mă grăbesc și să iau o decizie informată.', 'rating' => 5],
             ],
         ]
         : [
@@ -82,12 +82,12 @@
             'previous' => 'Previous review',
             'next' => 'Next review',
             'items' => [
-                ['text' => 'I saved almost €20,000 with the help of the report. I was very close to paying too much for an overvalued property.', 'rating' => 5],
-                ['text' => 'Simple, fast and easy to understand. It was worth it.', 'rating' => 5],
-                ['text' => 'I have bought 5 reports so far. They helped me make the right decision. I eliminated two properties from the start because I had not considered many risks.', 'rating' => 5],
-                ['text' => 'Simple, clear and direct. No hidden interests, no pressure. A cold and objective analysis. Exactly what I needed.', 'rating' => 5],
-                ['text' => 'I was delighted. I discovered a lot of information I had not even thought about. Now I know much better what to pay attention to.', 'rating' => 4],
-                ['text' => 'Since discovering the report, I still have not bought anything… I find a flaw in every property. 😅 But at least I know I am not rushing and I am making an informed decision.', 'rating' => 5],
+                ['text' => 'The report helped me realize the property was overvalued. I was very close to paying almost €20,000 more than made sense.', 'rating' => 5],
+                ['text' => 'It felt simple, fast, and easy to follow. For me, it was worth it.', 'rating' => 5],
+                ['text' => 'I have bought 5 reports so far, and they helped me filter my options much better. I dropped two properties right away because the report showed risks I had not considered.', 'rating' => 5],
+                ['text' => 'I liked that it was clear and direct. I did not feel any pressure or hidden interests, just a cold, objective analysis, exactly what I needed.', 'rating' => 5],
+                ['text' => 'I discovered a lot of things I honestly had not thought about. Now I look at properties differently and know better what questions to ask.', 'rating' => 4],
+                ['text' => 'Since discovering the report, I still have not bought anything because I keep finding something to check in every property. 😅 But I would rather not rush and make an informed decision.', 'rating' => 5],
             ],
         ];
     $professionalSection = $locale === 'ro'
@@ -457,19 +457,41 @@
                         </div>
                     </div>
 
-                    <div data-professionals-carousel class="-mx-4 mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto px-4 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] md:mt-10 [&::-webkit-scrollbar]:hidden">
+                    <div data-professionals-carousel class="-mx-4 mt-8 flex snap-x snap-mandatory items-start gap-6 overflow-x-auto px-4 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] md:mt-10 [&::-webkit-scrollbar]:hidden">
                         @foreach ($professionalSection['items'] as $recommendation)
                             @php
                                 $isFeaturedRecommendation = (bool) ($recommendation['featured'] ?? false);
+                                $isCollapsibleRecommendation = $loop->iteration === 2;
                             @endphp
                             <article data-professional-card class="flex min-w-[86%] snap-start flex-col justify-between border border-[#f3b44f]/24 bg-white/92 p-6 text-brand-primary shadow-[0_8px_20px_rgba(52,48,106,0.06)] backdrop-blur-sm sm:min-w-[500px] lg:min-w-[520px] md:p-7">
                                 <div>
                                     <div class="mb-5 h-1 w-16 bg-[#f3b44f]"></div>
-                                    @foreach ($recommendation['body'] as $paragraph)
-                                        <p class="text-[15px] font-medium leading-[1.72] text-brand-primary/82 md:text-base md:leading-[1.78] {{ $loop->first ? '' : 'mt-4' }}">
-                                            “{{ $paragraph }}”
-                                        </p>
-                                    @endforeach
+                                    @if ($isCollapsibleRecommendation)
+                                        <div data-expandable-recommendation>
+                                            <p class="text-[15px] font-medium leading-[1.72] text-brand-primary/82 md:text-base md:leading-[1.78]">
+                                                “{{ $recommendation['body'][0] }}”
+                                            </p>
+                                            <div data-expandable-recommendation-content class="hidden">
+                                                @foreach (array_slice($recommendation['body'], 1) as $paragraph)
+                                                    <p class="mt-4 text-[15px] font-medium leading-[1.72] text-brand-primary/82 md:text-base md:leading-[1.78]">
+                                                        “{{ $paragraph }}”
+                                                    </p>
+                                                @endforeach
+                                            </div>
+                                            @if (count($recommendation['body']) > 1)
+                                                <button type="button" data-expandable-recommendation-toggle aria-expanded="false" class="mt-4 inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-[#b86f12] transition-colors hover:text-brand-primary">
+                                                    <span data-expandable-recommendation-label>Mai mult</span>
+                                                    <span data-expandable-recommendation-icon class="text-lg leading-none transition-transform">↓</span>
+                                                </button>
+                                            @endif
+                                        </div>
+                                    @else
+                                        @foreach ($recommendation['body'] as $paragraph)
+                                            <p class="text-[15px] font-medium leading-[1.72] text-brand-primary/82 md:text-base md:leading-[1.78] {{ $loop->first ? '' : 'mt-4' }}">
+                                                “{{ $paragraph }}”
+                                            </p>
+                                        @endforeach
+                                    @endif
                                 </div>
 
                                 <div class="mt-6 border-t border-[#f3b44f]/24 pt-4">
@@ -657,6 +679,32 @@
 
             setupCarousel('[data-professionals-carousel]', '[data-professional-card]', '[data-professionals-prev]', '[data-professionals-next]');
             setupCarousel('[data-reviews-carousel]', '[data-review-card]', '[data-reviews-prev]', '[data-reviews-next]');
+
+            document.querySelectorAll('[data-expandable-recommendation]').forEach((container) => {
+                const toggle = container.querySelector('[data-expandable-recommendation-toggle]');
+                const content = container.querySelector('[data-expandable-recommendation-content]');
+                const label = container.querySelector('[data-expandable-recommendation-label]');
+                const icon = container.querySelector('[data-expandable-recommendation-icon]');
+
+                if (!toggle || !content) {
+                    return;
+                }
+
+                toggle.addEventListener('click', () => {
+                    const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+
+                    toggle.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+                    content.classList.toggle('hidden', isExpanded);
+
+                    if (label) {
+                        label.textContent = isExpanded ? 'Mai mult' : 'Mai puțin';
+                    }
+
+                    if (icon) {
+                        icon.classList.toggle('rotate-180', !isExpanded);
+                    }
+                });
+            });
         });
     </script>
 </x-layouts.public-marketing>

@@ -34,6 +34,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                   cookies: "/cookie-policy",
               };
     const navItems = [
+        { key: "about", href: localePath("/despre-noi") },
         {
             key: "landing_nav_example",
             href: localePath("/#report-example"),
