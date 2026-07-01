@@ -24,8 +24,13 @@ import { ReportType } from "@/types";
 
 type LandingIcon = ComponentType<any>;
 
+type LandingPricingReportType = Extract<
+    ReportType,
+    "buying_living" | "rental_living"
+>;
+
 type PricingOption = {
-    type: ReportType;
+    type: LandingPricingReportType;
     labelKey: string;
     priceKey: string;
     imageSrc: string;
@@ -142,6 +147,53 @@ const pricingOptions: PricingOption[] = [
         ],
     },
 ];
+
+const mediaAppearances = [
+    {
+        name: "Libertatea",
+        imageSrc: "/images/libertatea.svg",
+        url: "https://www.libertatea.ro/publicitate-advertorial/revolutia-tacuta-din-imobiliare-deciziile-bazate-pe-date-incep-sa-inlocuiasca-estimarile-si-perceptiile-5799503",
+    },
+    {
+        name: "Jurnalul",
+        imageSrc: "/images/jurnalul.png",
+        url: "https://jurnalul.ro/continut-platit/revolutia-tacuta-din-imobiliare-deciziile-bazate-pe-date-incep-sa-inlocuiasca-estimarile-si-perceptiile-1037629.html",
+    },
+    {
+        name: "Agerpres",
+        imageSrc: "/images/agerpress.png",
+        url: "https://agerpres.ro/ots/transparenta-incepe-sa-redefineasca-piata-imobiliara-getyourconsultant-lanseaza-un-nou-standard-pent--660976",
+    },
+    {
+        name: "Stirile Imobiliare",
+        imageSrc: "/images/stiri-imobiliare.webp",
+        url: "https://stirileimobiliare.ro/transparenta-incepe-sa-redefineasca-piata-imobiliara-getyourconsultant-lanseaza-un-nou-standard-pentru-analiza-proprietatilor/",
+    },
+    {
+        name: "Tribuna Economica",
+        imageSrc: "/images/tribuna-economica.png",
+        url: "https://tribunaeconomica.ro/transparenta-incepe-sa-redefineasca-piata-imobiliara-getyourconsultant-lanseaza-un-nou-standard-pentru-analiza-proprietatilor/",
+    },
+    {
+        name: "Europa Imobiliare",
+        imageSrc: "/images/europa-imobiliare.png",
+        url: "https://europaimobiliare.ro/2026/06/30/transparenta-incepe-sa-redefineasca-piata-imobiliara-getyourconsultant-lanseaza-un-nou-standard-pentru-analiza-proprietatilor/",
+    },
+] as const;
+
+const landingPromoPrices = {
+    ro: {
+        buying_living: { normal: "27,99 €", launch: "19,99 €" },
+        rental_living: { normal: "17,99 €", launch: "11,99 €" },
+    },
+    en: {
+        buying_living: { normal: "€27.99", launch: "€19.99" },
+        rental_living: { normal: "€17.99", launch: "€11.99" },
+    },
+} satisfies Record<
+    "ro" | "en",
+    Record<LandingPricingReportType, { normal: string; launch: string }>
+>;
 
 const warmGradientSectionClass =
     "border-b solid-divider bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)]";
@@ -543,6 +595,48 @@ export default function Landing({ pricingCatalog }: LandingProps) {
             </motion.section>
 
             <motion.section
+                id="media-appearances"
+                className="border-b solid-divider bg-white py-12 md:py-14"
+                variants={sectionVariants}
+                {...revealMotionProps}
+            >
+                <motion.div
+                    className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8"
+                    variants={containerVariants}
+                >
+                    <motion.div
+                        className="mx-auto max-w-3xl text-center"
+                        variants={itemVariants}
+                    >
+                        <h2 className="text-[2rem] leading-[1.04] font-bold tracking-[-0.04em] text-brand-primary md:text-[2.4rem]">
+                            {t("landing_media_title")}
+                        </h2>
+                    </motion.div>
+
+                    <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:mt-10 lg:grid-cols-6">
+                        {mediaAppearances.map(({ name, imageSrc, url }) => (
+                            <motion.a
+                                key={name}
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={name}
+                                className="group flex min-h-[112px] items-center justify-center border border-brand-primary/10 bg-white px-5 py-6 shadow-[0_10px_24px_rgba(52,48,106,0.06)] transition hover:-translate-y-0.5 hover:border-brand-primary/18 hover:shadow-[0_16px_34px_rgba(52,48,106,0.1)]"
+                                variants={itemVariants}
+                            >
+                                <img
+                                    src={imageSrc}
+                                    alt={name}
+                                    loading="lazy"
+                                    className="max-h-12 max-w-full object-contain opacity-80 grayscale transition group-hover:opacity-100 group-hover:grayscale-0"
+                                />
+                            </motion.a>
+                        ))}
+                    </div>
+                </motion.div>
+            </motion.section>
+
+            <motion.section
                 id="reviews"
                 className="border-b solid-divider bg-white py-10 md:py-12"
                 variants={sectionVariants}
@@ -644,78 +738,100 @@ export default function Landing({ pricingCatalog }: LandingProps) {
                             ({
                                 type,
                                 labelKey,
-                                priceKey,
                                 imageSrc,
                                 imageAltKey,
                                 featureKeys,
-                            }) => (
-                                <motion.div
-                                    key={type}
-                                    className="w-full max-w-[420px] overflow-hidden border border-brand-primary/10 bg-white text-brand-primary shadow-[0_22px_54px_rgba(52,48,106,0.08)]"
-                                    variants={itemVariants}
-                                >
-                                    <div className="relative flex h-72 items-center justify-center overflow-hidden border-b border-brand-primary/10 bg-white p-6 md:h-84 md:p-8">
-                                        <div className="absolute inset-x-10 bottom-5 h-8 rounded-full bg-brand-primary/6 blur-xl" />
-                                        <img
-                                            src={imageSrc}
-                                            alt={t(imageAltKey)}
-                                            className="relative z-10 h-full w-full scale-[1.16] object-contain drop-shadow-[0_10px_18px_rgba(52,48,106,0.08)]"
-                                        />
-                                    </div>
+                            }) => {
+                                const promoPrice =
+                                    landingPromoPrices[
+                                        locale === "ro" ? "ro" : "en"
+                                    ][type];
 
-                                    <div className="px-6 py-6">
-                                        <div className="flex items-start justify-between gap-4">
-                                            <h3 className="text-xl font-semibold text-brand-primary">
-                                                {t(labelKey)}
-                                            </h3>
-                                            <div className="text-right">
-                                                <p className="text-3xl font-bold tracking-[-0.05em] text-brand-primary">
-                                                    {formatCatalogPrice(
-                                                        type,
-                                                        priceKey,
-                                                    )}
-                                                </p>
-                                                <p className="mt-1 text-xs font-semibold text-brand-primary/54">
-                                                    {t(
-                                                        "landing_price_vat_included",
-                                                    )}
-                                                </p>
-                                            </div>
+                                return (
+                                    <motion.div
+                                        key={type}
+                                        className="w-full max-w-[420px] overflow-hidden border border-brand-primary/10 bg-white text-brand-primary shadow-[0_22px_54px_rgba(52,48,106,0.08)]"
+                                        variants={itemVariants}
+                                    >
+                                        <div className="relative flex h-72 items-center justify-center overflow-hidden border-b border-brand-primary/10 bg-white p-6 md:h-84 md:p-8">
+                                            <div className="absolute inset-x-10 bottom-5 h-8 rounded-full bg-brand-primary/6 blur-xl" />
+                                            <img
+                                                src={imageSrc}
+                                                alt={t(imageAltKey)}
+                                                className="relative z-10 h-full w-full scale-[1.16] object-contain drop-shadow-[0_10px_18px_rgba(52,48,106,0.08)]"
+                                            />
                                         </div>
 
-                                        <div className="mt-6 space-y-2">
-                                            {featureKeys.map((featureKey) => (
-                                                <div
-                                                    key={featureKey}
-                                                    className="flex items-start gap-3"
-                                                >
-                                                    <CheckCircle
-                                                        size={18}
-                                                        weight="fill"
-                                                        className="mt-0.5 text-brand-secondary"
-                                                    />
-                                                    <span className="text-[14px] leading-[1.6] text-brand-primary/76 md:text-sm">
-                                                        {t(featureKey)}
-                                                    </span>
+                                        <div className="px-6 py-6">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <h3 className="text-xl font-semibold text-brand-primary">
+                                                    {t(labelKey)}
+                                                </h3>
+                                                <div className="text-right">
+                                                    <p className="text-sm font-semibold text-brand-primary/48">
+                                                        {t(
+                                                            "landing_price_normal_label",
+                                                        )}
+                                                    </p>
+                                                    <p className="mt-1 text-lg font-semibold leading-none text-brand-primary/42 line-through decoration-2 decoration-brand-primary/45">
+                                                        {promoPrice.normal}
+                                                    </p>
+                                                    <p className="mt-3 text-base font-semibold leading-[1.35] text-[#b86f12]">
+                                                        {t(
+                                                            "landing_price_launch_label",
+                                                        )}
+                                                    </p>
+                                                    <p className="mt-1 text-3xl font-bold tracking-[-0.05em] text-brand-primary">
+                                                        {promoPrice.launch}
+                                                    </p>
+                                                    <p className="mt-1 text-xs font-semibold text-brand-primary/54">
+                                                        {t(
+                                                            "landing_price_vat_included",
+                                                        )}
+                                                    </p>
                                                 </div>
-                                            ))}
-                                        </div>
+                                            </div>
 
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                selectTypeFromPage(type)
-                                            }
-                                            className="mt-7 inline-flex cursor-pointer items-center gap-2 bg-brand-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-primary/92"
-                                        >
-                                            {t("landing_pricing_cta")}
-                                            <ArrowRight size={16} />
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            ),
+                                            <div className="mt-6 space-y-2">
+                                                {featureKeys.map(
+                                                    (featureKey) => (
+                                                        <div
+                                                            key={featureKey}
+                                                            className="flex items-start gap-3"
+                                                        >
+                                                            <CheckCircle
+                                                                size={18}
+                                                                weight="fill"
+                                                                className="mt-0.5 text-brand-secondary"
+                                                            />
+                                                            <span className="text-[14px] leading-[1.6] text-brand-primary/76 md:text-sm">
+                                                                {t(featureKey)}
+                                                            </span>
+                                                        </div>
+                                                    ),
+                                                )}
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    selectTypeFromPage(type)
+                                                }
+                                                className="mt-7 inline-flex cursor-pointer items-center gap-2 bg-brand-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-primary/92"
+                                            >
+                                                {t("landing_pricing_cta")}
+                                                <ArrowRight size={16} />
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                );
+                            },
                         )}
                     </div>
+
+                    <p className="mt-5 text-center text-[13px] font-semibold text-brand-primary/60 md:text-sm">
+                        {t("landing_price_campaign_note")}
+                    </p>
                 </motion.div>
             </motion.section>
 
