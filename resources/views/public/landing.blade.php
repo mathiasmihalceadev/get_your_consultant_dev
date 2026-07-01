@@ -57,6 +57,49 @@
         ],
     ];
 
+    $mediaAppearances = [
+        [
+            'name' => 'Libertatea',
+            'image' => asset('images/libertatea.svg'),
+            'url' => 'https://www.libertatea.ro/publicitate-advertorial/revolutia-tacuta-din-imobiliare-deciziile-bazate-pe-date-incep-sa-inlocuiasca-estimarile-si-perceptiile-5799503',
+        ],
+        [
+            'name' => 'Jurnalul',
+            'image' => asset('images/jurnalul.png'),
+            'url' => 'https://jurnalul.ro/continut-platit/revolutia-tacuta-din-imobiliare-deciziile-bazate-pe-date-incep-sa-inlocuiasca-estimarile-si-perceptiile-1037629.html',
+        ],
+        [
+            'name' => 'Agerpres',
+            'image' => asset('images/agerpress.png'),
+            'url' => 'https://agerpres.ro/ots/transparenta-incepe-sa-redefineasca-piata-imobiliara-getyourconsultant-lanseaza-un-nou-standard-pent--660976',
+        ],
+        [
+            'name' => 'Stirile Imobiliare',
+            'image' => asset('images/stiri-imobiliare.webp'),
+            'url' => 'https://stirileimobiliare.ro/transparenta-incepe-sa-redefineasca-piata-imobiliara-getyourconsultant-lanseaza-un-nou-standard-pentru-analiza-proprietatilor/',
+        ],
+        [
+            'name' => 'Tribuna Economica',
+            'image' => asset('images/tribuna-economica.png'),
+            'url' => 'https://tribunaeconomica.ro/transparenta-incepe-sa-redefineasca-piata-imobiliara-getyourconsultant-lanseaza-un-nou-standard-pentru-analiza-proprietatilor/',
+        ],
+        [
+            'name' => 'Europa Imobiliare',
+            'image' => asset('images/europa-imobiliare.png'),
+            'url' => 'https://europaimobiliare.ro/2026/06/30/transparenta-incepe-sa-redefineasca-piata-imobiliara-getyourconsultant-lanseaza-un-nou-standard-pentru-analiza-proprietatilor/',
+        ],
+    ];
+
+    $landingPromoPrices = $locale === 'ro'
+        ? [
+            'buying_living' => ['normal' => '27,99 €', 'launch' => '19,99 €'],
+            'rental_living' => ['normal' => '17,99 €', 'launch' => '11,99 €'],
+        ]
+        : [
+            'buying_living' => ['normal' => '€27.99', 'launch' => '€19.99'],
+            'rental_living' => ['normal' => '€17.99', 'launch' => '€11.99'],
+        ];
+
     $buyingSampleReportHref = asset($locale === 'ro' ? 'images/report-example-ro.pdf' : 'images/report-example-en.pdf');
     $rentalSampleReportHref = asset($locale === 'ro' ? 'images/report-example-rental-ro.pdf' : 'images/report-example-rental-en.pdf');
     $testimonialSection = $locale === 'ro'
@@ -263,7 +306,7 @@
 
                 <div class="relative mx-auto grid max-w-6xl gap-12 px-4 py-14 sm:px-6 md:py-18 lg:grid-cols-[minmax(0,0.98fr)_minmax(360px,0.92fr)] lg:items-center lg:px-8">
                     <div class="max-w-2xl">
-                        <h1 class="text-[2.45rem] leading-[0.98] font-extrabold tracking-[-0.05em] text-brand-primary md:text-[3.7rem] md:leading-[0.95]">
+                        <h1 class="text-[2.45rem] leading-[0.98] font-bold tracking-[-0.05em] text-brand-primary md:text-[3.7rem] md:leading-[0.95]">
                             {{ __('landing_hero_title_1') }}
                         </h1>
                         <p class="mt-4 max-w-xl text-[14px] leading-[1.6] text-brand-primary/82 md:mt-5 md:text-[1.05rem] md:leading-[1.72]">
@@ -400,6 +443,22 @@
                                     <p class="mt-2 text-[14px] leading-[1.6] text-brand-primary/76 md:mt-3 md:text-[1rem] md:leading-[1.7]">{{ $card['body'] }}</p>
                                 </div>
                             </div>
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+
+            <section id="media-appearances" class=" bg-white py-12 md:py-14">
+                <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                    <div class="mx-auto max-w-3xl text-center">
+                        <h2 class="text-[2rem] leading-[1.04] font-bold tracking-[-0.04em] text-brand-primary md:text-[2.4rem]">{{ __('landing_media_title') }}</h2>
+                    </div>
+
+                    <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:mt-10 lg:grid-cols-6">
+                        @foreach ($mediaAppearances as $appearance)
+                            <a href="{{ $appearance['url'] }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $appearance['name'] }}" class="group flex min-h-[112px] items-center justify-center border border-brand-primary/10 bg-white px-5 py-6 shadow-[0_10px_24px_rgba(52,48,106,0.06)] transition hover:-translate-y-0.5 hover:border-brand-primary/18 hover:shadow-[0_16px_34px_rgba(52,48,106,0.1)]">
+                                <img src="{{ $appearance['image'] }}" alt="{{ $appearance['name'] }}" loading="lazy" class="max-h-12 max-w-full object-contain opacity-80 grayscale transition group-hover:opacity-100 group-hover:grayscale-0">
+                            </a>
                         @endforeach
                     </div>
                 </div>
@@ -552,6 +611,9 @@
 
                     <div class="mt-10 flex flex-col items-center gap-5 lg:flex-row lg:justify-center">
                         @foreach ($pricingOptions as $option)
+                            @php
+                                $promoPrice = $landingPromoPrices[$option['type']];
+                            @endphp
                             <div class="w-full max-w-[420px] overflow-hidden border border-brand-primary/10 bg-white text-brand-primary shadow-[0_22px_54px_rgba(52,48,106,0.08)]">
                                 <div class="relative flex h-72 items-center justify-center overflow-hidden border-b border-brand-primary/10 bg-white p-6 md:h-84 md:p-8">
                                     <div class="absolute inset-x-10 bottom-5 h-8 rounded-full bg-brand-primary/6 blur-xl"></div>
@@ -562,8 +624,13 @@
                                     <div class="flex items-start justify-between gap-4">
                                         <h3 class="text-xl font-semibold text-brand-primary">{{ $option['label'] }}</h3>
                                         <div class="text-right">
-                                            <p class="text-3xl font-bold tracking-[-0.05em] text-brand-primary">
-                                                {{ $formatPrice($pricingCatalog[$option['type']] ?? [], $option['fallback_price']) }}
+                                            <p class="text-sm font-semibold text-brand-primary/48">{{ __('landing_price_normal_label') }}</p>
+                                            <p class="mt-1 text-lg font-semibold leading-none text-brand-primary/42 line-through decoration-brand-primary/45 decoration-2">
+                                                {{ $promoPrice['normal'] }}
+                                            </p>
+                                            <p class="mt-3 text-base font-semibold leading-[1.35] text-[#b86f12]">{{ __('landing_price_launch_label') }}</p>
+                                            <p class="mt-1 text-3xl font-bold tracking-[-0.05em] text-brand-primary">
+                                                {{ $promoPrice['launch'] }}
                                             </p>
                                             <p class="mt-1 text-xs font-semibold text-brand-primary/54">{{ __('landing_price_vat_included') }}</p>
                                         </div>
@@ -586,6 +653,10 @@
                             </div>
                         @endforeach
                     </div>
+
+                    <p class="mt-5 text-center text-[13px] font-semibold text-brand-primary/60 md:text-sm">
+                        {{ __('landing_price_campaign_note') }}
+                    </p>
                 </div>
             </section>
 
