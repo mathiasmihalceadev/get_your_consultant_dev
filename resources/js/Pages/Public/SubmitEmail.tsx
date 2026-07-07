@@ -8,7 +8,7 @@ import {
     ShieldCheck,
     FilePdf,
 } from "@phosphor-icons/react";
-import { Report } from "@/types";
+import { Report, ReportType } from "@/types";
 import PublicLayout from "@/Layouts/PublicLayout";
 import WizardLayout from "@/Components/WizardLayout";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -80,10 +80,34 @@ function BlurredReportPreview() {
 
 interface SubmitEmailProps {
     report: Pick<Report, "id" | "url" | "report_type">;
+    pricing: {
+        base_currency: string;
+        base_amount_minor: number;
+        checkout_currency: string;
+        checkout_amount_minor: number;
+    } | null;
     errors: Record<string, string>;
 }
 
-export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
+const campaignRegularPrices = {
+    ro: {
+        buying_living: "27,99 €",
+        rental_living: "17,99 €",
+    },
+    en: {
+        buying_living: "€27.99",
+        rental_living: "€17.99",
+    },
+} satisfies Record<
+    "ro" | "en",
+    Partial<Record<ReportType, string>>
+>;
+
+export default function SubmitEmail({
+    report,
+    pricing,
+    errors,
+}: SubmitEmailProps) {
     const { t, locale, localePath } = useTranslation();
     const [email, setEmail] = useState("");
     const [emailConfirmation, setEmailConfirmation] = useState("");
@@ -91,6 +115,31 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
     const [processing, setProcessing] = useState(false);
     const termsPath =
         locale === "ro" ? "/termeni-si-conditii" : "/terms-and-conditions";
+    const regularPrice =
+        campaignRegularPrices[locale === "ro" ? "ro" : "en"][
+            report.report_type
+        ];
+
+    const formatMoney = (minor: number, currency: string) =>
+        new Intl.NumberFormat(locale === "ro" ? "ro-RO" : "en-IE", {
+            style: "currency",
+            currency: currency.toUpperCase(),
+            currencyDisplay:
+                currency.toLowerCase() === "ron" ? "code" : "narrowSymbol",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(minor / 100);
+
+    const launchPrice = pricing
+        ? formatMoney(pricing.base_amount_minor, pricing.base_currency)
+        : null;
+    const checkoutPrice = pricing
+        ? formatMoney(pricing.checkout_amount_minor, pricing.checkout_currency)
+        : null;
+    const showCheckoutCurrency =
+        pricing &&
+        pricing.checkout_currency.toLowerCase() !==
+            pricing.base_currency.toLowerCase();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -242,6 +291,47 @@ export default function SubmitEmail({ report, errors }: SubmitEmailProps) {
                                 )
                             )}
                         </div>
+
+                        {pricing && launchPrice && (
+                            <div className="border border-brand-primary/10 bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)] px-5 py-4 text-brand-primary shadow-[0_12px_30px_rgba(52,48,106,0.07)]">
+                                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                                    <div>
+                                        <p className="text-sm font-semibold text-brand-primary/52">
+                                            {t("landing_price_normal_label")}
+                                        </p>
+                                        {regularPrice && (
+                                            <p className="mt-1 text-lg font-semibold leading-none text-brand-primary/42 line-through decoration-2 decoration-brand-primary/45">
+                                                {regularPrice}
+                                            </p>
+                                        )}
+                                        <p className="mt-3 text-base font-semibold leading-[1.35] text-[#b86f12]">
+                                            {t("landing_price_launch_label")}
+                                        </p>
+                                    </div>
+
+                                    <div className="sm:text-right">
+                                        <p className="text-3xl font-bold tracking-[-0.05em] text-brand-primary">
+                                            {launchPrice}
+                                        </p>
+                                        <p className="mt-1 text-xs font-semibold text-brand-primary/54">
+                                            {t("landing_price_vat_included")}
+                                        </p>
+                                        {showCheckoutCurrency && (
+                                            <p className="mt-2 text-[13px] font-semibold text-brand-primary/62">
+                                                {t(
+                                                    "submit_email_checkout_amount_label",
+                                                )}
+                                                : {checkoutPrice}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <p className="mt-3 text-[13px] font-semibold text-brand-primary/60">
+                                    {t("landing_price_campaign_note")}
+                                </p>
+                            </div>
+                        )}
 
                         <div>
                             <label className="flex cursor-pointer items-start gap-3 border border-brand-primary/10 bg-brand-primary/3 px-4 py-3 text-sm leading-6 text-brand-primary/76">

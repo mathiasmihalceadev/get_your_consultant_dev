@@ -248,7 +248,7 @@ class PublicReportController extends Controller
         return redirect()->route('submit-email');
     }
 
-    public function showEmailForm()
+    public function showEmailForm(Request $request, ReportPricingService $pricing)
     {
         $reportId = session('report_id');
 
@@ -262,12 +262,15 @@ class PublicReportController extends Controller
             return redirect()->route('home');
         }
 
+        $pricingCatalog = $pricing->catalogForRequest(app()->getLocale(), $request);
+
         return Inertia::render('Public/SubmitEmail', [
             'report' => [
                 'id' => $report->id,
                 'url' => $report->url,
                 'report_type' => $report->report_type,
             ],
+            'pricing' => $pricingCatalog[$report->report_type] ?? null,
         ]);
     }
 

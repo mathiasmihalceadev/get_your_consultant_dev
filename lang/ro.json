@@ -100,6 +100,7 @@
     "get_my_report": "Obține Raportul",
     "continue_to_payment": "Continuă către plată",
     "payment_checkout_note": "Vei fi redirecționat către Stripe. Generarea raportului începe numai după confirmarea plății.",
+    "submit_email_checkout_amount_label": "În checkout",
     "payment_unavailable": "Nu am putut deschide pagina de plată momentan. Încearcă din nou.",
     "payment_retry_unavailable": "Acest raport nu mai așteaptă o plată.",
     "payment_return_success": "Plata finalizată cu succes.",

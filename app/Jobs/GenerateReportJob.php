@@ -4,9 +4,9 @@ namespace App\Jobs;
 
 use App\Exceptions\OpenAIJsonException;
 use App\Exceptions\OpenAIRequestException;
-use App\Mail\ReportMail;
 use App\Models\Report;
 use App\Models\Settings;
+use App\Services\AutomaticReportDeliveryService;
 use App\Services\OpenAIService;
 use App\Services\ReportReadyNotificationService;
 use App\Services\RemotePdfRenderer;
@@ -17,7 +17,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class GenerateReportJob implements ShouldQueue
 {
@@ -33,6 +32,7 @@ class GenerateReportJob implements ShouldQueue
         OpenAIService $openAI,
         RemotePdfRenderer $pdfRenderer,
         ReportReadyNotificationService $reportReadyNotifications,
+        AutomaticReportDeliveryService $automaticReportDelivery,
     ): void
     {
         $report = Report::find($this->reportId);
@@ -105,8 +105,9 @@ class GenerateReportJob implements ShouldQueue
             'path' => $report->report_url,
         ]);
 
-        if (Settings::get('auto_send')) {
-            Mail::to($report->email)->send(new ReportMail($report));
+        $autoSendEnabled = Settings::get('auto_send');
+
+        if ($autoSendEnabled && $automaticReportDelivery->sendOrFallback($report)) {
             $report->status = 'sent';
         } else {
             $report->status = 'to_be_sent';
@@ -114,7 +115,7 @@ class GenerateReportJob implements ShouldQueue
 
         $report->save();
 
-        if ($report->status === 'to_be_sent') {
+        if ($report->status === 'to_be_sent' && !$autoSendEnabled) {
             $reportReadyNotifications->send($report);
         }
 
@@ -186,4 +187,3 @@ class GenerateReportJob implements ShouldQueue
             . "- If the chart id is total_acquisition_cost, every data.segments[].label must be a single word. Use labels like: {$oneWordExamples}.\n";
     }
 }
-
