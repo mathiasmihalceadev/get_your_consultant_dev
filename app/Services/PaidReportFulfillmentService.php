@@ -3,14 +3,17 @@
 namespace App\Services;
 
 use App\Jobs\GenerateReportJob;
-use App\Mail\ReportMail;
 use App\Models\Report;
 use App\Models\Settings;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class PaidReportFulfillmentService
 {
+    public function __construct(
+        private readonly AutomaticReportDeliveryService $automaticReportDelivery,
+    ) {
+    }
+
     public function fulfill(Report $report): void
     {
         if (in_array($report->status, ['pending', 'to_be_sent', 'sent'], true)) {
@@ -41,7 +44,9 @@ class PaidReportFulfillmentService
             ]);
 
             if (Settings::get('auto_send')) {
-                Mail::to($report->email)->send(new ReportMail($report));
+                if (!$this->automaticReportDelivery->sendOrFallback($report)) {
+                    return;
+                }
 
                 $report->update([
                     'status' => 'sent',

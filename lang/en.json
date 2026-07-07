@@ -99,6 +99,7 @@
     "get_my_report": "Get My Report",
     "continue_to_payment": "Continue to payment",
     "payment_checkout_note": "You will be redirected to Stripe. Report generation starts only after the payment is confirmed.",
+    "submit_email_checkout_amount_label": "At checkout",
     "payment_unavailable": "We couldn't open the payment page right now. Please try again.",
     "payment_retry_unavailable": "This report is not waiting for a payment.",
     "payment_return_success": "Payment completed successfully.",
