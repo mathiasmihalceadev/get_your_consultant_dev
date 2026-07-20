@@ -90,6 +90,120 @@
         ],
     ];
 
+    $faqItems = [
+        [
+            'question' => 'Ce este GetYourConsultant?',
+            'paragraphs' => [
+                'GetYourConsultant este o platformă care analizează date publice despre o proprietate și generează un raport informativ pentru a te ajuta să iei o decizie mai bine fundamentată.',
+            ],
+        ],
+        [
+            'question' => 'Înlocuiește un agent imobiliar?',
+            'paragraphs' => [
+                'Nu. Raportul completează informațiile oferite de agentul imobiliar și adaugă o analiză bazată pe date și indicatori obiectivi.',
+            ],
+        ],
+        [
+            'question' => 'Înlocuiește un evaluator ANEVAR?',
+            'paragraphs' => [
+                'Nu. Raportul nu reprezintă o evaluare autorizată și nu poate înlocui un raport întocmit de un evaluator acreditat.',
+            ],
+        ],
+        [
+            'question' => 'Înlocuiește un avocat?',
+            'paragraphs' => [
+                'Nu. Pentru verificările juridice recomandăm consultarea unui avocat specializat în tranzacții imobiliare.',
+            ],
+        ],
+        [
+            'question' => 'De unde provin informațiile?',
+            'paragraphs' => [
+                'Analiza se bazează exclusiv pe informații disponibile public. Datele sursă nu sunt modificate sau influențate de GetYourConsultant. Noi le centralizăm, le analizăm și le transformăm într-o analiză clară și obiectivă, pentru a sprijini o decizie mai bine informată.',
+            ],
+        ],
+        [
+            'question' => 'Cât durează generarea raportului? Valabilitate',
+            'paragraphs' => [
+                'În cele mai multe cazuri, raportul este disponibil în doar câteva minute și are o valabilitate de 30 zile.',
+            ],
+        ],
+        [
+            'question' => 'Pentru cine este util raportul?',
+            'paragraphs' => [
+                'Pentru cumpărători, chiriași, investitori, dezvoltatori imobiliari și chiar agenți imobiliari care doresc să ofere un plus de transparență clienților.',
+            ],
+        ],
+        [
+            'question' => 'De ce să cumpăr raportul?',
+            'paragraphs' => [
+                'Pentru că o decizie informată poate însemna economie de timp, bani și evitarea unor surprize neplăcute.',
+            ],
+        ],
+        [
+            'question' => 'Ce conține raportul?',
+            'paragraphs' => [
+                'Raportul include:',
+            ],
+            'items' => [
+                'estimarea valorii proprietății',
+                'evoluția prețurilor în zonă pentru proprietăți comparabile',
+                'analiza zonei',
+                'calitatea aerului',
+                'indicatori relevanți',
+                'riscuri identificate',
+                'concluzii',
+            ],
+        ],
+        [
+            'question' => 'Care este sursa datelor?',
+            'paragraphs' => [
+                'GetYourConsultant utilizează informații disponibile public din surse oficiale și relevante, în conformitate cu termenii și condițiile de utilizare aplicabile fiecărei surse.',
+                'În funcție de proprietatea analizată și de disponibilitatea datelor, acestea pot include:',
+            ],
+            'items' => [
+                'Eurostat',
+                'Institutul Național de Statistică (INS)',
+                'ANCPI, unde sunt disponibile date publice',
+                'Google Maps Platform',
+                'OpenStreetMap',
+                'platforme publice de anunțuri imobiliare',
+                'alte baze de date și surse publice relevante',
+            ],
+            'closing' => 'Datele sursă nu sunt modificate de GetYourConsultant. Rolul nostru este să le centralizăm, să le analizăm și să le prezentăm într-un raport clar și obiectiv, pentru a sprijini o decizie mai bine informată.',
+        ],
+        [
+            'question' => 'De ce pot avea încredere în GetYourConsultant?',
+            'paragraphs' => [
+                'GetYourConsultant nu reprezintă interesele cumpărătorului, ale vânzătorului sau ale unei agenții. Scopul nostru este să oferim transparență și informații care să sprijine luarea unei decizii.',
+            ],
+        ],
+        [
+            'question' => 'Raportul favorizează cumpărătorul sau vânzătorul?',
+            'paragraphs' => [
+                'Nu. Analiza este independentă și are rolul de a oferi o imagine cât mai obiectivă asupra proprietății.',
+            ],
+        ],
+        [
+            'question' => 'Colaborați cu agenții imobiliari?',
+            'paragraphs' => [
+                'Da. Considerăm că agenții imobiliari, dezvoltatorii, arhitecții și avocații au un rol esențial în procesul unei tranzacții. GetYourConsultant completează activitatea acestora printr-o analiză bazată pe date și transparență.',
+            ],
+        ],
+        [
+            'question' => 'Care este scopul GetYourConsultant?',
+            'paragraphs' => [
+                'Credem că fiecare persoană merită acces la informații clare și transparente înainte de a cumpăra sau închiria o proprietate. Misiunea noastră este să transformăm datele publice într-o analiză ușor de înțeles, care să sprijine decizii mai bine informate.',
+            ],
+        ],
+        [
+            'question' => 'De ce să plătesc pentru un raport dacă pot găsi unele informații gratuit pe internet?',
+            'paragraphs' => [
+                'Multe dintre informațiile utilizate în raport sunt disponibile din surse publice, însă sunt răspândite pe numeroase site-uri și baze de date. De cele mai multe ori, oamenii nu știu unde să le caute, cum să le verifice sau cum să le interpreteze corect.',
+                'GetYourConsultant centralizează și analizează aceste informații într-un singur raport clar și ușor de înțeles, economisindu-ți ore de documentare și ajutându-te să iei o decizie mai bine informată înainte de a cumpăra sau închiria o proprietate.',
+            ],
+        ],
+    ];
+
     $landingPromoPrices = $locale === 'ro'
         ? [
             'buying_living' => ['normal' => '27,99 €', 'launch' => '19,99 €'],
@@ -378,6 +492,23 @@
                 </div>
             </section>
 
+            <section class="relative overflow-hidden bg-white pb-14 pt-12 md:pb-18 md:pt-16">
+                <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                    <div class="relative mx-auto max-w-5xl">
+                        <div class="absolute inset-x-8 bottom-4 h-20 bg-brand-primary/12 blur-3xl"></div>
+                        <div class="relative overflow-hidden border border-brand-primary/10 bg-white shadow-[0_24px_60px_rgba(52,48,106,0.14)]">
+                            <iframe
+                                class="aspect-video w-full"
+                                src="https://www.youtube.com/embed/jD7AjgbLpL4"
+                                title="GetYourConsultant video"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen
+                            ></iframe>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section id="report-example" class="relative overflow-hidden bg-white pb-16 pt-12 md:py-18">
                 <img src="{{ asset('images/blue-noise-texture.png') }}" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.045] mix-blend-multiply">
 
@@ -600,7 +731,43 @@
                 </div>
             </section>
 
-            <section id="pricing" class="relative overflow-hidden border-b solid-divider bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)] py-16 md:py-18">
+            <section id="faq" class="bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)] py-16 md:py-18">
+                <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                    <div class="mx-auto max-w-3xl text-center">
+                        <h2 class="text-[2rem] leading-[1.04] font-bold tracking-[-0.04em] text-brand-primary md:text-[2.7rem]">Întrebări frecvente</h2>
+                    </div>
+
+                    <div class="mt-8 space-y-3 md:mt-10">
+                        @foreach ($faqItems as $index => $faq)
+                            <details class="group border border-brand-primary/10 bg-white shadow-[0_8px_20px_rgba(52,48,106,0.05)]" {{ $index === 0 ? 'open' : '' }}>
+                                <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-[15px] font-semibold leading-[1.4] text-brand-primary md:px-6 md:py-5 md:text-lg [&::-webkit-details-marker]:hidden">
+                                    <span>{{ $index + 1 }}. {{ $faq['question'] }}</span>
+                                    <span class="shrink-0 text-2xl leading-none text-brand-secondary transition-transform group-open:rotate-45">+</span>
+                                </summary>
+                                <div class="border-t border-brand-primary/10 px-5 py-5 text-[14px] leading-[1.7] text-brand-primary/76 md:px-6 md:text-base md:leading-[1.75]">
+                                    @foreach ($faq['paragraphs'] as $paragraph)
+                                        <p class="{{ $loop->first ? '' : 'mt-4' }}">{{ $paragraph }}</p>
+                                    @endforeach
+
+                                    @if (! empty($faq['items']))
+                                        <ul class="mt-4 space-y-2 pl-5">
+                                            @foreach ($faq['items'] as $item)
+                                                <li class="list-disc">{{ $item }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+
+                                    @if (! empty($faq['closing']))
+                                        <p class="mt-4">{{ $faq['closing'] }}</p>
+                                    @endif
+                                </div>
+                            </details>
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+
+            <section id="pricing" class="relative overflow-hidden border-b solid-divider bg-[#f2f5ff] py-16 md:py-18">
                 <img src="{{ asset('images/blue-noise-texture.png') }}" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.06] mix-blend-multiply">
 
                 <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
