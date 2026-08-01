@@ -195,12 +195,14 @@ const landingPromoPrices = {
     Record<LandingPricingReportType, { normal: string; launch: string }>
 >;
 
-const faqItems: {
+type FaqItem = {
     question: string;
     paragraphs: string[];
     items?: string[];
     closing?: string;
-}[] = [
+};
+
+const faqItemsRo: FaqItem[] = [
     {
         question: "Ce este GetYourConsultant?",
         paragraphs: [
@@ -314,6 +316,119 @@ const faqItems: {
     },
 ];
 
+const faqItemsEn: FaqItem[] = [
+    {
+        question: "What is GetYourConsultant?",
+        paragraphs: [
+            "GetYourConsultant analyzes publicly available property data and generates an informational report to support a better-informed decision.",
+        ],
+    },
+    {
+        question: "Does it replace a real estate agent?",
+        paragraphs: [
+            "No. The report complements an agent's information with analysis based on data and objective indicators.",
+        ],
+    },
+    {
+        question: "Does it replace an ANEVAR appraiser?",
+        paragraphs: [
+            "No. It is not an authorized valuation and cannot replace a report prepared by an accredited appraiser.",
+        ],
+    },
+    {
+        question: "Does it replace a lawyer?",
+        paragraphs: [
+            "No. For legal due diligence, we recommend consulting a lawyer who specializes in real estate transactions.",
+        ],
+    },
+    {
+        question: "Where does the information come from?",
+        paragraphs: [
+            "The analysis uses publicly available information. GetYourConsultant does not alter the source data; we centralize and analyze it to provide a clear, objective assessment.",
+        ],
+    },
+    {
+        question: "How long does generation take, and how long is the report valid?",
+        paragraphs: [
+            "In most cases, the report is available within a few minutes and is valid for 30 days.",
+        ],
+    },
+    {
+        question: "Who is the report useful for?",
+        paragraphs: [
+            "Buyers, tenants, investors, property developers, and real estate agents who want to provide clients with greater transparency.",
+        ],
+    },
+    {
+        question: "Why should I buy the report?",
+        paragraphs: [
+            "An informed decision can save time and money and help you avoid unpleasant surprises.",
+        ],
+    },
+    {
+        question: "What does the report contain?",
+        paragraphs: ["The report includes:"],
+        items: [
+            "an estimated property value",
+            "local price trends for comparable properties",
+            "a neighborhood analysis",
+            "air quality information",
+            "relevant indicators",
+            "identified risks",
+            "conclusions",
+        ],
+    },
+    {
+        question: "What are the data sources?",
+        paragraphs: [
+            "GetYourConsultant uses publicly available information from official and relevant sources in accordance with each source's applicable terms.",
+            "Depending on the property and data availability, these may include:",
+        ],
+        items: [
+            "Eurostat",
+            "Romania's National Institute of Statistics (INS)",
+            "ANCPI, where public data is available",
+            "Google Maps Platform",
+            "OpenStreetMap",
+            "public property-listing platforms",
+            "other relevant public databases and sources",
+        ],
+        closing:
+            "Our role is to centralize, analyze, and present the source data in a clear and objective report that supports a better-informed decision.",
+    },
+    {
+        question: "Why can I trust GetYourConsultant?",
+        paragraphs: [
+            "GetYourConsultant does not represent the interests of the buyer, seller, or an agency. We provide transparency and information that supports decision-making.",
+        ],
+    },
+    {
+        question: "Does the report favor the buyer or the seller?",
+        paragraphs: [
+            "No. The analysis is independent and aims to provide the most objective possible view of the property.",
+        ],
+    },
+    {
+        question: "Do you work with real estate agencies?",
+        paragraphs: [
+            "Yes. GetYourConsultant complements the work of agents, developers, architects, and lawyers through data-based analysis and transparency.",
+        ],
+    },
+    {
+        question: "What is the purpose of GetYourConsultant?",
+        paragraphs: [
+            "Our mission is to turn public data into an easy-to-understand analysis so everyone can access clear information before buying or renting a property.",
+        ],
+    },
+    {
+        question: "Why pay if some information is available online for free?",
+        paragraphs: [
+            "Public information is spread across many websites and databases, and it can be difficult to find, verify, and interpret correctly.",
+            "GetYourConsultant centralizes and analyzes it in one clear report, saving hours of research and supporting a better-informed property decision.",
+        ],
+    },
+];
+
 const warmGradientSectionClass =
     "border-b solid-divider bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)]";
 
@@ -359,6 +474,7 @@ export default function Landing({ pricingCatalog }: LandingProps) {
     const { t, locale, localePath } = useTranslation();
     const [url, setUrl] = useState("");
     const shouldReduceMotion = useReducedMotion();
+    const faqItems = locale === "ro" ? faqItemsRo : faqItemsEn;
 
     const heroMotionProps = shouldReduceMotion
         ? { initial: false }
@@ -404,16 +520,45 @@ export default function Landing({ pricingCatalog }: LandingProps) {
         }).format(pricing.base_amount_minor / 100);
     };
 
-    const handleHeroRedirect = (event: FormEvent<HTMLFormElement>) => {
+    const handleReportRedirect = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         router.visit(localePath("/get-report"));
     };
 
-    const renderLeadForm = (sectionId: string) => (
-        <form id={sectionId} onSubmit={handleHeroRedirect} className="w-full">
+    const handleEstimateRedirect = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        const propertyUrl = url.trim();
+
+        if (!propertyUrl) {
+            return;
+        }
+
+        router.visit(
+            localePath(
+                `/estimate-check?url=${encodeURIComponent(propertyUrl)}`,
+            ),
+        );
+    };
+
+    const renderLeadForm = (
+        sectionId: string,
+        mode: "estimate" | "report" = "report",
+    ) => (
+        <form
+            id={sectionId}
+            onSubmit={
+                mode === "estimate"
+                    ? handleEstimateRedirect
+                    : handleReportRedirect
+            }
+            className="w-full"
+        >
             <div className="flex flex-col gap-0 sm:flex-row sm:items-stretch">
                 <Input
                     id={`${sectionId}-url`}
+                    type="url"
+                    required={mode === "estimate"}
                     value={url}
                     placeholder={t("landing_hero_url_placeholder")}
                     onChange={(event) => {
@@ -425,7 +570,9 @@ export default function Landing({ pricingCatalog }: LandingProps) {
                     type="submit"
                     className="h-14 bg-brand-primary px-7 text-[0.98rem] font-semibold text-white shadow-[0_18px_36px_rgba(52,48,106,0.22)] hover:bg-brand-primary/92 sm:-ml-px"
                 >
-                    {t("landing_generate_report")}
+                    {mode === "estimate"
+                        ? t("landing_check_estimate")
+                        : t("landing_generate_report")}
                     <ArrowRight size={16} className="ml-2" />
                 </Button>
             </div>
@@ -461,7 +608,7 @@ export default function Landing({ pricingCatalog }: LandingProps) {
                         </p>
 
                         <div className="mt-7 max-w-xl md:mt-8">
-                            {renderLeadForm("hero-form")}
+                            {renderLeadForm("hero-form", "estimate")}
                         </div>
 
                         <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 md:mt-6 md:gap-x-6">
@@ -571,32 +718,34 @@ export default function Landing({ pricingCatalog }: LandingProps) {
                 </motion.div>
             </motion.section>
 
-            <motion.section
-                className="relative overflow-hidden bg-white pb-14 pt-12 md:pb-18 md:pt-16"
-                variants={sectionVariants}
-                {...revealMotionProps}
-            >
-                <motion.div
-                    className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8"
-                    variants={containerVariants}
+            {locale === "ro" ? (
+                <motion.section
+                    className="relative overflow-hidden bg-white pb-14 pt-12 md:pb-18 md:pt-16"
+                    variants={sectionVariants}
+                    {...revealMotionProps}
                 >
                     <motion.div
-                        className="relative mx-auto max-w-5xl"
-                        variants={itemVariants}
+                        className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8"
+                        variants={containerVariants}
                     >
-                        <div className="absolute inset-x-8 bottom-4 h-20 bg-brand-primary/12 blur-3xl" />
-                        <div className="relative overflow-hidden border border-brand-primary/10 bg-white shadow-[0_24px_60px_rgba(52,48,106,0.14)]">
-                            <iframe
-                                className="aspect-video w-full"
-                                src="https://www.youtube.com/embed/jD7AjgbLpL4"
-                                title="GetYourConsultant video"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                allowFullScreen
-                            />
-                        </div>
+                        <motion.div
+                            className="relative mx-auto max-w-5xl"
+                            variants={itemVariants}
+                        >
+                            <div className="absolute inset-x-8 bottom-4 h-20 bg-brand-primary/12 blur-3xl" />
+                            <div className="relative overflow-hidden border border-brand-primary/10 bg-white shadow-[0_24px_60px_rgba(52,48,106,0.14)]">
+                                <iframe
+                                    className="aspect-video w-full"
+                                    src="https://www.youtube.com/embed/jD7AjgbLpL4"
+                                    title="GetYourConsultant video"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowFullScreen
+                                />
+                            </div>
+                        </motion.div>
                     </motion.div>
-                </motion.div>
-            </motion.section>
+                </motion.section>
+            ) : null}
 
             <motion.section
                 id="report-example"
@@ -866,7 +1015,7 @@ export default function Landing({ pricingCatalog }: LandingProps) {
                         variants={itemVariants}
                     >
                         <h2 className="text-[2rem] leading-[1.04] font-bold tracking-[-0.04em] text-brand-primary md:text-[2.7rem]">
-                            Întrebări frecvente
+                            {t("landing_faq_title")}
                         </h2>
                     </motion.div>
 
@@ -1080,7 +1229,7 @@ export default function Landing({ pricingCatalog }: LandingProps) {
                         </p>
 
                         <div className="mt-7 max-w-xl md:mt-8">
-                            {renderLeadForm("final-cta-form")}
+                            {renderLeadForm("final-cta-form", "estimate")}
                         </div>
 
                         <div className="mt-5 flex items-start gap-3 text-[14px] leading-[1.6] font-medium text-brand-primary/74 md:text-sm">

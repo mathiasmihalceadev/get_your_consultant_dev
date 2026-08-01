@@ -12,40 +12,15 @@ use Tests\TestCase;
 
 class StripeCheckoutServiceTest extends TestCase
 {
-    public function test_it_uses_ron_for_ro_hosts_and_eur_for_com_hosts(): void
-    {
-        config()->set('services.stripe.currency', 'eur');
-        config()->set('services.stripe.currencies', [
-            'en' => 'eur',
-            'ro' => 'ron',
-        ]);
-
-        $service = new StripeCheckoutService(
-            app(PaidReportFulfillmentService::class),
-            app(ReportPricingService::class),
-        );
-        $method = new \ReflectionMethod($service, 'currencyForLocale');
-
-        $this->assertSame('ron', $method->invoke($service, 'ro'));
-        $this->assertSame('eur', $method->invoke($service, 'en'));
-    }
-
-    public function test_it_resolves_checkout_locale_from_the_request_host(): void
+    public function test_billing_tests_use_the_romanian_currency_for_every_report_locale(): void
     {
         $service = new StripeCheckoutService(
             app(PaidReportFulfillmentService::class),
             app(ReportPricingService::class),
         );
-        $method = new \ReflectionMethod($service, 'checkoutLocale');
-        $report = new Report(['locale' => 'en']);
+        $method = new \ReflectionMethod($service, 'billingTestCurrency');
 
-        app()->instance('request', Request::create('https://customer.example.ro/report', 'GET'));
-        $this->assertSame('ro', $method->invoke($service, $report));
-
-        app()->instance('request', Request::create('https://customer.example.com/report', 'GET'));
-        $this->assertSame('en', $method->invoke($service, $report));
-
-        app()->forgetInstance('request');
+        $this->assertSame('ron', $method->invoke($service));
     }
 
     public function test_it_uses_admin_return_urls_for_billing_test_reports(): void

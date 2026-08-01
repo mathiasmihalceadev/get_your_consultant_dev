@@ -145,8 +145,7 @@ export default function TestTools({
     const activePreview = reportOptions.find(
         (option) => option.value === selectedPreviewKey,
     );
-    const currentBillingTestAmount =
-        billingTestForm.data.locale === "ro" ? "5.00 RON" : "1.00 EUR";
+    const currentBillingTestAmount = "5.00 RON";
 
     const handleBillingTestCheckout = () => {
         billingTestForm.post("/admin/billing-tests/checkout");
@@ -244,7 +243,7 @@ export default function TestTools({
                                             Română / RON / 5.00
                                         </option>
                                         <option value="en">
-                                            English / EUR / 1.00
+                                            English / RON / 5.00
                                         </option>
                                     </select>
                                     <CaretDown

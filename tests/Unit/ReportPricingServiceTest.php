@@ -39,8 +39,13 @@ class ReportPricingServiceTest extends TestCase
         $this->assertSame('prod_rental_living', $pricing['stripe_product_id']);
     }
 
-    public function test_catalog_pricing_keeps_eur_amounts_for_com_hosts_without_requiring_product_ids(): void
+    public function test_catalog_pricing_uses_the_same_ron_checkout_on_com_hosts(): void
     {
+        config()->set('services.stripe.products', [
+            'rental_living' => '',
+            'buying_living' => '',
+        ]);
+
         $service = new ReportPricingService(
             fn (string $key, mixed $default = null) => [
                 'pricing_rental_living_eur' => '17.99',
@@ -53,10 +58,12 @@ class ReportPricingServiceTest extends TestCase
             Request::create('https://customer.example.com/get-report', 'GET'),
         );
 
-        $this->assertSame('eur', $catalog['rental_living']['checkout_currency']);
-        $this->assertSame(1799, $catalog['rental_living']['checkout_amount_minor']);
-        $this->assertSame('eur', $catalog['buying_living']['checkout_currency']);
-        $this->assertSame(2799, $catalog['buying_living']['checkout_amount_minor']);
+        $this->assertSame('en', $catalog['rental_living']['checkout_locale']);
+        $this->assertSame('ron', $catalog['rental_living']['checkout_currency']);
+        $this->assertSame(9085, $catalog['rental_living']['checkout_amount_minor']);
+        $this->assertSame('5.05', $catalog['rental_living']['exchange_rate']);
+        $this->assertSame('ron', $catalog['buying_living']['checkout_currency']);
+        $this->assertSame(14135, $catalog['buying_living']['checkout_amount_minor']);
         $this->assertNull($catalog['buying_living']['stripe_product_id']);
     }
 }

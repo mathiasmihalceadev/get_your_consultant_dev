@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Report;
 use App\Models\Settings;
-use App\Support\LocalizedUrl;
 use Closure;
 use Illuminate\Http\Request;
 use RuntimeException;
@@ -73,13 +72,13 @@ class ReportPricingService
         bool $requireStripeProductId,
     ): array {
         $checkoutLocale = $this->checkoutLocale($request, $fallbackLocale);
-        $checkoutCurrency = $checkoutLocale === 'ro' ? 'ron' : 'eur';
+        // Both public domains use the Romanian billing flow. Locale controls
+        // presentation and report language, never checkout currency.
+        $checkoutCurrency = 'ron';
         $baseAmount = $this->baseAmountEur($reportType);
         $baseAmountMinor = $this->decimalToScaledInteger($baseAmount, 2);
-        $exchangeRate = $checkoutCurrency === 'ron' ? $this->eurRonRate() : null;
-        $checkoutAmountMinor = $checkoutCurrency === 'ron'
-            ? $this->convertEurMinorToRonMinor($baseAmountMinor, $exchangeRate)
-            : $baseAmountMinor;
+        $exchangeRate = $this->eurRonRate();
+        $checkoutAmountMinor = $this->convertEurMinorToRonMinor($baseAmountMinor, $exchangeRate);
 
         return [
             'report_type' => $reportType,
@@ -99,25 +98,9 @@ class ReportPricingService
 
     private function checkoutLocale(?Request $request, ?string $fallbackLocale): string
     {
-        if ($request) {
-            $host = LocalizedUrl::requestHost($request);
+        $locale = strtolower((string) ($request?->attributes->get('active_locale') ?: $fallbackLocale ?: app()->getLocale()));
 
-            if (str_ends_with($host, '.ro')) {
-                return 'ro';
-            }
-
-            if (str_ends_with($host, '.com')) {
-                return 'en';
-            }
-
-            return LocalizedUrl::localeForHost($host);
-        }
-
-        $locale = strtolower((string) ($fallbackLocale ?: LocalizedUrl::defaultLocale()));
-
-        return in_array($locale, LocalizedUrl::supportedLocales(), true)
-            ? $locale
-            : LocalizedUrl::defaultLocale();
+        return in_array($locale, ['en', 'ro'], true) ? $locale : 'ro';
     }
 
     private function baseAmountEur(string $reportType): string

@@ -26,14 +26,14 @@ if ($publicLocales === []) {
 }
 
 $domainUrls = [
-    'en' => env('APP_DOMAIN_EN', 'http://myapp-com.test:8000'),
-    'ro' => env('APP_DOMAIN_RO', 'http://myapp-ro.test:8000'),
+    'en' => env('APP_DOMAIN_EN', 'https://getyourconsultant.com'),
+    'ro' => env('APP_DOMAIN_RO', 'https://getyourconsultant.ro'),
 ];
 
 $hostLocaleMap = [];
 $defaultHosts = [
-    'en' => ['myapp-com.test', 'stage.example.com', 'example.com', 'www.example.com'],
-    'ro' => ['myapp-ro.test', 'stage.example.ro', 'example.ro', 'www.example.ro'],
+    'en' => ['myapp-com.test', 'getyourconsultant.com', 'www.getyourconsultant.com'],
+    'ro' => ['myapp-ro.test', 'getyourconsultant.ro', 'www.getyourconsultant.ro'],
 ];
 
 foreach ($defaultHosts as $locale => $hosts) {
@@ -44,7 +44,14 @@ foreach ($defaultHosts as $locale => $hosts) {
     $configuredHost = parse_url($domainUrls[$locale] ?? '', PHP_URL_HOST);
 
     if (is_string($configuredHost) && $configuredHost !== '') {
-        $hostLocaleMap[strtolower($configuredHost)] = $locale;
+        $configuredHost = strtolower($configuredHost);
+        $hostLocaleMap[$configuredHost] = $locale;
+
+        if (str_starts_with($configuredHost, 'www.')) {
+            $hostLocaleMap[substr($configuredHost, 4)] = $locale;
+        } else {
+            $hostLocaleMap['www.'.$configuredHost] = $locale;
+        }
     }
 }
 
@@ -59,6 +66,10 @@ return [
         '/' => [
             'en' => '/',
             'ro' => '/',
+        ],
+        '/about-us' => [
+            'en' => '/about-us',
+            'ro' => '/despre-noi',
         ],
         '/privacy-policy' => [
             'en' => '/privacy-policy',

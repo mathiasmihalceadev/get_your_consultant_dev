@@ -21,6 +21,16 @@ class OpenAIService
         'not_buying_property',
         'not_renting_property',
     ];
+    private const LANDING_ESTIMATE_VALUATIONS = [
+        'under_estimated',
+        'close_to_estimated',
+        'over_estimated',
+    ];
+    private const LANDING_ESTIMATE_RESULTS = [
+        'Under estimated value',
+        'Close to the estimated value',
+        'Over the estimated value',
+    ];
 
     public function __construct()
     {
@@ -139,6 +149,150 @@ Respond ONLY with strict JSON in one of these shapes:
 {"accessible": false, "reason_code": "not_property", "reason": "short explanation"}
 {"accessible": false, "reason_code": "not_buying_property", "reason": "short explanation"}
 {"accessible": false, "reason_code": "not_renting_property", "reason": "short explanation"}
+PROMPT;
+    }
+
+    public function estimateListingValue(string $url, string $locale): array
+    {
+        $instructions = $this->landingEstimateInstructions($locale);
+
+        try {
+            $payload = [
+                'model' => $this->urlValidationModel,
+                'instructions' => $instructions,
+                'input' => $url,
+                'reasoning' => [
+                    'effort' => 'medium',
+                ],
+                'tools' => [
+                    ['type' => 'web_search_preview'],
+                ],
+            ];
+
+            $response = $this->sendResponsesRequest('landing_estimate_check', $payload, 90);
+
+            if ($response->failed()) {
+                Log::channel('report')->error('OpenAI landing estimate request failed', [
+                    'url' => $url,
+                    'status' => $response->status(),
+                    'response_body' => $response->body(),
+                ]);
+                throw new OpenAIRequestException('OpenAI request failed with status ' . $response->status());
+            }
+
+            $content = $this->extractOutputText($response->json());
+            $content = $this->cleanJsonResponse($content);
+            $data = json_decode($content, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
+                Log::channel('report')->error('OpenAI landing estimate JSON parse failed', [
+                    'url' => $url,
+                    'raw_response' => $content,
+                ]);
+                throw new OpenAIJsonException('Failed to parse OpenAI response as JSON');
+            }
+
+            if (empty($data['accessible'])) {
+                $reasonCode = $data['reason_code'] ?? 'source_blocked';
+
+                if (!in_array($reasonCode, ['source_blocked', 'not_property'], true)) {
+                    $reasonCode = 'source_blocked';
+                }
+
+                return [
+                    'success' => false,
+                    'reason_code' => $reasonCode,
+                    'message' => $data['reason'] ?? 'URL estimate check failed.',
+                ];
+            }
+
+            $transactionType = $data['transaction_type'] ?? null;
+            $reportType = match ($transactionType) {
+                'buying' => 'buying_living',
+                'renting' => 'rental_living',
+                default => null,
+            };
+
+            $resultLabel = is_string($data['result'] ?? null) ? $data['result'] : null;
+            $valuation = match ($resultLabel) {
+                'Under estimated value' => 'under_estimated',
+                'Close to the estimated value' => 'close_to_estimated',
+                'Over the estimated value' => 'over_estimated',
+                default => $data['valuation'] ?? null,
+            };
+
+            if (!$reportType || !in_array($valuation, self::LANDING_ESTIMATE_VALUATIONS, true)) {
+                Log::channel('report')->error('OpenAI landing estimate returned invalid classification', [
+                    'url' => $url,
+                    'data' => $data,
+                ]);
+
+                throw new OpenAIJsonException('OpenAI response has an invalid estimate classification.');
+            }
+
+            return [
+                'success' => true,
+                'report_type' => $reportType,
+                'transaction_type' => $transactionType,
+                'valuation' => $valuation,
+                'result' => $resultLabel && in_array($resultLabel, self::LANDING_ESTIMATE_RESULTS, true)
+                    ? $resultLabel
+                    : match ($valuation) {
+                        'under_estimated' => 'Under estimated value',
+                        'close_to_estimated' => 'Close to the estimated value',
+                        'over_estimated' => 'Over the estimated value',
+                    },
+                'asking_price' => $data['asking_price'] ?? null,
+                'estimated_value' => $data['estimated_value'] ?? null,
+                'currency' => $data['currency'] ?? null,
+                'difference_percent' => $data['difference_percent'] ?? null,
+                'confidence' => $data['confidence'] ?? 'medium',
+            ];
+
+        } catch (OpenAIRequestException|OpenAIJsonException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            Log::channel('report')->error('OpenAI landing estimate exception', [
+                'url' => $url,
+                'error' => $e->getMessage(),
+            ]);
+            throw new OpenAIRequestException('OpenAI request failed: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    private function landingEstimateInstructions(string $locale): string
+    {
+        return <<<PROMPT
+You are a residential real-estate listing pre-checker for GetYourConsultant.
+
+Use the web search tool to inspect the provided URL. First validate the URL using the same standards as the full report flow, then create a fast indicative price/rent check.
+
+Validation rules:
+- The URL must be publicly reachable and must represent one specific residential property listing.
+- Valid residential listings include apartments, studios, houses, villas, duplexes, or other homes meant for people to live in.
+- Reject search pages, category pages, homepages, news articles, blog posts, agent profile pages, generic portal pages, non-residential listings, vehicle listings, and ambiguous marketplace pages.
+- If the page cannot be inspected well enough because of login walls, bot protection, automation limits, broken pages, or unavailable content, use source_blocked.
+
+For valid listings:
+- Detect whether the listing is for buying/sale or renting.
+- Extract the asking sale price or monthly rent from the listing.
+- Estimate a fair market value or fair monthly rent using public comparable information, location context, property characteristics, and market indicators available from public sources.
+- Classify the listing with exactly one result value:
+  - "Under estimated value": asking price/rent is at least 5% below your estimated fair value/rent.
+  - "Close to the estimated value": asking price/rent is within +/- 5% of your estimated fair value/rent.
+  - "Over the estimated value": asking price/rent is at least 5% above your estimated fair value/rent.
+- If the asking price/rent or enough property context cannot be found, return source_blocked instead of guessing.
+- This is only a fast indicative check, not an official valuation.
+
+Respond ONLY with strict JSON in one of these shapes:
+{"accessible": false, "reason_code": "source_blocked", "reason": "short explanation"}
+{"accessible": false, "reason_code": "not_property", "reason": "short explanation"}
+{"accessible": true, "reason_code": "accessible_property", "transaction_type": "buying", "result": "Under estimated value", "asking_price": 120000, "estimated_value": 130000, "currency": "EUR", "difference_percent": -7.7, "confidence": "low|medium|high"}
+{"accessible": true, "reason_code": "accessible_property", "transaction_type": "buying", "result": "Close to the estimated value", "asking_price": 120000, "estimated_value": 122000, "currency": "EUR", "difference_percent": -1.6, "confidence": "low|medium|high"}
+{"accessible": true, "reason_code": "accessible_property", "transaction_type": "buying", "result": "Over the estimated value", "asking_price": 135000, "estimated_value": 120000, "currency": "EUR", "difference_percent": 12.5, "confidence": "low|medium|high"}
+{"accessible": true, "reason_code": "accessible_property", "transaction_type": "renting", "result": "Under estimated value", "asking_price": 500, "estimated_value": 560, "currency": "EUR", "difference_percent": -10.7, "confidence": "low|medium|high"}
+{"accessible": true, "reason_code": "accessible_property", "transaction_type": "renting", "result": "Close to the estimated value", "asking_price": 500, "estimated_value": 510, "currency": "EUR", "difference_percent": -2, "confidence": "low|medium|high"}
+{"accessible": true, "reason_code": "accessible_property", "transaction_type": "renting", "result": "Over the estimated value", "asking_price": 600, "estimated_value": 520, "currency": "EUR", "difference_percent": 15.4, "confidence": "low|medium|high"}
 PROMPT;
     }
 
