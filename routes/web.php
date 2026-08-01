@@ -13,9 +13,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PublicReportController::class, 'landing'])->name('home');
-Route::get('/despre-noi', [PublicReportController::class, 'about'])->name('about');
+Route::get('/about-us', [PublicReportController::class, 'about'])->name('about');
+Route::get('/despre-noi', [PublicReportController::class, 'about']);
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::get('/get-report', [PublicReportController::class, 'index'])->name('get-report');
+Route::get('/estimate-check', [PublicReportController::class, 'showEstimateCheck'])->name('estimate-check.show');
 Route::get('/submit-url', [PublicReportController::class, 'showUrlForm'])->name('submit-url');
 Route::get('/submit-email', [PublicReportController::class, 'showEmailForm'])->name('submit-email');
 Route::get('/report/{pageToken}', [PublicReportController::class, 'status'])->name('report.status');
@@ -34,6 +36,10 @@ Route::get('/politica-de-cookie-uri', [PublicReportController::class, 'cookiePol
 Route::post('/validate-url', [PublicReportController::class, 'validateUrl'])
     ->middleware('throttle:5,1')
     ->name('validate-url');
+
+Route::post('/estimate-check/analyze', [PublicReportController::class, 'analyzeEstimateCheck'])
+    ->middleware('throttle:5,1')
+    ->name('estimate-check.analyze');
 
 Route::middleware('throttle:10,1')->group(function () {
     Route::post('/submit-email', [PublicReportController::class, 'submitEmail'])->name('submit-email.store');
@@ -60,7 +66,7 @@ Route::get('/locale-test', function (Request $request) {
 Route::get('/sitemap.xml', function () {
     abort_unless(config('seo.indexing'), 404);
 
-    $paths = ['/', '/despre-noi', '/contact', '/get-report', '/privacy-policy', '/terms-and-conditions', '/cookie-policy'];
+    $paths = ['/', '/about-us', '/contact', '/get-report', '/privacy-policy', '/terms-and-conditions', '/cookie-policy'];
     $urls = collect(LocalizedUrl::publicLocales())
         ->flatMap(fn (string $locale) => collect($paths)->map(fn (string $path) => LocalizedUrl::urlForLocale($locale, $path)))
         ->all();

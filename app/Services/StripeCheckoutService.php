@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Report;
 use App\Models\ReportPurchase;
-use App\Support\LocalizedUrl;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -68,6 +67,7 @@ class StripeCheckoutService
 
         $payload = [
             'mode' => 'payment',
+            'locale' => $report->locale === 'ro' ? 'ro' : 'en',
             'line_items' => [
                 [
                     'price_data' => [
@@ -147,7 +147,7 @@ class StripeCheckoutService
             throw new RuntimeException('Billing test checkout can only be created for reports marked as tests.');
         }
 
-        $currency = $this->billingTestCurrency($report->locale);
+        $currency = $this->billingTestCurrency();
         $amountMinor = $this->billingTestAmountMinor($currency);
         $metadata = array_filter([
             'report_id' => (string) $report->id,
@@ -179,6 +179,7 @@ class StripeCheckoutService
 
         $payload = [
             'mode' => 'payment',
+            'locale' => $report->locale === 'ro' ? 'ro' : 'en',
             'line_items' => [
                 [
                     'price_data' => [
@@ -905,58 +906,9 @@ class StripeCheckoutService
         );
     }
 
-    private function checkoutLocale(Report $report): string
-    {
-        $request = request();
-
-        if ($request) {
-            $host = LocalizedUrl::requestHost($request);
-
-            if (str_ends_with($host, '.ro')) {
-                return 'ro';
-            }
-
-            if (str_ends_with($host, '.com')) {
-                return 'en';
-            }
-
-            return LocalizedUrl::localeForHost($host);
-        }
-
-        $locale = strtolower((string) ($report->locale ?: LocalizedUrl::defaultLocale()));
-
-        return in_array($locale, LocalizedUrl::supportedLocales(), true)
-            ? $locale
-            : LocalizedUrl::defaultLocale();
-    }
-
-    private function currencyForLocale(string $locale): string
-    {
-        $currency = strtolower((string) config("services.stripe.currencies.{$locale}", ''));
-
-        if ($currency !== '') {
-            return $currency;
-        }
-
-        return $locale === 'ro'
-            ? 'ron'
-            : $this->currency();
-    }
-
-    private function resolvePriceId(string $reportType): string
-    {
-        $priceId = (string) config("services.stripe.prices.{$reportType}");
-
-        if ($priceId === '') {
-            throw new RuntimeException("Stripe price ID is not configured for report type [{$reportType}].");
-        }
-
-        return $priceId;
-    }
-
     private function currency(): string
     {
-        return strtolower((string) config('services.stripe.currency', 'eur'));
+        return 'ron';
     }
 
     private function checkoutBillingCollectionPayload(): array
@@ -969,9 +921,9 @@ class StripeCheckoutService
         ];
     }
 
-    private function billingTestCurrency(?string $locale): string
+    private function billingTestCurrency(): string
     {
-        return strtolower($locale) === 'ro' ? 'ron' : 'eur';
+        return 'ron';
     }
 
     private function billingTestAmountMinor(string $currency): int
@@ -981,19 +933,14 @@ class StripeCheckoutService
 
     private function billingTestProductName(Report $report): string
     {
-        return match ($report->locale) {
-            'ro' => 'Test Stripe + SmartBill',
-            default => 'Stripe + SmartBill test',
-        };
+        return 'Test Stripe + SmartBill';
     }
 
     private function billingTestProductDescription(Report $report): string
     {
         $reportType = Str::replace('_', ' ', $report->report_type);
 
-        return $report->locale === 'ro'
-            ? 'Flux de test pentru plata si facturare. Nu se genereaza raportul final. Tip: ' . $reportType
-            : 'Billing test flow for payment and invoicing. No final report will be generated. Type: ' . $reportType;
+        return 'Flux de test pentru plata si facturare. Nu se genereaza raportul final. Tip: ' . $reportType;
     }
 
     private function webhookSecret(): string

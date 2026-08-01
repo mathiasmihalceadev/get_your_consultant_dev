@@ -7,6 +7,8 @@
         'terms' => LocalizedUrl::equivalentPath('/terms-and-conditions', $locale),
         'cookies' => LocalizedUrl::equivalentPath('/cookie-policy', $locale),
     ];
+    $homeUrl = LocalizedUrl::publicUrlForLocale($locale, '/');
+    $onlineDisputeLabel = $locale === 'ro' ? 'Soluționarea litigiilor online' : 'Online dispute resolution';
 @endphp
 
 <footer class="bg-brand-primary">
@@ -22,15 +24,15 @@
                 <a href="https://reclamatiisal.anpc.ro/" target="_blank" rel="noopener noreferrer" class="block transition-colors" aria-label="ANPC">
                     <img src="{{ asset('images/anpc.png') }}" alt="ANPC" class="h-auto w-full max-w-64 md:max-w-84 object-contain">
                 </a>
-                <a href="https://consumer-redress.ec.europa.eu/index_en?prefLang=ro" target="_blank" rel="noopener noreferrer" class="block transition-colors" aria-label="Soluționarea litigiilor online">
-                    <img src="{{ asset('images/solutionare.png') }}" alt="Soluționarea litigiilor online" class="h-auto w-full max-w-64 md:max-w-84 object-contain">
+                <a href="https://consumer-redress.ec.europa.eu/index_en?prefLang={{ $locale }}" target="_blank" rel="noopener noreferrer" class="block transition-colors" aria-label="{{ $onlineDisputeLabel }}">
+                    <img src="{{ asset('images/solutionare.png') }}" alt="{{ $onlineDisputeLabel }}" class="h-auto w-full max-w-64 md:max-w-84 object-contain">
                 </a>
             </div>
 
            <div class="lg:justify-self-end lg:text-right">
                 <h4 class="mb-3 text-[14px] text-white/80 md:text-base">{{ __('footer_follow_us') }}</h4>
                 <div class="flex items-center gap-2 lg:justify-end">
-                    <a href="https://www.facebook.com/profile.php?id=61590563915563&locale=ro_RO" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white">
+                    <a href="https://www.facebook.com/profile.php?id=61590563915563&locale={{ $locale === 'ro' ? 'ro_RO' : 'en_US' }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white">
                         <x-marketing.icon name="facebook-logo" weight="duotone" class="h-4.5 w-4.5" />
                     </a>
                     <a href="https://www.instagram.com/getyourconsultant" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="flex h-9 w-9 items-center justify-center border border-white/20 text-white/80 transition-colors hover:border-white/40 hover:text-white">
@@ -43,17 +45,17 @@
                 <div class="mt-4">
                     <p class="whitespace-pre-line text-[14px] leading-[1.7] text-white/70 md:text-base">{{ __('landing_footer_address') }}</p>
                 </div>
-                <img src="{{ asset('images/secure-payment.png') }}" alt="Soluționarea litigiilor online" class="h-auto w-full max-w-64 md:max-w-64 object-contain mt-6">
+                <img src="{{ asset('images/secure-payment.png') }}" alt="{{ $locale === 'ro' ? 'Plată securizată' : 'Secure payment' }}" class="h-auto w-full max-w-64 md:max-w-64 object-contain mt-6">
             </div>
         </div>
 
         <div class="flex flex-col gap-4 border-t border-white/10 pt-6 md:flex-row md:items-end md:justify-between">
             <div class="flex flex-wrap gap-4 text-[14px] md:text-base">
-                <a href="{{ url('/').'#hero-form' }}" class="text-white/70 transition-colors hover:text-white">{{ __('get_report') }}</a>
-                <a href="{{ url($legalPaths['privacy']) }}" class="text-white/70 transition-colors hover:text-white">{{ __('privacy') }}</a>
-                <a href="{{ url($legalPaths['terms']) }}" class="text-white/70 transition-colors hover:text-white">{{ __('terms') }}</a>
-                <a href="{{ url($legalPaths['cookies']) }}" class="text-white/70 transition-colors hover:text-white">{{ __('cookie_policy') }}</a>
-                <a href="{{ route('contact') }}" class="text-white/70 transition-colors hover:text-white">{{ __('contact') }}</a>
+                <a href="{{ $homeUrl }}#hero-form" class="text-white/70 transition-colors hover:text-white">{{ __('get_report') }}</a>
+                <a href="{{ LocalizedUrl::publicUrlForLocale($locale, $legalPaths['privacy']) }}" class="text-white/70 transition-colors hover:text-white">{{ __('privacy') }}</a>
+                <a href="{{ LocalizedUrl::publicUrlForLocale($locale, $legalPaths['terms']) }}" class="text-white/70 transition-colors hover:text-white">{{ __('terms') }}</a>
+                <a href="{{ LocalizedUrl::publicUrlForLocale($locale, $legalPaths['cookies']) }}" class="text-white/70 transition-colors hover:text-white">{{ __('cookie_policy') }}</a>
+                <a href="{{ LocalizedUrl::publicUrlForLocale($locale, '/contact') }}" class="text-white/70 transition-colors hover:text-white">{{ __('contact') }}</a>
             </div>
 
             <div class="space-y-1 text-[13px] leading-[1.55] text-white/56 md:ml-auto md:max-w-none md:shrink-0 md:text-right md:text-sm md:leading-[1.65] lg:whitespace-nowrap">

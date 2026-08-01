@@ -1,4 +1,4 @@
-import { Link } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 import {
     Globe,
     FacebookLogo,
@@ -9,6 +9,7 @@ import { PropsWithChildren } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 
 export default function PublicLayout({ children }: PropsWithChildren) {
+    const { url } = usePage();
     const {
         t,
         locale,
@@ -20,6 +21,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
     const otherLocale =
         publicLocales.find((candidateLocale) => candidateLocale !== locale) ??
         null;
+    const canSwitchLocale = !url.split("?", 1)[0].endsWith("/submit-email");
     const currentYear = new Date().getFullYear();
     const legalPaths =
         locale === "ro"
@@ -34,7 +36,10 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                   cookies: "/cookie-policy",
               };
     const navItems = [
-        { key: "about", href: localePath("/despre-noi") },
+        {
+            key: "about",
+            href: localePath(locale === "ro" ? "/despre-noi" : "/about-us"),
+        },
         {
             key: "landing_nav_example",
             href: localePath("/#report-example"),
@@ -98,9 +103,14 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                 {t("get_report")}
                             </Link>
 
-                            {showLocaleSwitcher && otherLocale ? (
+                            {showLocaleSwitcher && otherLocale && canSwitchLocale ? (
                                 <button
                                     onClick={switchLocale}
+                                    type="button"
+                                    aria-label={t("language_switch_to").replace(
+                                        ":language",
+                                        otherLocale.toUpperCase(),
+                                    )}
                                     className="flex items-center gap-1.5 border border-gray-200 px-3 py-2 text-[14px] font-semibold text-brand-primary/76 transition-colors cursor-pointer hover:text-brand-primary md:text-base"
                                 >
                                     <Globe size={16} />
@@ -158,7 +168,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                 />
                             </a>
                             <a
-                                href="https://consumer-redress.ec.europa.eu/index_en?prefLang=ro"
+                                href={`https://consumer-redress.ec.europa.eu/index_en?prefLang=${locale}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="block transition-colors"
@@ -178,7 +188,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                             </h4>
                             <div className="flex items-center gap-2 lg:justify-end">
                                 <a
-                                    href="https://www.facebook.com/profile.php?id=61590563915563&locale=ro_RO"
+                                    href={`https://www.facebook.com/profile.php?id=61590563915563&locale=${locale === "ro" ? "ro_RO" : "en_US"}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="Facebook"

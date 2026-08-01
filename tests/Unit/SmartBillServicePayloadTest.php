@@ -87,6 +87,31 @@ class SmartBillServicePayloadTest extends TestCase
         $this->assertSame('Raport cumparare locuinta', $payload['name']);
     }
 
+    public function test_english_reports_use_the_same_romanian_smartbill_invoice_format(): void
+    {
+        $purchase = (new ReportPurchase())->forceFill([
+            'id' => 71,
+            'report_id' => 72,
+            'report_type' => 'buying_living',
+            'locale' => 'en',
+            'currency' => 'ron',
+            'paid_currency' => 'ron',
+            'amount_total' => 9995,
+            'report' => (object) ['is_test' => false],
+        ]);
+        $service = app(SmartBillService::class);
+        $invoiceMethod = new \ReflectionMethod($service, 'buildInvoicePayload');
+        $productMethod = new \ReflectionMethod($service, 'buildProductPayload');
+
+        $invoicePayload = $invoiceMethod->invoke($service, $purchase);
+        $productPayload = $productMethod->invoke($service, $purchase);
+
+        $this->assertSame('RON', $invoicePayload['currency']);
+        $this->assertSame('RO', $invoicePayload['language']);
+        $this->assertSame('Raport cumparare locuinta', $productPayload['name']);
+        $this->assertArrayNotHasKey('translatedName', $productPayload);
+    }
+
     public function test_it_builds_a_stable_product_code_for_billing_tests(): void
     {
         $purchase = (new ReportPurchase())->forceFill([

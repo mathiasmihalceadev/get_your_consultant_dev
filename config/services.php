@@ -43,11 +43,7 @@ return [
         'public_key' => env('STRIPE_PUBLIC_KEY'),
         'secret_key' => env('STRIPE_SECRET_KEY'),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
-        'currency' => strtolower((string) env('STRIPE_CURRENCY', 'eur')),
-        'currencies' => [
-            'en' => strtolower((string) env('STRIPE_CURRENCY_EN', env('STRIPE_CURRENCY', 'eur'))),
-            'ro' => strtolower((string) env('STRIPE_CURRENCY_RO', 'ron')),
-        ],
+        'currency' => 'ron',
         'products' => [
             'rental_living' => env('STRIPE_PRODUCT_RENTAL_LIVING'),
             'buying_living' => env('STRIPE_PRODUCT_BUYING_LIVING'),

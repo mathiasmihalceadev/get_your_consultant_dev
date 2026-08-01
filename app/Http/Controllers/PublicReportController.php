@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
+use App\Models\ReportPurchase;
 use App\Services\AffiliateAttributionService;
 use App\Services\OpenAIService;
 use App\Services\RecaptchaService;
@@ -10,9 +11,11 @@ use App\Services\ReportPricingService;
 use App\Services\StripeCheckoutService;
 use App\Support\LocalizedUrl;
 use App\Support\RequestAudit;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Cookie;
 use Inertia\Inertia;
 use League\CommonMark\GithubFlavoredMarkdownConverter;
@@ -41,19 +44,31 @@ class PublicReportController extends Controller
         return Inertia::render('Public/Index');
     }
 
+    public function showEstimateCheck(Request $request, RecaptchaService $recaptcha)
+    {
+        if ($this->publicWizardMaintenanceEnabled()) {
+            return redirect()->route('get-report');
+        }
+
+        return Inertia::render('Public/HeroEstimateCheck', [
+            'initialUrl' => (string) $request->query('url', ''),
+            'recaptchaSiteKey' => $recaptcha->enabled() ? $recaptcha->siteKey() : null,
+        ]);
+    }
+
     public function about()
     {
         $locale = app()->getLocale();
         $alternates = collect(LocalizedUrl::publicLocales())
             ->mapWithKeys(fn (string $publicLocale) => [
-                $publicLocale === 'ro' ? 'ro-RO' : 'en-US' => LocalizedUrl::publicUrlForLocale($publicLocale, '/despre-noi'),
+                $publicLocale === 'ro' ? 'ro-RO' : 'en-US' => LocalizedUrl::publicUrlForLocale($publicLocale, '/about-us'),
             ])
             ->all();
 
         return response()->view('public.about', [
-            'canonical' => LocalizedUrl::publicUrlForLocale($locale, '/despre-noi'),
+            'canonical' => LocalizedUrl::publicUrlForLocale($locale, '/about-us'),
             'alternates' => $alternates,
-            'xDefault' => LocalizedUrl::publicUrlForLocale(LocalizedUrl::publicXDefaultLocale(), '/despre-noi'),
+            'xDefault' => LocalizedUrl::publicUrlForLocale(LocalizedUrl::publicXDefaultLocale(), '/about-us'),
         ]);
     }
 
@@ -248,6 +263,115 @@ class PublicReportController extends Controller
         return redirect()->route('submit-email');
     }
 
+    public function analyzeEstimateCheck(
+        Request $request,
+        OpenAIService $openAI,
+        AffiliateAttributionService $affiliates,
+        RecaptchaService $recaptcha,
+    ): JsonResponse {
+        if ($this->publicWizardMaintenanceEnabled()) {
+            return response()->json([
+                'message' => __('wizard_maintenance_body'),
+            ], 503);
+        }
+
+        $validator = Validator::make(
+            $request->all(),
+            ['url' => ['required', 'url']],
+            [
+                'url.required' => __('wizard_url_required'),
+                'url.url' => __('wizard_url_invalid'),
+            ],
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->errors()->first('url'),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        if (!$recaptcha->verify($request, 'landing_estimate_check')) {
+            return response()->json([
+                'message' => __('contact_validation_recaptcha_failed'),
+            ], 422);
+        }
+
+        $url = (string) $validator->validated()['url'];
+        $locale = app()->getLocale();
+
+        Log::channel('audit')->info('Landing estimate check audit', [
+            'locale' => $locale,
+            'url' => $url,
+            'audit' => RequestAudit::fromRequest($request),
+        ]);
+
+        try {
+            $result = $openAI->estimateListingValue($url, $locale);
+        } catch (\Throwable $e) {
+            Log::channel('report')->error('Landing estimate check exception', [
+                'url' => $url,
+                'locale' => $locale,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => __('hero_estimate_error_generic'),
+            ], 500);
+        }
+
+        if (!$result['success']) {
+            $message = $this->resolveEstimateCheckMessage($result['reason_code'] ?? null);
+
+            Log::channel('report')->info('Landing estimate check failed', [
+                'url' => $url,
+                'locale' => $locale,
+                'reason_code' => $result['reason_code'] ?? 'unknown',
+                'reason' => $result['message'] ?? null,
+            ]);
+
+            return response()->json([
+                'message' => $message,
+                'reason_code' => $result['reason_code'] ?? 'source_blocked',
+            ], 422);
+        }
+
+        $report = Report::create([
+            'url' => $url,
+            'report_type' => $result['report_type'],
+            'locale' => $locale,
+            'status' => 'pending',
+            ...$affiliates->attributesFromRequest($request),
+        ]);
+
+        $affiliates->markUsed($report->affiliate_tag_id);
+        session(['report_id' => $report->id]);
+
+        Log::channel('report')->info('Landing estimate check completed', [
+            'report_id' => $report->id,
+            'type' => $report->report_type,
+            'locale' => $report->locale,
+            'url' => $report->url,
+            'valuation' => $result['valuation'],
+            'confidence' => $result['confidence'] ?? null,
+            'affiliate_ref' => $report->affiliate_ref,
+        ]);
+
+        return response()->json([
+            'report_id' => $report->id,
+            'url' => $report->url,
+            'report_type' => $report->report_type,
+            'transaction_type' => $result['transaction_type'],
+            'valuation' => $result['valuation'],
+            'result' => $result['result'],
+            'asking_price' => $result['asking_price'],
+            'estimated_value' => $result['estimated_value'],
+            'currency' => $result['currency'],
+            'difference_percent' => $result['difference_percent'],
+            'confidence' => is_string($result['confidence'] ?? null) ? $result['confidence'] : null,
+        ]);
+    }
+
     public function showEmailForm(Request $request, ReportPricingService $pricing)
     {
         $reportId = session('report_id');
@@ -292,7 +416,7 @@ class PublicReportController extends Controller
                 return redirect()->route('report.status', ['pageToken' => $report->page_token]);
             }
 
-            return redirect()->route('home')->withErrors(['error' => 'This report is no longer pending.']);
+            return redirect()->route('home')->withErrors(['error' => __('report_no_longer_pending')]);
         }
 
         if (!$report->affiliate_tag_id) {
@@ -505,6 +629,15 @@ class PublicReportController extends Controller
 
     private function purchaseDataLayerEvent(Report $report, ?int $purchaseId, Request $request): ?array
     {
+        $purchase = $purchaseId ? ReportPurchase::find($purchaseId) : null;
+        $usesCheckoutAmount = $purchase?->amount_total !== null || $purchase?->checkout_amount_minor !== null;
+        $amountMinor = $purchase?->amount_total
+            ?? $purchase?->checkout_amount_minor
+            ?? $purchase?->base_amount_minor;
+        $currency = strtoupper((string) ($usesCheckoutAmount
+            ? ($purchase?->paid_currency ?: $purchase?->currency ?: 'RON')
+            : ($purchase?->base_currency ?: 'EUR')));
+        $value = $amountMinor !== null ? round(((int) $amountMinor) / 100, 2) : null;
         $userData = $this->enhancedConversionUserData($report, $request);
         $withUserData = static fn (array $event): array => $userData === null
             ? $event
@@ -517,9 +650,9 @@ class PublicReportController extends Controller
                 'report_id' => $report->id,
                 'purchase_id' => $purchaseId,
                 'report_type' => $report->report_type,
-                'currency' => 'EUR',
-                'value' => 27.99,
-                'content_name' => 'Raport Cumparare',
+                'currency' => $currency,
+                'value' => $value,
+                'content_name' => 'Residential purchase report',
             ]),
             str_starts_with($report->report_type, 'rental_') => $withUserData([
                 'event' => 'report_purchased_rental',
@@ -527,9 +660,9 @@ class PublicReportController extends Controller
                 'report_id' => $report->id,
                 'purchase_id' => $purchaseId,
                 'report_type' => $report->report_type,
-                'currency' => 'EUR',
-                'value' => 17.99,
-                'content_name' => 'Raport Inchiriere',
+                'currency' => $currency,
+                'value' => $value,
+                'content_name' => 'Residential rental report',
             ]),
             default => null,
         };
@@ -695,6 +828,15 @@ class PublicReportController extends Controller
             'not_property' => __('wizard_url_not_property'),
             'not_buying_property' => __('wizard_url_not_buying_property'),
             'not_renting_property' => __('wizard_url_not_renting_property'),
+            'source_blocked', 'accessible_property', null => __('wizard_url_access_failed'),
+            default => __('wizard_url_access_failed'),
+        };
+    }
+
+    private function resolveEstimateCheckMessage(?string $reasonCode): string
+    {
+        return match ($reasonCode) {
+            'not_property' => __('wizard_url_not_property'),
             'source_blocked', 'accessible_property', null => __('wizard_url_access_failed'),
             default => __('wizard_url_access_failed'),
         };

@@ -377,11 +377,6 @@ class SmartBillService
             $payload['taxPercentage'] = $taxPercentage;
         }
 
-        if ($this->invoiceLanguage($purchase) !== 'RO') {
-            $payload['translatedName'] = $this->productName($purchase, 'en');
-            $payload['translatedMeasuringUnit'] = 'piece';
-        }
-
         return $payload;
     }
 
@@ -640,12 +635,10 @@ class SmartBillService
 
     private function productName(ReportPurchase $purchase, ?string $locale = null): string
     {
-        $locale ??= $purchase->locale === 'ro' ? 'ro' : 'en';
+        $locale ??= 'ro';
 
         if ($purchase->report?->is_test) {
-            return $locale === 'ro'
-                ? 'Test Stripe + SmartBill'
-                : 'Stripe + SmartBill test';
+            return 'Test Stripe + SmartBill';
         }
 
         return match ([$purchase->report_type, $locale]) {
@@ -664,14 +657,10 @@ class SmartBillService
     private function productDescription(ReportPurchase $purchase): string
     {
         if ($purchase->report?->is_test) {
-            return $purchase->locale === 'ro'
-                ? 'Flux de test pentru Stripe si SmartBill. Nu se genereaza raportul final.'
-                : 'Billing test flow for Stripe and SmartBill. No final report is generated.';
+            return 'Flux de test pentru Stripe si SmartBill. Nu se genereaza raportul final.';
         }
 
-        return $purchase->locale === 'ro'
-            ? 'Raport digital pentru analiza unei proprietati imobiliare.'
-            : 'Digital report for the analysis of a real-estate property.';
+        return 'Raport digital pentru analiza unei proprietati imobiliare.';
     }
 
     private function amountForPurchase(ReportPurchase $purchase): float
@@ -751,7 +740,7 @@ class SmartBillService
 
     private function invoiceLanguage(ReportPurchase $purchase): string
     {
-        return $purchase->locale === 'ro' ? 'RO' : 'EN';
+        return 'RO';
     }
 
     private function assertConfigured(): void

@@ -90,7 +90,7 @@
         ],
     ];
 
-    $faqItems = [
+    $faqItems = $locale === 'ro' ? [
         [
             'question' => 'Ce este GetYourConsultant?',
             'paragraphs' => [
@@ -200,6 +200,118 @@
             'paragraphs' => [
                 'Multe dintre informațiile utilizate în raport sunt disponibile din surse publice, însă sunt răspândite pe numeroase site-uri și baze de date. De cele mai multe ori, oamenii nu știu unde să le caute, cum să le verifice sau cum să le interpreteze corect.',
                 'GetYourConsultant centralizează și analizează aceste informații într-un singur raport clar și ușor de înțeles, economisindu-ți ore de documentare și ajutându-te să iei o decizie mai bine informată înainte de a cumpăra sau închiria o proprietate.',
+            ],
+        ],
+    ] : [
+        [
+            'question' => 'What is GetYourConsultant?',
+            'paragraphs' => [
+                'GetYourConsultant is a platform that analyzes publicly available property data and generates an informational report to help you make a better-informed decision.',
+            ],
+        ],
+        [
+            'question' => 'Does it replace a real estate agent?',
+            'paragraphs' => [
+                'No. The report complements the information provided by a real estate agent with an analysis based on data and objective indicators.',
+            ],
+        ],
+        [
+            'question' => 'Does it replace an ANEVAR appraiser?',
+            'paragraphs' => [
+                'No. The report is not an authorized valuation and cannot replace a report prepared by an accredited appraiser.',
+            ],
+        ],
+        [
+            'question' => 'Does it replace a lawyer?',
+            'paragraphs' => [
+                'No. For legal due diligence, we recommend consulting a lawyer who specializes in real estate transactions.',
+            ],
+        ],
+        [
+            'question' => 'Where does the information come from?',
+            'paragraphs' => [
+                'The analysis is based exclusively on publicly available information. GetYourConsultant does not alter or influence the source data. We centralize, analyze, and turn it into a clear, objective assessment that supports a better-informed decision.',
+            ],
+        ],
+        [
+            'question' => 'How long does report generation take, and how long is it valid?',
+            'paragraphs' => [
+                'In most cases, the report is available within a few minutes and is valid for 30 days.',
+            ],
+        ],
+        [
+            'question' => 'Who is the report useful for?',
+            'paragraphs' => [
+                'It is useful for buyers, tenants, investors, property developers, and real estate agents who want to provide clients with greater transparency.',
+            ],
+        ],
+        [
+            'question' => 'Why should I buy the report?',
+            'paragraphs' => [
+                'Because an informed decision can save time and money and help you avoid unpleasant surprises.',
+            ],
+        ],
+        [
+            'question' => 'What does the report contain?',
+            'paragraphs' => [
+                'The report includes:',
+            ],
+            'items' => [
+                'an estimated property value',
+                'local price trends for comparable properties',
+                'a neighborhood analysis',
+                'air quality information',
+                'relevant indicators',
+                'identified risks',
+                'conclusions',
+            ],
+        ],
+        [
+            'question' => 'What are the data sources?',
+            'paragraphs' => [
+                'GetYourConsultant uses publicly available information from official and relevant sources, in accordance with the applicable terms of use for each source.',
+                'Depending on the property and data availability, these sources may include:',
+            ],
+            'items' => [
+                'Eurostat',
+                'Romania’s National Institute of Statistics (INS)',
+                'ANCPI, where public data is available',
+                'Google Maps Platform',
+                'OpenStreetMap',
+                'public property-listing platforms',
+                'other relevant public databases and sources',
+            ],
+            'closing' => 'GetYourConsultant does not alter the source data. Our role is to centralize, analyze, and present it in a clear and objective report that supports a better-informed decision.',
+        ],
+        [
+            'question' => 'Why can I trust GetYourConsultant?',
+            'paragraphs' => [
+                'GetYourConsultant does not represent the interests of the buyer, seller, or an agency. Our purpose is to provide transparency and information that supports decision-making.',
+            ],
+        ],
+        [
+            'question' => 'Does the report favor the buyer or the seller?',
+            'paragraphs' => [
+                'No. The analysis is independent and aims to provide the most objective possible view of the property.',
+            ],
+        ],
+        [
+            'question' => 'Do you work with real estate agencies?',
+            'paragraphs' => [
+                'Yes. We believe real estate agents, developers, architects, and lawyers play an essential role in a transaction. GetYourConsultant complements their work through data-based analysis and transparency.',
+            ],
+        ],
+        [
+            'question' => 'What is the purpose of GetYourConsultant?',
+            'paragraphs' => [
+                'We believe everyone deserves access to clear and transparent information before buying or renting a property. Our mission is to turn public data into an easy-to-understand analysis that supports better-informed decisions.',
+            ],
+        ],
+        [
+            'question' => 'Why pay for a report if some of the information is available online for free?',
+            'paragraphs' => [
+                'Much of the information used in the report is available from public sources, but it is spread across many websites and databases. Most people do not know where to look, how to verify it, or how to interpret it correctly.',
+                'GetYourConsultant centralizes and analyzes this information in one clear, easy-to-understand report, saving you hours of research and helping you make a better-informed decision before buying or renting a property.',
             ],
         ],
     ];
@@ -392,6 +504,8 @@
                 ],
             ],
         ];
+    $professionalPreviousLabel = $locale === 'ro' ? 'Recomandarea anterioară' : 'Previous recommendation';
+    $professionalNextLabel = $locale === 'ro' ? 'Recomandarea următoare' : 'Next recommendation';
     $formatPrice = static function (array $entry, string $fallback) use ($locale): string {
         if ($entry === []) {
             return $fallback;
@@ -428,12 +542,24 @@
                         </p>
 
                         <div class="mt-7 max-w-xl md:mt-8">
-                            <a href="{{ route('get-report') }}" class="inline-flex h-14 cursor-pointer items-center justify-center bg-brand-primary px-7 text-[0.98rem] font-semibold text-white shadow-[0_18px_36px_rgba(52,48,106,0.22)] transition-colors hover:bg-brand-primary/92">
-                                <span class="inline-flex items-center gap-2">
-                                    {{ __('landing_generate_report') }}
-                                    <x-marketing.icon name="arrow-right" class="h-4 w-4" />
-                                </span>
-                            </a>
+                            <form action="{{ route('estimate-check.show') }}" method="GET" class="w-full">
+                                <div class="flex flex-col gap-0 sm:flex-row sm:items-stretch">
+                                    <input
+                                        id="hero-form-url"
+                                        name="url"
+                                        type="url"
+                                        required
+                                        placeholder="{{ __('landing_hero_url_placeholder') }}"
+                                        class="h-14 border border-brand-primary/12 bg-[#fff] px-5 text-base text-brand-primary shadow-[0_16px_40px_rgba(52,48,106,0.08)] placeholder:text-brand-primary/45 focus:outline-none"
+                                    >
+                                    <button type="submit" class="h-14 cursor-pointer bg-brand-primary px-7 text-[0.98rem] font-semibold text-white shadow-[0_18px_36px_rgba(52,48,106,0.22)] transition-colors hover:bg-brand-primary/92 sm:-ml-px">
+                                        <span class="inline-flex items-center gap-2">
+                                            {{ __('landing_check_estimate') }}
+                                            <x-marketing.icon name="arrow-right" class="h-4 w-4" />
+                                        </span>
+                                    </button>
+                                </div>
+                            </form>
                         </div>
 
                         <div class="mt-5 flex flex-wrap gap-x-5 gap-y-2 md:mt-6 md:gap-x-6">
@@ -492,22 +618,24 @@
                 </div>
             </section>
 
-            <section class="relative overflow-hidden bg-white pb-14 pt-12 md:pb-18 md:pt-16">
-                <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                    <div class="relative mx-auto max-w-5xl">
-                        <div class="absolute inset-x-8 bottom-4 h-20 bg-brand-primary/12 blur-3xl"></div>
-                        <div class="relative overflow-hidden border border-brand-primary/10 bg-white shadow-[0_24px_60px_rgba(52,48,106,0.14)]">
-                            <iframe
-                                class="aspect-video w-full"
-                                src="https://www.youtube.com/embed/jD7AjgbLpL4"
-                                title="GetYourConsultant video"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                allowfullscreen
-                            ></iframe>
+            @if ($locale === 'ro')
+                <section class="relative overflow-hidden bg-white pb-14 pt-12 md:pb-18 md:pt-16">
+                    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                        <div class="relative mx-auto max-w-5xl">
+                            <div class="absolute inset-x-8 bottom-4 h-20 bg-brand-primary/12 blur-3xl"></div>
+                            <div class="relative overflow-hidden border border-brand-primary/10 bg-white shadow-[0_24px_60px_rgba(52,48,106,0.14)]">
+                                <iframe
+                                    class="aspect-video w-full"
+                                    src="https://www.youtube.com/embed/jD7AjgbLpL4"
+                                    title="GetYourConsultant video"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowfullscreen
+                                ></iframe>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            @endif
 
             <section id="report-example" class="relative overflow-hidden bg-white pb-16 pt-12 md:py-18">
                 <img src="{{ asset('images/blue-noise-texture.png') }}" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.045] mix-blend-multiply">
@@ -642,8 +770,8 @@
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <button type="button" data-professionals-prev aria-label="Previous recommendation" class="flex h-11 w-11 cursor-pointer items-center justify-center border border-[#f3b44f]/30 bg-white text-lg font-semibold text-brand-primary shadow-[0_14px_34px_rgba(52,48,106,0.08)] transition-colors hover:border-[#f3b44f]/55 hover:bg-white/78 disabled:cursor-not-allowed disabled:opacity-40">&lt;</button>
-                            <button type="button" data-professionals-next aria-label="Next recommendation" class="flex h-11 w-11 cursor-pointer items-center justify-center border border-[#f3b44f]/30 bg-white text-lg font-semibold text-brand-primary shadow-[0_14px_34px_rgba(52,48,106,0.08)] transition-colors hover:border-[#f3b44f]/55 hover:bg-white/78 disabled:cursor-not-allowed disabled:opacity-40">&gt;</button>
+                            <button type="button" data-professionals-prev aria-label="{{ $professionalPreviousLabel }}" class="flex h-11 w-11 cursor-pointer items-center justify-center border border-[#f3b44f]/30 bg-white text-lg font-semibold text-brand-primary shadow-[0_14px_34px_rgba(52,48,106,0.08)] transition-colors hover:border-[#f3b44f]/55 hover:bg-white/78 disabled:cursor-not-allowed disabled:opacity-40">&lt;</button>
+                            <button type="button" data-professionals-next aria-label="{{ $professionalNextLabel }}" class="flex h-11 w-11 cursor-pointer items-center justify-center border border-[#f3b44f]/30 bg-white text-lg font-semibold text-brand-primary shadow-[0_14px_34px_rgba(52,48,106,0.08)] transition-colors hover:border-[#f3b44f]/55 hover:bg-white/78 disabled:cursor-not-allowed disabled:opacity-40">&gt;</button>
                         </div>
                     </div>
 
@@ -670,7 +798,7 @@
                                             </div>
                                             @if (count($recommendation['body']) > 1)
                                                 <button type="button" data-expandable-recommendation-toggle aria-expanded="false" class="mt-4 inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-[#b86f12] transition-colors hover:text-brand-primary">
-                                                    <span data-expandable-recommendation-label>Mai mult</span>
+                                                    <span data-expandable-recommendation-label>{{ __('landing_show_more') }}</span>
                                                     <span data-expandable-recommendation-icon class="text-lg leading-none transition-transform">↓</span>
                                                 </button>
                                             @endif
@@ -734,7 +862,7 @@
             <section id="faq" class="bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)] py-16 md:py-18">
                 <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                     <div class="mx-auto max-w-3xl text-center">
-                        <h2 class="text-[2rem] leading-[1.04] font-bold tracking-[-0.04em] text-brand-primary md:text-[2.7rem]">Întrebări frecvente</h2>
+                        <h2 class="text-[2rem] leading-[1.04] font-bold tracking-[-0.04em] text-brand-primary md:text-[2.7rem]">{{ __('landing_faq_title') }}</h2>
                     </div>
 
                     <div class="mt-8 space-y-3 md:mt-10">
@@ -836,18 +964,19 @@
                         <p class="mt-3 text-[14px] leading-[1.6] text-brand-primary/78 md:mt-4 md:text-lg md:leading-[1.74]">{{ __('landing_cta_desc') }}</p>
 
                         <div class="mt-7 max-w-xl md:mt-8">
-                            <form id="final-cta-form" action="{{ route('get-report') }}" method="GET" class="w-full">
+                            <form id="final-cta-form" action="{{ route('estimate-check.show') }}" method="GET" class="w-full">
                                 <div class="flex flex-col gap-0 sm:flex-row sm:items-stretch">
                                     <input
                                         id="final-cta-form-url"
                                         name="url"
                                         type="url"
+                                        required
                                         placeholder="{{ __('landing_hero_url_placeholder') }}"
                                         class="h-14 border border-brand-primary/12 bg-[#fff] px-5 text-base text-brand-primary shadow-[0_16px_40px_rgba(52,48,106,0.08)] placeholder:text-brand-primary/45 focus:outline-none"
                                     >
                                     <button type="submit" class="h-14 cursor-pointer bg-brand-primary px-7 text-[0.98rem] font-semibold text-white shadow-[0_18px_36px_rgba(52,48,106,0.22)] transition-colors hover:bg-brand-primary/92 sm:-ml-px">
                                         <span class="inline-flex items-center gap-2">
-                                            {{ __('landing_generate_report') }}
+                                            {{ __('landing_check_estimate') }}
                                             <x-marketing.icon name="arrow-right" class="h-4 w-4" />
                                         </span>
                                     </button>
@@ -935,7 +1064,9 @@
                     content.classList.toggle('hidden', isExpanded);
 
                     if (label) {
-                        label.textContent = isExpanded ? 'Mai mult' : 'Mai puțin';
+                        label.textContent = isExpanded
+                            ? @json(__('landing_show_more'))
+                            : @json(__('landing_show_less'));
                     }
 
                     if (icon) {

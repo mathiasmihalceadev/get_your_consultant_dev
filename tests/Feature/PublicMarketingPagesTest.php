@@ -11,7 +11,7 @@ class PublicMarketingPagesTest extends TestCase
         parent::setUp();
 
         config()->set('locales.supported', ['en', 'ro']);
-        config()->set('locales.public', ['ro']);
+        config()->set('locales.public', ['en', 'ro']);
         config()->set('locales.default', 'en');
         config()->set('locales.domain_urls', [
             'en' => 'http://myapp-com.test:8000',
@@ -36,8 +36,8 @@ class PublicMarketingPagesTest extends TestCase
             ->assertOk()
             ->assertSeeText('Ai întrebări? Suntem aici să te ajutăm.')
             ->assertSee('id="contact-form"', false)
-            ->assertSee('>Tornimae 5', false)
-            ->assertSee('Tallinn, Estonia 10145</p>', false)
+            ->assertSeeText('Aghata Barsescu')
+            ->assertSeeText('București RO')
             ->assertDontSee('data-page=', false);
     }
 
@@ -58,5 +58,23 @@ class PublicMarketingPagesTest extends TestCase
                 ->assertSee('<article', false)
                 ->assertDontSee('data-page=', false);
         }
+    }
+
+    public function test_about_page_uses_the_domain_language_and_localized_path(): void
+    {
+        $englishResponse = $this->get('http://myapp-com.test/about-us');
+
+        $englishResponse
+            ->assertOk()
+            ->assertSeeText('Who are we?')
+            ->assertSeeText('What do we provide?')
+            ->assertDontSeeText('Cine suntem?');
+
+        $romanianResponse = $this->get('http://myapp-ro.test/despre-noi');
+
+        $romanianResponse
+            ->assertOk()
+            ->assertSeeText('Cine suntem?')
+            ->assertSee('href="http://myapp-com.test:8000/about-us"', false);
     }
 }
