@@ -181,20 +181,6 @@ const mediaAppearances = [
     },
 ] as const;
 
-const landingPromoPrices = {
-    ro: {
-        buying_living: { normal: "27,99 €", launch: "19,99 €" },
-        rental_living: { normal: "17,99 €", launch: "11,99 €" },
-    },
-    en: {
-        buying_living: { normal: "€27.99", launch: "€19.99" },
-        rental_living: { normal: "€17.99", launch: "€11.99" },
-    },
-} satisfies Record<
-    "ro" | "en",
-    Record<LandingPricingReportType, { normal: string; launch: string }>
->;
-
 type FaqItem = {
     question: string;
     paragraphs: string[];
@@ -1111,10 +1097,12 @@ export default function Landing({ pricingCatalog }: LandingProps) {
                                 imageAltKey,
                                 featureKeys,
                             }) => {
-                                const promoPrice =
-                                    landingPromoPrices[
-                                        locale === "ro" ? "ro" : "en"
-                                    ][type];
+                                const price = formatCatalogPrice(
+                                    type,
+                                    type === "buying_living"
+                                        ? "landing_pricing_buying_price"
+                                        : "landing_pricing_rental_price",
+                                );
 
                                 return (
                                     <motion.div
@@ -1137,21 +1125,8 @@ export default function Landing({ pricingCatalog }: LandingProps) {
                                                     {t(labelKey)}
                                                 </h3>
                                                 <div className="text-right">
-                                                    <p className="text-sm font-semibold text-brand-primary/48">
-                                                        {t(
-                                                            "landing_price_normal_label",
-                                                        )}
-                                                    </p>
-                                                    <p className="mt-1 text-lg font-semibold leading-none text-brand-primary/42 line-through decoration-2 decoration-brand-primary/45">
-                                                        {promoPrice.normal}
-                                                    </p>
-                                                    <p className="mt-3 text-base font-semibold leading-[1.35] text-[#b86f12]">
-                                                        {t(
-                                                            "landing_price_launch_label",
-                                                        )}
-                                                    </p>
-                                                    <p className="mt-1 text-3xl font-bold tracking-[-0.05em] text-brand-primary">
-                                                        {promoPrice.launch}
+                                                    <p className="text-3xl font-bold tracking-[-0.05em] text-brand-primary">
+                                                        {price}
                                                     </p>
                                                     <p className="mt-1 text-xs font-semibold text-brand-primary/54">
                                                         {t(
@@ -1197,10 +1172,6 @@ export default function Landing({ pricingCatalog }: LandingProps) {
                             },
                         )}
                     </div>
-
-                    <p className="mt-5 text-center text-[13px] font-semibold text-brand-primary/60 md:text-sm">
-                        {t("landing_price_campaign_note")}
-                    </p>
                 </motion.div>
             </motion.section>
 
