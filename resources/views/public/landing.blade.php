@@ -316,16 +316,6 @@
         ],
     ];
 
-    $landingPromoPrices = $locale === 'ro'
-        ? [
-            'buying_living' => ['normal' => '27,99 €', 'launch' => '19,99 €'],
-            'rental_living' => ['normal' => '17,99 €', 'launch' => '11,99 €'],
-        ]
-        : [
-            'buying_living' => ['normal' => '€27.99', 'launch' => '€19.99'],
-            'rental_living' => ['normal' => '€17.99', 'launch' => '€11.99'],
-        ];
-
     $buyingSampleReportHref = asset($locale === 'ro' ? 'images/report-example-ro.pdf' : 'images/report-example-en.pdf');
     $rentalSampleReportHref = asset($locale === 'ro' ? 'images/report-example-rental-ro.pdf' : 'images/report-example-rental-en.pdf');
     $testimonialSection = $locale === 'ro'
@@ -906,9 +896,6 @@
 
                     <div class="mt-10 flex flex-col items-center gap-5 lg:flex-row lg:justify-center">
                         @foreach ($pricingOptions as $option)
-                            @php
-                                $promoPrice = $landingPromoPrices[$option['type']];
-                            @endphp
                             <div class="w-full max-w-[420px] overflow-hidden border border-brand-primary/10 bg-white text-brand-primary shadow-[0_22px_54px_rgba(52,48,106,0.08)]">
                                 <div class="relative flex h-72 items-center justify-center overflow-hidden border-b border-brand-primary/10 bg-white p-6 md:h-84 md:p-8">
                                     <div class="absolute inset-x-10 bottom-5 h-8 rounded-full bg-brand-primary/6 blur-xl"></div>
@@ -919,13 +906,8 @@
                                     <div class="flex items-start justify-between gap-4">
                                         <h3 class="text-xl font-semibold text-brand-primary">{{ $option['label'] }}</h3>
                                         <div class="text-right">
-                                            <p class="text-sm font-semibold text-brand-primary/48">{{ __('landing_price_normal_label') }}</p>
-                                            <p class="mt-1 text-lg font-semibold leading-none text-brand-primary/42 line-through decoration-brand-primary/45 decoration-2">
-                                                {{ $promoPrice['normal'] }}
-                                            </p>
-                                            <p class="mt-3 text-base font-semibold leading-[1.35] text-[#b86f12]">{{ __('landing_price_launch_label') }}</p>
-                                            <p class="mt-1 text-3xl font-bold tracking-[-0.05em] text-brand-primary">
-                                                {{ $promoPrice['launch'] }}
+                                            <p class="text-3xl font-bold tracking-[-0.05em] text-brand-primary">
+                                                {{ $formatPrice($pricingCatalog[$option['type']] ?? [], $option['fallback_price']) }}
                                             </p>
                                             <p class="mt-1 text-xs font-semibold text-brand-primary/54">{{ __('landing_price_vat_included') }}</p>
                                         </div>
@@ -948,10 +930,6 @@
                             </div>
                         @endforeach
                     </div>
-
-                    <p class="mt-5 text-center text-[13px] font-semibold text-brand-primary/60 md:text-sm">
-                        {{ __('landing_price_campaign_note') }}
-                    </p>
                 </div>
             </section>
 

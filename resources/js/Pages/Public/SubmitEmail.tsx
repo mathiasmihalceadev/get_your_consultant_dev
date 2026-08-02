@@ -89,20 +89,6 @@ interface SubmitEmailProps {
     errors: Record<string, string>;
 }
 
-const campaignRegularPrices = {
-    ro: {
-        buying_living: "27,99 €",
-        rental_living: "17,99 €",
-    },
-    en: {
-        buying_living: "€27.99",
-        rental_living: "€17.99",
-    },
-} satisfies Record<
-    "ro" | "en",
-    Partial<Record<ReportType, string>>
->;
-
 export default function SubmitEmail({
     report,
     pricing,
@@ -115,10 +101,6 @@ export default function SubmitEmail({
     const [processing, setProcessing] = useState(false);
     const termsPath =
         locale === "ro" ? "/termeni-si-conditii" : "/terms-and-conditions";
-    const regularPrice =
-        campaignRegularPrices[locale === "ro" ? "ro" : "en"][
-            report.report_type
-        ];
 
     const formatMoney = (minor: number, currency: string) =>
         new Intl.NumberFormat(locale === "ro" ? "ro-RO" : "en-IE", {
@@ -130,7 +112,7 @@ export default function SubmitEmail({
             maximumFractionDigits: 2,
         }).format(minor / 100);
 
-    const launchPrice = pricing
+    const reportPrice = pricing
         ? formatMoney(pricing.base_amount_minor, pricing.base_currency)
         : null;
     const checkoutPrice = pricing
@@ -292,44 +274,24 @@ export default function SubmitEmail({
                             )}
                         </div>
 
-                        {pricing && launchPrice && (
+                        {pricing && reportPrice && (
                             <div className="border border-brand-primary/10 bg-[linear-gradient(180deg,#ffffff_0%,#f2f5ff_100%)] px-5 py-4 text-brand-primary shadow-[0_12px_30px_rgba(52,48,106,0.07)]">
-                                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                                    <div>
-                                        <p className="text-sm font-semibold text-brand-primary/52">
-                                            {t("landing_price_normal_label")}
+                                <div className="sm:text-right">
+                                    <p className="text-3xl font-bold tracking-[-0.05em] text-brand-primary">
+                                        {reportPrice}
+                                    </p>
+                                    <p className="mt-1 text-xs font-semibold text-brand-primary/54">
+                                        {t("landing_price_vat_included")}
+                                    </p>
+                                    {showCheckoutCurrency && (
+                                        <p className="mt-2 text-[13px] font-semibold text-brand-primary/62">
+                                            {t(
+                                                "submit_email_checkout_amount_label",
+                                            )}
+                                            : {checkoutPrice}
                                         </p>
-                                        {regularPrice && (
-                                            <p className="mt-1 text-lg font-semibold leading-none text-brand-primary/42 line-through decoration-2 decoration-brand-primary/45">
-                                                {regularPrice}
-                                            </p>
-                                        )}
-                                        <p className="mt-3 text-base font-semibold leading-[1.35] text-[#b86f12]">
-                                            {t("landing_price_launch_label")}
-                                        </p>
-                                    </div>
-
-                                    <div className="sm:text-right">
-                                        <p className="text-3xl font-bold tracking-[-0.05em] text-brand-primary">
-                                            {launchPrice}
-                                        </p>
-                                        <p className="mt-1 text-xs font-semibold text-brand-primary/54">
-                                            {t("landing_price_vat_included")}
-                                        </p>
-                                        {showCheckoutCurrency && (
-                                            <p className="mt-2 text-[13px] font-semibold text-brand-primary/62">
-                                                {t(
-                                                    "submit_email_checkout_amount_label",
-                                                )}
-                                                : {checkoutPrice}
-                                            </p>
-                                        )}
-                                    </div>
+                                    )}
                                 </div>
-
-                                <p className="mt-3 text-[13px] font-semibold text-brand-primary/60">
-                                    {t("landing_price_campaign_note")}
-                                </p>
                             </div>
                         )}
 
