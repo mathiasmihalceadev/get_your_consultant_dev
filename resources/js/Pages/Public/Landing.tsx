@@ -372,8 +372,6 @@ const faqItemsEn: FaqItem[] = [
         ],
         items: [
             "Eurostat",
-            "Romania's National Institute of Statistics (INS)",
-            "ANCPI, where public data is available",
             "Google Maps Platform",
             "OpenStreetMap",
             "public property-listing platforms",
