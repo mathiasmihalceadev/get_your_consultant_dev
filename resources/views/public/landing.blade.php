@@ -274,8 +274,6 @@
             ],
             'items' => [
                 'Eurostat',
-                'Romania’s National Institute of Statistics (INS)',
-                'ANCPI, where public data is available',
                 'Google Maps Platform',
                 'OpenStreetMap',
                 'public property-listing platforms',
@@ -437,7 +435,7 @@
                 ],
                 [
                     'body' => [
-                        'Romania’s real estate market is extraordinarily diverse, from charming interwar buildings to new residential complexes or exclusive penthouses. Correctly evaluating each typology involves dozens of criteria that are almost impossible to gather and interpret on your own.',
+                        'The real estate market is extraordinarily diverse, from character buildings to new residential complexes and exclusive penthouses. Correctly evaluating each typology involves dozens of criteria that are almost impossible to gather and interpret on your own.',
                         'This is exactly where a GetYourConsultant report adds value. Its benefit is not only the amount of information provided, but the way that information is correlated and placed in context. A property should not be analyzed only through price or appearance, but also through urban context, technical risks, future costs, and real usability potential.',
                     ],
                     'role' => 'Architect',

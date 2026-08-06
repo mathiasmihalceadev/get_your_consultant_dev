@@ -664,6 +664,13 @@
     $verdict = $data['page_one']['verdict'] ?? [];
     $pages = $data['pages'] ?? [];
     $meta = $data['report_meta'] ?? [];
+    $currency = strtoupper((string) ($hero['currency'] ?? 'EUR'));
+    $moneySymbol = match ($currency) {
+        'GBP' => '£',
+        'USD' => '$',
+        'RON' => 'RON ',
+        default => '€',
+    };
 
     $viewTranslations = [
         'ro' => [
@@ -1008,7 +1015,7 @@
                 </div>
                 <div style="display: flex; gap: 8px; align-items: flex-end;">
                     <div class="hero-price-box" style="padding: 8px 12px; min-width: 110px;">
-                        <div class="hero-price">&euro;{{ number_format($hero['asking_price'] ?? 0) }}</div>
+                        <div class="hero-price">{{ $moneySymbol }}{{ number_format($hero['asking_price'] ?? 0) }}</div>
                         <div class="hero-price-label">{{ $t('asking_price') }}</div>
                         @if(!empty($hero['price_deviation_pct']))
                             <div class="hero-deviation">
@@ -1018,7 +1025,7 @@
                     </div>
                     @if(!empty($hero['fair_value_estimate']))
                     <div class="hero-price-box" style="background: linear-gradient(135deg, var(--green), #047857); min-width: 140px; padding: 8px 14px;">
-                        <div class="hero-price">&euro;{{ number_format($hero['fair_value_estimate']) }}</div>
+                        <div class="hero-price">{{ $moneySymbol }}{{ number_format($hero['fair_value_estimate']) }}</div>
                         <div class="hero-price-label">{{ $t('fair_value_estimate') }}</div>
                     </div>
                     @endif
@@ -1312,7 +1319,7 @@
                                             <span class="cost-note">{{ $ci['note'] }}</span>
                                         @endif
                                     </td>
-                                    <td style="text-align:right;font-weight:600;">&euro;{{ number_format($ci['value'] ?? 0) }}</td>
+                                    <td style="text-align:right;font-weight:600;">{{ $moneySymbol }}{{ number_format($ci['value'] ?? 0) }}</td>
                                     <td style="text-align:center;" class="{{ ($ci['mandatory'] ?? false) ? 'included' : 'not-included' }}">
                                         {{ ($ci['mandatory'] ?? false) ? $t('yes') : $t('optional') }}
                                     </td>
@@ -1321,7 +1328,7 @@
                         </tbody>
                         @if(!empty($section['total_acquisition_cost']))
                         <tfoot>
-                            <tr><td>{{ $t('total_acquisition_estimated') }}</td><td style="text-align:right;">&euro;{{ number_format($section['total_acquisition_cost']) }}</td><td></td></tr>
+                            <tr><td>{{ $t('total_acquisition_estimated') }}</td><td style="text-align:right;">{{ $moneySymbol }}{{ number_format($section['total_acquisition_cost']) }}</td><td></td></tr>
                         </tfoot>
                         @endif
                     </table>
@@ -1331,7 +1338,7 @@
                 @if(!empty($section['negotiation_arguments']))
                     <div class="negotiation-box">
                         @if(!empty($section['target_price']))
-                            <div class="negotiation-target">{{ $t('target_price') }}: <span>&euro;{{ number_format($section['target_price']) }}</span></div>
+                            <div class="negotiation-target">{{ $t('target_price') }}: <span>{{ $moneySymbol }}{{ number_format($section['target_price']) }}</span></div>
                         @endif
                         <ul class="negotiation-list">
                             @foreach($section['negotiation_arguments'] as $arg)<li>{{ $arg }}</li>@endforeach
@@ -1359,19 +1366,19 @@
                             <div class="scenario-title">{{ $ms['label'] ?? '' }}</div>
                             <div class="scenario-grid">
                                 <div class="scenario-metric">
-                                    <div class="scenario-metric-value">&euro;{{ number_format($ms['down_payment_eur'] ?? 0) }}</div>
+                                    <div class="scenario-metric-value">{{ $moneySymbol }}{{ number_format($ms['down_payment_eur'] ?? 0) }}</div>
                                     <div class="scenario-metric-label">{{ $t('down_payment') }}</div>
                                 </div>
                                 <div class="scenario-metric">
-                                    <div class="scenario-metric-value">&euro;{{ number_format($ms['monthly_rate_eur'] ?? 0) }}</div>
+                                    <div class="scenario-metric-value">{{ $moneySymbol }}{{ number_format($ms['monthly_rate_eur'] ?? 0) }}</div>
                                     <div class="scenario-metric-label">{{ $t('monthly_payment') }}</div>
                                 </div>
                                 <div class="scenario-metric">
-                                    <div class="scenario-metric-value">&euro;{{ number_format($ms['loan_eur'] ?? 0) }}</div>
+                                    <div class="scenario-metric-value">{{ $moneySymbol }}{{ number_format($ms['loan_eur'] ?? 0) }}</div>
                                     <div class="scenario-metric-label">{{ $t('loan') }}</div>
                                 </div>
                                 <div class="scenario-metric">
-                                    <div class="scenario-metric-value">&euro;{{ number_format($ms['total_cost_eur'] ?? 0) }}</div>
+                                    <div class="scenario-metric-value">{{ $moneySymbol }}{{ number_format($ms['total_cost_eur'] ?? 0) }}</div>
                                     <div class="scenario-metric-label">{{ $t('total_cost') }}</div>
                                 </div>
                             </div>
@@ -1386,11 +1393,11 @@
                 @if(!empty($section['rental_data']))
                     @php $rd = $section['rental_data']; @endphp
                     <div class="data-grid">
-                        <div class="data-cell highlight-yellow"><span class="data-label">{{ $t('estimated_rent_furnished') }}</span><span class="data-value">&euro;{{ number_format($rd['estimated_monthly_rent_furnished_eur'] ?? 0) }} <span class="unit">{{ $t('per_month') }}</span></span></div>
-                        <div class="data-cell"><span class="data-label">{{ $t('estimated_rent_unfurnished') }}</span><span class="data-value">&euro;{{ number_format($rd['estimated_monthly_rent_unfurnished_eur'] ?? 0) }} <span class="unit">{{ $t('per_month') }}</span></span></div>
+                        <div class="data-cell highlight-yellow"><span class="data-label">{{ $t('estimated_rent_furnished') }}</span><span class="data-value">{{ $moneySymbol }}{{ number_format($rd['estimated_monthly_rent_furnished_eur'] ?? 0) }} <span class="unit">{{ $t('per_month') }}</span></span></div>
+                        <div class="data-cell"><span class="data-label">{{ $t('estimated_rent_unfurnished') }}</span><span class="data-value">{{ $moneySymbol }}{{ number_format($rd['estimated_monthly_rent_unfurnished_eur'] ?? 0) }} <span class="unit">{{ $t('per_month') }}</span></span></div>
                         <div class="data-cell"><span class="data-label">{{ $t('gross_yield') }}</span><span class="data-value">{{ $rd['gross_yield_pct'] ?? 0 }}%</span></div>
                         <div class="data-cell highlight-yellow"><span class="data-label">{{ $t('net_yield') }}</span><span class="data-value">{{ $rd['net_yield_pct'] ?? 0 }}%</span></div>
-                        <div class="data-cell"><span class="data-label">{{ $t('annual_net_income') }}</span><span class="data-value">&euro;{{ number_format($rd['annual_net_rental_income_eur'] ?? 0) }}</span></div>
+                        <div class="data-cell"><span class="data-label">{{ $t('annual_net_income') }}</span><span class="data-value">{{ $moneySymbol }}{{ number_format($rd['annual_net_rental_income_eur'] ?? 0) }}</span></div>
                         <div class="data-cell"><span class="data-label">{{ $t('days_to_rent') }}</span><span class="data-value">{{ $rd['avg_days_to_rent'] ?? '-' }} {{ $t('days') }}</span></div>
                         <div class="data-cell"><span class="data-label">{{ $t('breakeven') }}</span><span class="data-value">{{ $rd['breakeven_years'] ?? '-' }} {{ $t('years') }}</span></div>
                         <div class="data-cell"><span class="data-label">{{ $t('tenant_demand') }}</span><span class="data-value">{{ $titleCase($rd['tenant_demand'] ?? '-') }}</span></div>
@@ -1411,11 +1418,11 @@
                             <div class="scenario-title">{{ $as['name'] ?? '' }} (+{{ $as['annual_growth_pct'] ?? 0 }}%/an)</div>
                             <div class="scenario-grid">
                                 <div class="scenario-metric">
-                                    <div class="scenario-metric-value">&euro;{{ number_format($as['value_2036_eur'] ?? 0) }}</div>
+                                    <div class="scenario-metric-value">{{ $moneySymbol }}{{ number_format($as['value_2036_eur'] ?? 0) }}</div>
                                     <div class="scenario-metric-label">{{ $t('value_2036') }}</div>
                                 </div>
                                 <div class="scenario-metric">
-                                    <div class="scenario-metric-value" style="color: var(--green);">+&euro;{{ number_format($as['total_gain_eur'] ?? 0) }}</div>
+                                    <div class="scenario-metric-value" style="color: var(--green);">+{{ $moneySymbol }}{{ number_format($as['total_gain_eur'] ?? 0) }}</div>
                                     <div class="scenario-metric-label">{{ $t('total_gain') }}</div>
                                 </div>
                                 <div class="scenario-metric">
@@ -1434,11 +1441,11 @@
                 @if(!empty($section['buy_vs_rent']))
                     @php $bvr = $section['buy_vs_rent']; @endphp
                     <div class="data-grid">
-                        <div class="data-cell highlight-yellow"><span class="data-label">{{ $t('buy_total_cost_10y') }}</span><span class="data-value">&euro;{{ number_format($bvr['buy_total_cost_10yr_eur'] ?? 0) }}</span></div>
-                        <div class="data-cell"><span class="data-label">{{ $t('rent_total_10y') }}</span><span class="data-value">&euro;{{ number_format($bvr['rent_total_10yr_eur'] ?? 0) }}</span></div>
-                        <div class="data-cell"><span class="data-label">{{ $t('property_value_2036') }}</span><span class="data-value">&euro;{{ number_format($bvr['buy_property_value_moderat_eur'] ?? 0) }}</span></div>
-                        <div class="data-cell"><span class="data-label">{{ $t('buy_net_position') }}</span><span class="data-value" style="color: var(--green);">+&euro;{{ number_format($bvr['buy_net_position_eur'] ?? 0) }}</span></div>
-                        <div class="data-cell highlight-yellow full-width"><span class="data-label">{{ $t('buy_advantage_vs_rent_10y') }}</span><span class="data-value" style="color: var(--green);">+&euro;{{ number_format($bvr['advantage_buying_eur'] ?? 0) }}</span></div>
+                        <div class="data-cell highlight-yellow"><span class="data-label">{{ $t('buy_total_cost_10y') }}</span><span class="data-value">{{ $moneySymbol }}{{ number_format($bvr['buy_total_cost_10yr_eur'] ?? 0) }}</span></div>
+                        <div class="data-cell"><span class="data-label">{{ $t('rent_total_10y') }}</span><span class="data-value">{{ $moneySymbol }}{{ number_format($bvr['rent_total_10yr_eur'] ?? 0) }}</span></div>
+                        <div class="data-cell"><span class="data-label">{{ $t('property_value_2036') }}</span><span class="data-value">{{ $moneySymbol }}{{ number_format($bvr['buy_property_value_moderat_eur'] ?? 0) }}</span></div>
+                        <div class="data-cell"><span class="data-label">{{ $t('buy_net_position') }}</span><span class="data-value" style="color: var(--green);">+{{ $moneySymbol }}{{ number_format($bvr['buy_net_position_eur'] ?? 0) }}</span></div>
+                        <div class="data-cell highlight-yellow full-width"><span class="data-label">{{ $t('buy_advantage_vs_rent_10y') }}</span><span class="data-value" style="color: var(--green);">+{{ $moneySymbol }}{{ number_format($bvr['advantage_buying_eur'] ?? 0) }}</span></div>
                     </div>
                     @if(!empty($bvr['note']))
                         <div class="warning-box">{{ $bvr['note'] }}</div>
@@ -1466,10 +1473,10 @@
                                             <span class="cost-note">{{ $imp['note'] }}</span>
                                         @endif
                                     </td>
-                                    <td style="text-align:right;">&euro;{{ number_format($imp['cost_eur'] ?? 0) }}</td>
-                                    <td style="text-align:right;font-weight:600;">&euro;{{ number_format($imp['value_increase_eur'] ?? 0) }}</td>
+                                    <td style="text-align:right;">{{ $moneySymbol }}{{ number_format($imp['cost_eur'] ?? 0) }}</td>
+                                    <td style="text-align:right;font-weight:600;">{{ $moneySymbol }}{{ number_format($imp['value_increase_eur'] ?? 0) }}</td>
                                     <td style="text-align:center;" class="roi-value">+{{ $imp['roi_pct'] ?? 0 }}%</td>
-                                    <td style="text-align:right;">+&euro;{{ $imp['rental_increase_monthly_eur'] ?? 0 }}</td>
+                                    <td style="text-align:right;">+{{ $moneySymbol }}{{ $imp['rental_increase_monthly_eur'] ?? 0 }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -1729,6 +1736,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     document.fonts.ready.then(function() {
+    var moneySymbol = @json($moneySymbol);
     Chart.defaults.font.family = "'Inter', sans-serif";
     Chart.defaults.font.size = 11;
     Chart.defaults.color = '#334155';
@@ -1788,7 +1796,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         min: Math.min.apply(null, values) * 0.92,
                         grid: { color: '#f0f0f0' },
                         ticks: {
-                            callback: function(v) { return '\u20AC' + v; },
+                            callback: function(v) { return moneySymbol + v; },
                             font: { size: 11, weight: '500' }
                         }
                     },
@@ -1813,7 +1821,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     ctx2.fillStyle = '#334155';
                     var meta = chart.getDatasetMeta(0);
                     meta.data.forEach(function(point, i) {
-                        ctx2.fillText('\u20AC' + values[i], point.x, point.y - 6);
+                        ctx2.fillText(moneySymbol + values[i], point.x, point.y - 6);
                     });
                     ctx2.restore();
                 }
@@ -1859,7 +1867,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         min: Math.min.apply(null, values) * 0.9,
                         grid: { color: '#f0f0f0' },
                         ticks: {
-                            callback: function(v) { return '\u20AC' + v.toLocaleString(); },
+                            callback: function(v) { return moneySymbol + v.toLocaleString(); },
                             font: { size: 11, weight: '500' }
                         }
                     },
@@ -1885,7 +1893,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         var meta = chart.getDatasetMeta(0);
                         var bar = meta.data[i];
                         ctx2.fillStyle = '#334155';
-                        ctx2.fillText('\u20AC' + val.toLocaleString(), bar.x, bar.y - 4);
+                        ctx2.fillText(moneySymbol + val.toLocaleString(), bar.x, bar.y - 4);
                     });
                     ctx2.restore();
                 }
@@ -1942,7 +1950,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 var data = chart.data;
                                 return data.labels.map(function(label, i) {
                                     return {
-                                        text: compactLabel(label) + '  \u20AC' + data.datasets[0].data[i].toLocaleString(),
+                                        text: compactLabel(label) + '  ' + moneySymbol + data.datasets[0].data[i].toLocaleString(),
                                         fillStyle: colors[i],
                                         strokeStyle: '#fff',
                                         lineWidth: 0,
@@ -1966,7 +1974,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     ctx2.textBaseline = 'middle';
                     var centerX = (chart.chartArea.left + chart.chartArea.right) / 2;
                     var centerY = (chart.chartArea.top + chart.chartArea.bottom) / 2;
-                    ctx2.fillText('\u20AC' + total.toLocaleString(), centerX, centerY - 2);
+                    ctx2.fillText(moneySymbol + total.toLocaleString(), centerX, centerY - 2);
                     ctx2.font = '500 9px "Inter", sans-serif';
                     ctx2.fillStyle = '#667085';
                     ctx2.fillText(@json($t('total_cost_chart')), centerX, centerY + 10);
@@ -2123,4 +2131,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </body>
 </html>
-
