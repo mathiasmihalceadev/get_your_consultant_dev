@@ -702,34 +702,36 @@ export default function Landing({ pricingCatalog }: LandingProps) {
                 </motion.div>
             </motion.section>
 
-            {locale === "ro" ? (
-                <motion.section
-                    className="relative overflow-hidden bg-white pb-14 pt-12 md:pb-18 md:pt-16"
-                    variants={sectionVariants}
-                    {...revealMotionProps}
+            <motion.section
+                className="relative overflow-hidden bg-white pb-14 pt-12 md:pb-18 md:pt-16"
+                variants={sectionVariants}
+                {...revealMotionProps}
+            >
+                <motion.div
+                    className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8"
+                    variants={containerVariants}
                 >
                     <motion.div
-                        className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8"
-                        variants={containerVariants}
+                        className="relative mx-auto max-w-5xl"
+                        variants={itemVariants}
                     >
-                        <motion.div
-                            className="relative mx-auto max-w-5xl"
-                            variants={itemVariants}
-                        >
-                            <div className="absolute inset-x-8 bottom-4 h-20 bg-brand-primary/12 blur-3xl" />
-                            <div className="relative overflow-hidden border border-brand-primary/10 bg-white shadow-[0_24px_60px_rgba(52,48,106,0.14)]">
-                                <iframe
-                                    className="aspect-video w-full"
-                                    src="https://www.youtube.com/embed/jD7AjgbLpL4"
-                                    title="GetYourConsultant video"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    allowFullScreen
-                                />
-                            </div>
-                        </motion.div>
+                        <div className="absolute inset-x-8 bottom-4 h-20 bg-brand-primary/12 blur-3xl" />
+                        <div className="relative overflow-hidden border border-brand-primary/10 bg-white shadow-[0_24px_60px_rgba(52,48,106,0.14)]">
+                            <iframe
+                                className="aspect-video w-full"
+                                src={`https://www.youtube.com/embed/${
+                                    locale === "ro"
+                                        ? "jD7AjgbLpL4"
+                                        : "M12tVWNp4X8"
+                                }`}
+                                title="GetYourConsultant video"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowFullScreen
+                            />
+                        </div>
                     </motion.div>
-                </motion.section>
-            ) : null}
+                </motion.div>
+            </motion.section>
 
             <motion.section
                 id="report-example"
