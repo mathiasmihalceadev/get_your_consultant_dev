@@ -606,24 +606,22 @@
                 </div>
             </section>
 
-            @if ($locale === 'ro')
-                <section class="relative overflow-hidden bg-white pb-14 pt-12 md:pb-18 md:pt-16">
-                    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                        <div class="relative mx-auto max-w-5xl">
-                            <div class="absolute inset-x-8 bottom-4 h-20 bg-brand-primary/12 blur-3xl"></div>
-                            <div class="relative overflow-hidden border border-brand-primary/10 bg-white shadow-[0_24px_60px_rgba(52,48,106,0.14)]">
-                                <iframe
-                                    class="aspect-video w-full"
-                                    src="https://www.youtube.com/embed/jD7AjgbLpL4"
-                                    title="GetYourConsultant video"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    allowfullscreen
-                                ></iframe>
-                            </div>
+            <section class="relative overflow-hidden bg-white pb-14 pt-12 md:pb-18 md:pt-16">
+                <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                    <div class="relative mx-auto max-w-5xl">
+                        <div class="absolute inset-x-8 bottom-4 h-20 bg-brand-primary/12 blur-3xl"></div>
+                        <div class="relative overflow-hidden border border-brand-primary/10 bg-white shadow-[0_24px_60px_rgba(52,48,106,0.14)]">
+                            <iframe
+                                class="aspect-video w-full"
+                                src="https://www.youtube.com/embed/{{ $locale === 'ro' ? 'jD7AjgbLpL4' : 'M12tVWNp4X8' }}"
+                                title="GetYourConsultant video"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen
+                            ></iframe>
                         </div>
                     </div>
-                </section>
-            @endif
+                </div>
+            </section>
 
             <section id="report-example" class="relative overflow-hidden bg-white pb-16 pt-12 md:py-18">
                 <img src="{{ asset('images/blue-noise-texture.png') }}" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.045] mix-blend-multiply">
