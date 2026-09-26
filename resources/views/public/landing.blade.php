@@ -216,12 +216,6 @@
             ],
         ],
         [
-            'question' => 'Does it replace an ANEVAR appraiser?',
-            'paragraphs' => [
-                'No. The report is not an authorized valuation and cannot replace a report prepared by an accredited appraiser.',
-            ],
-        ],
-        [
             'question' => 'Does it replace a lawyer?',
             'paragraphs' => [
                 'No. For legal due diligence, we recommend consulting a lawyer who specializes in real estate transactions.',

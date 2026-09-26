@@ -36,7 +36,7 @@ class PublicMarketingPagesTest extends TestCase
             ->assertOk()
             ->assertSeeText('Ai întrebări? Suntem aici să te ajutăm.')
             ->assertSee('id="contact-form"', false)
-            ->assertSeeText('Aghata Barsescu')
+            ->assertSeeText('Agatha Bârsescu')
             ->assertSeeText('București RO')
             ->assertDontSee('data-page=', false);
     }
