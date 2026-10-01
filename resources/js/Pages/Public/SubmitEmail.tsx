@@ -112,14 +112,19 @@ export default function SubmitEmail({
             maximumFractionDigits: 2,
         }).format(minor / 100);
 
-    const reportPrice = pricing
-        ? formatMoney(pricing.base_amount_minor, pricing.base_currency)
-        : null;
+    // The Romanian site shows the RON amount that Stripe actually charges.
+    const showCheckoutAmountOnly = locale === "ro";
     const checkoutPrice = pricing
         ? formatMoney(pricing.checkout_amount_minor, pricing.checkout_currency)
         : null;
+    const reportPrice = pricing
+        ? showCheckoutAmountOnly
+            ? checkoutPrice
+            : formatMoney(pricing.base_amount_minor, pricing.base_currency)
+        : null;
     const showCheckoutCurrency =
         pricing &&
+        !showCheckoutAmountOnly &&
         pricing.checkout_currency.toLowerCase() !==
             pricing.base_currency.toLowerCase();
 

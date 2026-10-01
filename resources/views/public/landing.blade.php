@@ -216,6 +216,12 @@
             ],
         ],
         [
+            'question' => 'Does it replace an appraiser?',
+            'paragraphs' => [
+                'No. The report is not an authorized valuation and cannot replace a report prepared by an accredited appraiser.',
+            ],
+        ],
+        [
             'question' => 'Does it replace a lawyer?',
             'paragraphs' => [
                 'No. For legal due diligence, we recommend consulting a lawyer who specializes in real estate transactions.',
@@ -493,8 +499,10 @@
             return $fallback;
         }
 
-        $amount = ((int) ($entry['base_amount_minor'] ?? 0)) / 100;
-        $currency = strtoupper((string) ($entry['base_currency'] ?? 'EUR'));
+        // The Romanian site shows the RON amount that Stripe actually charges.
+        $useCheckoutAmount = $locale === 'ro' && isset($entry['checkout_amount_minor'], $entry['checkout_currency']);
+        $amount = ((int) ($useCheckoutAmount ? $entry['checkout_amount_minor'] : ($entry['base_amount_minor'] ?? 0))) / 100;
+        $currency = strtoupper((string) ($useCheckoutAmount ? $entry['checkout_currency'] : ($entry['base_currency'] ?? 'EUR')));
 
         return ($locale === 'ro'
             ? number_format($amount, 2, ',', '.')
